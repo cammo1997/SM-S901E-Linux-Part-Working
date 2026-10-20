@@ -10,7 +10,7 @@ Updated 2026-10-20 · attempt 39 · kernel 7.2.11 (#21)
 - [x] Wi-Fi 5 GHz, autoconnects at boot ([[Wi-Fi]])
 - [x] Bluetooth
 - [x] Bluetooth audio in (A2DP sink): phone plays music streamed from another device (2026-10-21)
-- [ ] Bluetooth audio out (S22 to earbuds/speaker): untested
+- [x] Bluetooth audio out: connects to a car stereo, clear audio (2026-10-21)
 - [x] Display 120 Hz, touch, GPU ([[Display]]); CPU frequency scaling + PSCI idle states verified
 - [x] Stereo speakers + 2 mics ([[Audio]]); amp digital volume +3 dB (841), no speaker protection yet
 - [x] Power, volume down, volume up buttons
