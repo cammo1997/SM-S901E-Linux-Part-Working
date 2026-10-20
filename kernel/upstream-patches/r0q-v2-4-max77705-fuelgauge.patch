@@ -1,0 +1,69 @@
+Subject: [PATCH v2 4/6] arm64: dts: qcom: r0q: enable max77705 fuelgauge
+
+The Samsung Galaxy S22 uses max77705 for its charger and fuelgauge,
+enable them.
+
+Signed-off-by: Eric Gonçalves <ghatto404@xxxxxxxxx>
+---
+ .../boot/dts/qcom/sm8450-samsung-r0q.dts      | 32 +++++++++++++++++++
+ 1 file changed, 32 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts b/arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts
+index 96a8a0e69681..244fed27a4cc 100644
+--- a/arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts
++++ b/arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts
+@@ -15,6 +15,16 @@ / {
+ 	compatible = "samsung,r0q", "qcom,sm8450";
+ 	chassis-type = "handset";
+ 
++	battery: battery {
++		compatible = "simple-battery";
++
++		constant-charge-current-max-microamp = <2150000>;
++		charge-full-design-microamp-hours = <3700000>;
++		over-voltage-threshold-microvolt = <4500000>;
++		voltage-min-design-microvolt = <3400000>;
++		voltage-max-design-microvolt = <4350000>;
++	};
++
+ 	chosen {
+ 		#address-cells = <2>;
+ 		#size-cells = <2>;
+@@ -199,6 +209,24 @@ vreg_l11c_3p0: ldo11 {
+ 	};
+ };
+ 
++&i2c5 {
++	status = "okay";
++
++	max77705_charger: charger@69 {
++		compatible = "maxim,max77705-charger";
++		reg = <0x69>;
++		monitored-battery = <&battery>;
++		interrupts-extended = <&tlmm 5 IRQ_TYPE_LEVEL_LOW>;
++	};
++
++	fuel-gauge@36 {
++		reg = <0x36>;
++		compatible = "maxim,max77705-battery";
++		power-supplies = <&max77705_charger>;
++		interrupts-extended = <&tlmm 5 IRQ_TYPE_LEVEL_LOW>;
++	};
++};
++
+ &pm8350_gpios {
+ 	vol_up_n: vol-up-n-state {
+ 		pins = "gpio6";
+@@ -218,6 +246,10 @@ &pon_resin {
+ 	status = "okay";
+ };
+ 
++&qupv3_id_0 {
++	status = "okay";
++};
++
+ &tlmm {
+ 	gpio-reserved-ranges = <36 4>; /* SPI (Unused) */
+ 
+-- 
+2.51.0

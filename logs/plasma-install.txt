@@ -1,0 +1,18 @@
+/dev/loop0p2            101.0G      1.7G     94.0G   2% /
+Executing eudev-9999.3.2.14-r7.trigger
+Executing shared-mime-info-2.4-r7.trigger
+Executing fontconfig-2.18.1-r0.trigger
+Executing desktop-file-utils-0.28-r0.trigger
+Executing gtk-update-icon-cache-3.24.52-r0.trigger
+Executing eudev-hwids-9999.3.2.14-r7.trigger
+Executing mkfontscale-1.2.4-r0.trigger
+OK: 2692.3 MiB in 1185 packages
+== installed:
+/usr/sbin/kwin_wayland
+phosh.desktop
+plasma-mobile.desktop
+plasma.desktop
+greetd
+tinydm
+               greetd | default
+               tinydm | default

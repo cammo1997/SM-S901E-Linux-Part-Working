@@ -1,0 +1,19 @@
+01:00.0 Network controller: Qualcomm Technologies, Inc QCNFA765 Wireless Network Adapter (rev 01)
+[  249.345087] faux_driver regulatory: Direct firmware load for regulatory.db failed with error -2
+[  249.393125] ath11k_pci 0000:01:00.0: BAR 0 [mem 0x60400000-0x605fffff 64bit]: assigned
+[  249.395787] ath11k_pci 0000:01:00.0: enabling device (0000 -> 0002)
+[  249.400642] ath11k_pci 0000:01:00.0: MSI vectors: 32
+[  249.402718] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[  249.575576] mhi mhi0: Requested to power ON
+[  249.577882] mhi mhi0: Power on setup success
+[  271.332702] mhi mhi0: Device link is not accessible
+[  271.335745] mhi mhi0: MHI did not enter READY state
+[  271.339480] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[  271.341611] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[  271.343375] ath11k_pci 0000:01:00.0: failed to power up :-110
+[  271.359369] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[  271.361430] ath11k_pci 0000:01:00.0: failed to init core: -110
+[  271.504994] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110
+== wireless:
+lo
+usb0

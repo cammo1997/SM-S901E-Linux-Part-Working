@@ -1,0 +1,25 @@
+rmmod: ERROR: Module mhi is not currently loaded
+mhi-debug-loaded
+[  816.910760] ath11k_pci 0000:01:00.0: BAR 0 [mem 0x60400000-0x605fffff 64bit]: assigned
+[  816.911590] ath11k_pci 0000:01:00.0: MSI vectors: 32
+[  816.911615] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[  817.069724] mhi mhi0: BHIe programming for RDDM
+[  817.069752] mhi mhi0: Address: 000000006a7cb395 and len: 0x90 sequence: 788965402
+[  817.069764] mhi mhi0: Requested to power ON
+[  817.069776] mhi mhi0: Attempting power on with EE: PRIMARY BOOTLOADER, state: RESET
+[  817.069796] mhi mhi0: Power on setup success
+[  817.072316] mhi mhi0: Starting image download via BHI. Session ID: 472398267
+[  838.660403] mhi mhi0: Device link is not accessible
+[  838.660440] mhi mhi0: MHI did not enter READY state
+[  838.662015] mhi mhi0: Processing disable transition with PM state: Linkdown or Error Fatal Detect
+[  838.662033] mhi mhi0: Waiting for all pending event ring processing to complete
+[  838.662060] mhi mhi0: Waiting for all pending threads to complete
+[  838.662072] mhi mhi0: Reset all active channels and remove MHI devices
+[  838.662086] mhi mhi0: Resetting EV CTXT and CMD CTXT
+[  838.662102] mhi mhi0: Exiting with PM state: DISABLE, MHI state: RESET
+[  838.662162] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[  838.662186] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[  838.662199] ath11k_pci 0000:01:00.0: failed to power up :-110
+[  838.679365] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[  838.679392] ath11k_pci 0000:01:00.0: failed to init core: -110
+[  838.802610] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110

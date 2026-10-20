@@ -1,0 +1,18 @@
+7ceaafb5a8bebf9344fd04d9eb478c3f  /lib/modules/7.2.11-dirty/kernel/drivers/gpu/drm/panel/panel-samsung-s6e3fac.ko.zst
+pmsg-ramoops-0
+== now
+panel_samsung_s6e3fac    16384  0
+backlight              20480  1 panel_samsung_s6e3fac
+dispcc_sm8450          45056  15
+drm_display_helper    212992  2 msm,panel_samsung_s6e3fac
+card0
+card1
+card1-DSI-1
+card1-Writeback-1
+renderD128
+version
+[    6.747861] /soc@0/display-subsystem@ae00000/dsi@ae94000/panel@0: Fixed dependency cycle(s) with /soc@0/display-subsystem@ae00000/dsi@ae94000
+[    7.111743] panel_samsung_s6e3fac: loading out-of-tree module taints kernel.
+[    7.120003] msm_dpu ae01000.display-controller: bound ae94000.dsi (ops dsi_ops [msm])
+[    7.347190] panel-samsung-s6e3fac ae94000.dsi.0: after init: power mode 0x99 (ret 0), id 81 00 65 (ret 1 1 1)
+[    7.347753] panel-samsung-s6e3fac ae94000.dsi.0: after display on: power mode 0x9d (ret 0), id 81 00 65 (ret 1 1 1)

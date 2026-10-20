@@ -1,0 +1,11 @@
+1
+[  104.541794] rtc-pm8xxx c400000.spmi:pmic@0:rtc@6100: registered as rtc0
+[  104.542543] rtc-pm8xxx c400000.spmi:pmic@0:rtc@6100: setting system clock to 1970-01-01T05:38:10 UTC (20290)
+[  104.544818] qcom-pcie 1c00000.pcie: supply vdda not found, using dummy regulator
+[  104.545502] qcom-pcie 1c00000.pcie: supply vddpe-3v3 not found, using dummy regulator
+[  104.546029] qcom-pcie 1c00000.pcie: Failed to get clocks
+[  110.029756] geni_i2c 994000.i2c: Bus frequency not specified, default to 100kHz.
+[  110.042895] qcom-pcie 1c00000.pcie: supply vdda not found, using dummy regulator
+[  110.045486] qcom-pcie 1c00000.pcie: supply vddpe-3v3 not found, using dummy regulator
+[  110.047720] qcom-pcie 1c00000.pcie: Failed to get clocks
+[  115.585971] max77705 0-0066: error -ENODEV: Rev.0x2 is not tested

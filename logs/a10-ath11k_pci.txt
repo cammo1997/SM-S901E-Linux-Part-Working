@@ -1,0 +1,36 @@
+1
+[    0.000000] [Firmware Bug]: Kernel image misaligned at boot, please fix your bootloader!
+[    0.000000] psci: PSCIv1.1 detected in firmware.
+[    0.839970] qcom_scm firmware:scm: qseecom: found qseecom with version 0x1402000
+[    0.840038] qcom_scm firmware:scm: qseecom: untested machine, skipping
+[  400.896454] ath11k_pci 0000:01:00.0: BAR 0 [mem 0x60400000-0x605fffff 64bit]: assigned
+[  400.897266] ath11k_pci 0000:01:00.0: enabling device (0000 -> 0002)
+[  400.898176] faux_driver regulatory: Direct firmware load for regulatory.db failed with error -2
+[  400.899880] ath11k_pci 0000:01:00.0: MSI vectors: 32
+[  400.900440] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[  401.067151] mhi mhi0: Requested to power ON
+[  401.070464] mhi mhi0: Power on setup success
+[  422.881753] mhi mhi0: MHI did not load image over BHI, ret: -5
+[  422.886056] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[  422.890514] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[  422.892568] ath11k_pci 0000:01:00.0: failed to power up :-110
+[  422.917294] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[  422.921736] ath11k_pci 0000:01:00.0: failed to init core: -110
+[  423.074924] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110
+==ifaces
+BusyBox v1.38.0 (2026-09-22 18:41:43 UTC) multi-call binary.
+
+Usage: ip [OPTIONS] address|route|link|tunnel|neigh|rule [ARGS]
+
+OPTIONS := -f[amily] inet|inet6|link | -o[neline]
+
+ip addr add|del IFADDR dev IFACE | show|flush [dev IFACE] [to PREFIX]
+ip route list|flush|add|del|change|append|replace|test ROUTE
+ip link set IFACE [up|down] [arp on|off] [multicast on|off]
+	[promisc on|off] [mtu NUM] [name NAME] [qlen NUM] [address MAC]
+	[master IFACE | nomaster] [netns PID]
+ip tunnel add|change|del|show [NAME]
+	[mode ipip|gre|sit] [remote ADDR] [local ADDR] [ttl TTL]
+ip neigh show|flush [to PREFIX] [dev DEV] [nud STATE]
+ip rule [list] | add|del SELECTOR ACTION
+==iw

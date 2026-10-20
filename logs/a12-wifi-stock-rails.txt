@@ -1,0 +1,21 @@
+[ 1613.788973] wifirails: loading out-of-tree module taints kernel.
+[ 1613.790465] wifirails: smps2 set 1012000..1040000 -> ret 0, now 1012000 uV
+[ 1613.790576] wifirails: smps12 set 1350000..1400000 -> ret 0, now 1352000 uV
+[ 1613.790662] wifirails: smps1 set 1900000..2024000 -> ret 0, now 1904000 uV
+smps12 1352000
+smps2 1012000
+smps1 1904000
+==
+[ 1613.905566] ath11k_pci 0000:01:00.0: BAR 0 [mem 0x60400000-0x605fffff 64bit]: assigned
+[ 1613.905665] ath11k_pci 0000:01:00.0: enabling device (0000 -> 0002)
+[ 1613.906524] ath11k_pci 0000:01:00.0: MSI vectors: 32
+[ 1613.906556] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[ 1614.064711] mhi mhi0: Requested to power ON
+[ 1614.064730] mhi mhi0: Power on setup success
+[ 1635.354895] mhi mhi0: MHI did not load image over BHI, ret: -5
+[ 1635.355788] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[ 1635.355801] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[ 1635.355806] ath11k_pci 0000:01:00.0: failed to power up :-110
+[ 1635.361836] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[ 1635.361854] ath11k_pci 0000:01:00.0: failed to init core: -110
+[ 1635.479460] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110

@@ -1,0 +1,15 @@
+max170xx_battery
+max77705-charger
+== /sys/class/power_supply/max170xx_battery
+type=Battery
+status=Unknown
+capacity=99
+voltage_now=4336875
+current_now=21562
+health=Good
+== /sys/class/power_supply/max77705-charger
+type=USB
+status=Full
+online=1
+charge_type=N/A
+health=Good

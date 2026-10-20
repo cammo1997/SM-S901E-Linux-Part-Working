@@ -1,0 +1,74 @@
+# Samsung Galaxy S22 (r0q) bring-up: built-in so they work before any rootfs/modules exist.
+# USB gadget networking (SSH/telnet over USB)
+CONFIG_USB_GADGET=y
+CONFIG_USB_CONFIGFS=y
+CONFIG_USB_CONFIGFS_NCM=y
+CONFIG_USB_CONFIGFS_RNDIS=y
+CONFIG_USB_CONFIGFS_ECM=y
+CONFIG_PHY_QCOM_USB_SNPS_FEMTO_V2=y
+# Storage (UFS)
+CONFIG_SCSI_UFS_QCOM=y
+CONFIG_PHY_QCOM_QMP=y
+CONFIG_PHY_QCOM_QMP_UFS=y
+
+CONFIG_QCOM_LLCC=y
+# Early screen output from the bootloader framebuffer (simple-framebuffer in the DT)
+CONFIG_SYSFB_SIMPLEFB=y
+CONFIG_DRM=y
+CONFIG_DRM_SIMPLEDRM=y
+
+# Required by 'pmbootstrap kconfig check' (default category)
+CONFIG_BPF_LSM=y
+CONFIG_DEBUG_INFO_BTF_MODULES=y
+CONFIG_DEBUG_INFO_BTF=y
+CONFIG_DEBUG_INFO_DWARF5=y
+# CONFIG_DEBUG_INFO_REDUCED is not set
+CONFIG_DM_CRYPT=y
+CONFIG_FTRACE=y
+CONFIG_FW_LOADER_COMPRESS=y
+CONFIG_FW_LOADER_COMPRESS_ZSTD=y
+CONFIG_KPROBE_EVENTS=y
+CONFIG_KPROBES=y
+CONFIG_MODULE_COMPRESS=y
+CONFIG_MODULE_COMPRESS_ZSTD=y
+CONFIG_MODULE_DECOMPRESS=y
+CONFIG_NLS_ASCII=y
+CONFIG_NULL_TTY=m
+CONFIG_PSI=y
+CONFIG_SECURITY_PATH=y
+CONFIG_SYN_COOKIES=y
+CONFIG_UDMABUF=y
+CONFIG_UEVENT_HELPER=y
+
+# Debug: kernel log in RAM that survives warm reset (pstore/ramoops)
+CONFIG_PSTORE=y
+CONFIG_PSTORE_RAM=y
+CONFIG_PSTORE_CONSOLE=y
+CONFIG_PSTORE_PMSG=y
+
+# Reboot modes (reboot recovery / reboot bootloader) via PMK8350 SDAM
+CONFIG_NVMEM_SPMI_SDAM=y
+CONFIG_NVMEM_REBOOT_MODE=y
+CONFIG_REBOOT_MODE=y
+
+# SM8450 multimedia clock controllers built in (avoid GPU SMMU timeout / sync_state pending)
+CONFIG_SM_GPUCC_8450=y
+# CONFIG_SM_DISPCC_8450 is not set (built-in garbles simple-framebuffer; re-enable with a real display driver)
+CONFIG_SM_VIDEOCC_8450=y
+CONFIG_SM_CAMCC_8450=y
+# PMK8350 PON: power key + Vol Down
+CONFIG_POWER_RESET_QCOM_PON=y
+CONFIG_INPUT_PM8941_PWRKEY=y
+
+# Flash bundle: MAX77705 (charger/fuel gauge/hwmon) and zram as modules
+CONFIG_MFD_MAX77705=m
+CONFIG_CHARGER_MAX77705=m
+CONFIG_SENSORS_MAX77705=m
+CONFIG_BATTERY_MAX17042=m
+CONFIG_ZRAM=m
+CONFIG_ZRAM_BACKEND_ZSTD=y
+CONFIG_ZRAM_BACKEND_LZ4=y
+
+# Attempt 11: touchscreen (upstream fts2ba61y patch) on spi-gpio
+CONFIG_SPI_GPIO=m
+CONFIG_TOUCHSCREEN_FTS2BA61Y=m

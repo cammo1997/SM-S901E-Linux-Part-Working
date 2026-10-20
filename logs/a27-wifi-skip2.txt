@@ -1,0 +1,12 @@
+MHISTATUS 0xff05 state 255 syserr 1 BHIOFF 0x100
+EXECENV 0x1
+STATUS 0xb48ef5f7
+[  155.182439] mhi mhi0: Power on setup success
+[  155.302590] mhi mhi0: Wait for device to enter SBL or Mission mode
+[  177.123464] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[  177.123501] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[  177.123517] ath11k_pci 0000:01:00.0: failed to power up :-110
+[  177.131051] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[  177.131079] ath11k_pci 0000:01:00.0: failed to init core: -110
+[  177.272475] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110
+DONE

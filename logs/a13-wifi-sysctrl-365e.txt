@@ -1,0 +1,13 @@
+SYS_CTRL now 0000365e
+[ 1082.555660] ath11k_pci 0000:01:00.0: BAR 0 [mem 0x60400000-0x605fffff 64bit]: assigned
+[ 1082.557156] ath11k_pci 0000:01:00.0: MSI vectors: 32
+[ 1082.557190] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[ 1082.714936] mhi mhi0: Requested to power ON
+[ 1082.714976] mhi mhi0: Power on setup success
+[ 1102.858537] mhi mhi0: MHI did not load image over BHI, ret: -5
+[ 1102.859074] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[ 1102.859090] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[ 1102.859099] ath11k_pci 0000:01:00.0: failed to power up :-110
+[ 1102.872960] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[ 1102.872988] ath11k_pci 0000:01:00.0: failed to init core: -110
+[ 1103.010126] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110

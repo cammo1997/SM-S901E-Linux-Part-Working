@@ -1,0 +1,140 @@
+From: YOUR NAME <you@example.com>
+Subject: [PATCH] PCI: qcom: Parse iommu-map entries using #iommu-cells
+
+qcom_pcie_config_sid_1_9_0() reads "iommu-map" as an array of fixed
+4-cell entries (BDF, phandle, SID, length). Since the Qualcomm DTs were
+changed to pass #iommu-cells = <2> specifiers (SID and mask), e.g.
+"arm64: dts: qcom: sm8450: Fix the PCIe iommu-map entries", each entry
+is 5 cells long:
+
+	iommu-map = <0x0   &apps_smmu 0x1c00 0x0 0x1>,
+		    <0x100 &apps_smmu 0x1c01 0x0 0x1>;
+
+The driver then misreads every entry after the first. On SM8450 the
+second entry is taken as BDF 0x1 with the SMMU phandle as its SID, so
+(phandle - sid_base) underflows into the BDF field and the only entry
+written besides BDF 0 is garbage (0xffe54300 in slot 7 on a Galaxy S22),
+while the real endpoint BDF 01:00.0 gets no entry at all.
+
+DMA from the endpoint keeps working, because the root port and the
+endpoint share an IOMMU group, but its MSIs reach the GIC ITS with the
+root port's ID and are lost. With a WCN6855-family (QCA6490) Wi-Fi chip
+on pcie0 this shows up as ath11k timing out in MHI BHI ("MHI did not
+load image over BHI, ret: -5"), with zero interrupts counted on the
+bhi/mhi vectors.
+
+Take the specifier length from the IOMMU's #iommu-cells, and keep
+accepting legacy DTs that pass a single SID cell with #iommu-cells = <2>
+by applying the same heuristic as of_check_bad_map() in the OF core
+(4-cell entries, one target phandle, length 1 everywhere). Also only
+disable the BDF-to-SID bypass once the map has been parsed.
+
+Tested on a Samsung Galaxy S22 (SM-S901E, SM8450) with the 5-cell
+sm8450.dtsi: the table now holds BDF 01:00.0 -> SID offset 1
+(0x01000100, slot 21), the junk entry is gone, the endpoint's MSIs are
+delivered and the ath11k BHI image download completes. The legacy 4-cell
+and #iommu-cells = <1> paths were only checked with a userspace model of
+the parsing logic, not on hardware.
+
+Fixes: 9b10e56647fa ("arm64: dts: qcom: sm8450: Fix the PCIe iommu-map entries")
+Assisted-by: Claude:claude-opus-5-5
+---
+Note: the same iommu-map DT series also converted sm8250, sm8350, sm8550,
+sm8650 and others that use this function, so they are probably affected
+too; only SM8450 was tested.
+
+--- a/drivers/pci/controller/dwc/pcie-qcom.c
++++ b/drivers/pci/controller/dwc/pcie-qcom.c
+@@ -1119,37 +1119,78 @@
+ 
+ static int qcom_pcie_config_sid_1_9_0(struct qcom_pcie *pcie)
+ {
+-	/* iommu map structure */
++	/* iommu map entry: BDF, phandle, SID (+ any extra specifier cells), length */
+ 	struct {
+ 		u32 bdf;
+-		u32 phandle;
+ 		u32 smmu_sid;
+-		u32 smmu_sid_len;
+ 	} *map;
+ 	void __iomem *bdf_to_sid_base = pcie->parf + PARF_BDF_TO_SID_TABLE_N;
+ 	struct device *dev = pcie->pci->dev;
+ 	u8 qcom_pcie_crc8_table[CRC8_TABLE_SIZE];
+-	int i, nr_map, size = 0;
++	int i, nr_map, nr_cells, stride, size = 0;
++	struct device_node *iommu_np;
++	u32 iommu_cells = 1;
+ 	u32 smmu_sid_base;
++	u32 *cells;
+ 	u32 val;
+ 
+ 	of_get_property(dev->of_node, "iommu-map", &size);
+-	if (!size)
++	if (size < 4 * sizeof(u32))
+ 		return 0;
+ 
+-	/* Enable BDF to SID translation by disabling bypass mode (default) */
+-	val = readl(pcie->parf + PARF_BDF_TO_SID_CFG);
+-	val &= ~BDF_TO_SID_BYPASS;
+-	writel(val, pcie->parf + PARF_BDF_TO_SID_CFG);
++	nr_cells = size / sizeof(u32);
++	cells = kcalloc(nr_cells, sizeof(*cells), GFP_KERNEL);
++	if (!cells)
++		return -ENOMEM;
+ 
+-	map = kzalloc(size, GFP_KERNEL);
+-	if (!map)
++	of_property_read_u32_array(dev->of_node, "iommu-map", cells, nr_cells);
++
++	/*
++	 * Each entry carries #iommu-cells specifier cells (2 on SoCs whose SMMU
++	 * takes a SID and a mask). Keep accepting legacy DTs that pass a single
++	 * SID cell with #iommu-cells = <2>: same target phandle and a length of
++	 * 1 in every 4-cell entry, as of_check_bad_map() does in the OF core.
++	 */
++	iommu_np = of_find_node_by_phandle(cells[1]);
++	if (iommu_np) {
++		of_property_read_u32(iommu_np, "#iommu-cells", &iommu_cells);
++		of_node_put(iommu_np);
++	}
++
++	stride = 3 + iommu_cells;
++	if (stride != 4 && nr_cells % 4 == 0) {
++		bool legacy = true;
++
++		for (i = 0; i < nr_cells; i += 4)
++			if (cells[i + 1] != cells[1] || cells[i + 3] != 1)
++				legacy = false;
++		if (legacy)
++			stride = 4;
++	}
++
++	if (nr_cells % stride) {
++		dev_err(dev, "Invalid iommu-map length\n");
++		kfree(cells);
++		return -EINVAL;
++	}
++
++	nr_map = nr_cells / stride;
++	map = kcalloc(nr_map, sizeof(*map), GFP_KERNEL);
++	if (!map) {
++		kfree(cells);
+ 		return -ENOMEM;
++	}
+ 
+-	of_property_read_u32_array(dev->of_node, "iommu-map", (u32 *)map,
+-				   size / sizeof(u32));
++	for (i = 0; i < nr_map; i++) {
++		map[i].bdf = cells[i * stride];
++		map[i].smmu_sid = cells[i * stride + 2];
++	}
++	kfree(cells);
+ 
+-	nr_map = size / (sizeof(*map));
++	/* Enable BDF to SID translation by disabling bypass mode (default) */
++	val = readl(pcie->parf + PARF_BDF_TO_SID_CFG);
++	val &= ~BDF_TO_SID_BYPASS;
++	writel(val, pcie->parf + PARF_BDF_TO_SID_CFG);
+ 
+ 	crc8_populate_msb(qcom_pcie_crc8_table, QCOM_PCIE_CRC8_POLYNOMIAL);
+ 

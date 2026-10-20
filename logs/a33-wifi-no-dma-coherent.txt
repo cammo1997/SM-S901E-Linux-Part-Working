@@ -1,0 +1,15 @@
+MHISTATUS 0xff05 state 255 syserr 1 BHIOFF 0x100
+EXECENV 0x1
+[   37.682121] ath11k_pci 0000:01:00.0: enabling device (0000 -> 0002)
+[   37.683588] ath11k_pci 0000:01:00.0: MSI vectors: 32
+[   37.683630] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[   37.843321] mhi mhi0: Requested to power ON
+[   37.843367] mhi mhi0: Power on setup success
+[   37.964452] mhi mhi0: Wait for device to enter SBL or Mission mode
+[   58.333090] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[   58.333126] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[   58.333141] ath11k_pci 0000:01:00.0: failed to power up :-110
+[   58.348943] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[   58.348977] ath11k_pci 0000:01:00.0: failed to init core: -110
+[   58.635373] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110
+DONE

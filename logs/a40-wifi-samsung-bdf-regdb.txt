@@ -1,0 +1,10 @@
+ath11k_pci 0000:01:00.0: boot firmware request ath11k/WCN6855/hw2.1/regdb.bin size 24278
+ath11k_pci 0000:01:00.0: boot fetched regdb
+ath11k_pci 0000:01:00.0: boot firmware request ath11k/WCN6855/hw2.1/board.bin size 59924
+	txpower 20.00 dBm
+Error: Connection activation failed: The Wi-Fi network could not be found
+wlan0: send auth to XX:XX:XX:XX:XX:XX (try 1/3)
+wlan0: send auth to XX:XX:XX:XX:XX:XX (try 2/3)
+wlan0: send auth to XX:XX:XX:XX:XX:XX (try 3/3)
+wlan0: authentication with XX:XX:XX:XX:XX:XX timed out
+wlan0            DOWN           

@@ -1,0 +1,20 @@
+before: LnkSta:	Speed 5GT/s, Width x1
+LnkCtl2: LnkCtl2: Target Link Speed: 2.5GT/s, EnterCompliance- SpeedD
+after:  LnkSta:	Speed 2.5GT/s, Width x1
+wifi:   LnkSta:	Speed 2.5GT/s (downgraded), Width x1
+[  603.092291] ath11k_pci 0000:01:00.0: BAR 0 [mem 0x60400000-0x605fffff 64bit]: assigned
+[  603.097046] ath11k_pci 0000:01:00.0: MSI vectors: 32
+[  603.099471] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[  603.259228] mhi mhi0: Requested to power ON
+[  603.261451] mhi mhi0: Power on setup success
+[  623.592192] mhi mhi0: Device link is not accessible
+[  623.596046] mhi mhi0: MHI did not enter READY state
+[  623.599024] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[  623.599582] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[  623.600018] ath11k_pci 0000:01:00.0: failed to power up :-110
+[  623.615438] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[  623.616071] ath11k_pci 0000:01:00.0: failed to init core: -110
+[  623.734718] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110
+== wireless:
+lo
+usb0

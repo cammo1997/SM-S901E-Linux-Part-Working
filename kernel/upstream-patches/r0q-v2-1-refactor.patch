@@ -1,0 +1,87 @@
+Subject: [PATCH v2 1/6] arm64: dts: qcom: r0q: small refactor
+
+Fix the order of some nodes and add regulator names.
+
+Signed-off-by: Eric Gonçalves <ghatto404@xxxxxxxxx>
+---
+ .../boot/dts/qcom/sm8450-samsung-r0q.dts      | 25 +++++++++++--------
+ 1 file changed, 15 insertions(+), 10 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts b/arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts
+index 880d74ae6032..a17dcb848fc1 100644
+--- a/arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts
++++ b/arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts
+@@ -28,15 +28,6 @@ framebuffer: framebuffer@b8000000 {
+ 		};
+ 	};
+ 
+-	vph_pwr: regulator-vph-pwr {
+-		compatible = "regulator-fixed";
+-		regulator-name = "vph_pwr";
+-		regulator-min-microvolt = <3700000>;
+-		regulator-max-microvolt = <3700000>;
+-		regulator-always-on;
+-		regulator-boot-on;
+-	};
+-
+ 	reserved-memory {
+ 		/*
+ 		 * The bootloader will only keep display hardware enabled
+@@ -47,6 +38,16 @@ splash-region@b8000000 {
+ 			no-map;
+ 		};
+ 	};
++
++	vph_pwr: regulator-vph-pwr {
++		compatible = "regulator-fixed";
++		regulator-name = "vph_pwr";
++		regulator-min-microvolt = <3700000>;
++		regulator-max-microvolt = <3700000>;
++
++		regulator-always-on;
++		regulator-boot-on;
++	};
+ };
+ 
+ &apps_rsc {
+@@ -71,12 +72,14 @@ regulators-0 {
+ 		vdd-l3-l5-supply = <&vreg_bob>;
+ 
+ 		vreg_l2b_3p07: ldo2 {
++			regulator-name = "vreg_l2b_3p07";
+ 			regulator-min-microvolt = <3072000>;
+ 			regulator-max-microvolt = <3072000>;
+ 			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+ 		};
+ 
+ 		vreg_l5b_0p88: ldo5 {
++			regulator-name = "vreg_l5b_0p88";
+ 			regulator-min-microvolt = <880000>;
+ 			regulator-max-microvolt = <888000>;
+ 			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+@@ -106,12 +109,14 @@ regulators-1 {
+ 		vdd-bob-supply = <&vph_pwr>;
+ 
+ 		vreg_bob: bob {
++			regulator-name = "vreg_bob";
+ 			regulator-min-microvolt = <3008000>;
+ 			regulator-max-microvolt = <3960000>;
+ 			regulator-initial-mode = <RPMH_REGULATOR_MODE_AUTO>;
+ 		};
+ 
+ 		vreg_l1c_1p8: ldo1 {
++			regulator-name = "vreg_l1c_1p8";
+ 			regulator-min-microvolt = <1800000>;
+ 			regulator-max-microvolt = <1800000>;
+ 			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+@@ -120,7 +125,7 @@ vreg_l1c_1p8: ldo1 {
+ };
+ 
+ &tlmm {
+-	gpio-reserved-ranges = <36 4>; /* SPI (not linked to anything) */
++	gpio-reserved-ranges = <36 4>; /* SPI (Unused) */
+ };
+ 
+ &usb_1 {
+-- 
+2.51.0

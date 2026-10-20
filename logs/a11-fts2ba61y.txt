@@ -1,0 +1,10 @@
+loaded: 1
+[   83.408927] input: fts2ba61y as /devices/platform/spi8/spi_master/spi0/spi0.0/input/input2
+[   83.416502] debugfs: '0-0036-max17042' already exists in 'regmap'
+== input devices:
+N: Name="pmic_pwrkey"
+H: Handlers=kbd event0 
+N: Name="pmic_resin"
+H: Handlers=kbd event1 
+N: Name="fts2ba61y"
+H: Handlers=event2 

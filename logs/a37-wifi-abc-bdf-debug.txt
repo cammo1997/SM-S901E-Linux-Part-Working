@@ -1,0 +1,32 @@
+===== A: upstream fw + generic board-2.bin
+[  245.786308] mhi mhi0: BHIe programming for RDDM
+[  246.574134] ath11k_pci 0000:01:00.0: chip_id 0x12 chip_family 0xb board_id 0xff soc_id 0x400c1211
+[  246.574148] ath11k_pci 0000:01:00.0: fw_version 0x11088c35 fw_build_timestamp 2024-04-17 08:34 fw_build_id WLAN.HSP.1.1-03125-QCAHSPSWPL_V1_V2_SILI
+[  261.973580] wlan0: authenticate with XX:XX:XX:XX:XX:XX (local address=48:BC:E1:XX:XX:XX)
+Error: Timeout expired (25 seconds)
+[  288.966242] wlan0: send auth to XX:XX:XX:XX:XX:XX (try 2/3)
+[  288.973519] wlan0: send auth to XX:XX:XX:XX:XX:XX (try 3/3)
+[  288.981194] wlan0: authentication with XX:XX:XX:XX:XX:XX timed out
+wlan0            DOWN           
+===== B: upstream fw + Samsung bdwlang.elf
+[  294.844548] mhi mhi0: BHIe programming for RDDM
+[  295.698578] ath11k_pci 0000:01:00.0: chip_id 0x12 chip_family 0xb board_id 0xff soc_id 0x400c1211
+[  295.698605] ath11k_pci 0000:01:00.0: fw_version 0x11088c35 fw_build_timestamp 2024-04-17 08:34 fw_build_id WLAN.HSP.1.1-03125-QCAHSPSWPL_V1_V2_SILI
+      1 2442.0 -74.00 HOME-2G
+Error: Timeout expired (25 seconds)
+[  319.753609] wlan0: send auth to XX:XX:XX:XX:XX:XX (try 2/3)
+[  319.761344] wlan0: send auth to XX:XX:XX:XX:XX:XX (try 3/3)
+[  319.769219] wlan0: authentication with XX:XX:XX:XX:XX:XX timed out
+wlan0            DOWN           
+===== C: Samsung fw + Samsung bdwlang.elf
+[  347.947075] mhi mhi0: BHIe programming for RDDM
+[  348.767695] ath11k_pci 0000:01:00.0: chip_id 0x12 chip_family 0xb board_id 0xff soc_id 0x400c1211
+[  348.767717] ath11k_pci 0000:01:00.0: fw_version 0x200e01bb fw_build_timestamp 2025-04-28 05:42 fw_build_id WLAN.HSP.2.0.c1-00441-QCAHSPSWPL_V1_V2_S
+      1 2442.0 -74.00 HOME-2G
+Error: Timeout expired (25 seconds)
+[  395.690495] wlan0: send auth to XX:XX:XX:XX:XX:XX (try 2/3)
+[  395.698366] wlan0: send auth to XX:XX:XX:XX:XX:XX (try 3/3)
+[  395.706112] wlan0: authentication with XX:XX:XX:XX:XX:XX timed out
+wlan0            DOWN           
+===== restored upstream setup
+DONE

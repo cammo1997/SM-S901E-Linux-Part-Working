@@ -1,0 +1,7 @@
+[  171.084892] mhi mhi0: Wait for device to enter SBL or Mission mode
+[  191.462282] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[  211.946379] ath11k_pci 0000:01:00.0: r0q rddm: force -5 ee 8
+[  232.423113] ath11k_pci 0000:01:00.0: r0q rddm: download -5 img 000000004c6655b2
+[  232.443594] ath11k_pci 0000:01:00.0: r0q rddm: 9 segs, 0 nonzero bytes, 0 strings
+[  232.443628] ath11k_pci 0000:01:00.0: failed to power up :-110
+DONE

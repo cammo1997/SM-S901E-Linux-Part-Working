@@ -1,0 +1,37 @@
+===== Samsung fw + bdwlang.elf
+ath11k_pci 0000:01:00.0: fw_version 0x200e01bb fw_build_timestamp 2025-04-28 05:42 fw_build_id WLAN.HSP.2.0.c1-00441-QCAHSPSWPL_V1_V2_S
+ath11k_pci 0000:01:00.0: boot using board name 'bus=pci,vendor=17cb,device=1103,subsystem-vendor=17cb,subsystem-device=0108,qmi-chip-id
+ath11k_pci 0000:01:00.0: boot board name
+ath11k_pci 0000:01:00.0: boot board name
+ath11k_pci 0000:01:00.0: boot board name
+ath11k_pci 0000:01:00.0: boot board name
+===== Samsung fw + bdwlang.elf1
+ath11k_pci 0000:01:00.0: fw_version 0x200e01bb fw_build_timestamp 2025-04-28 05:42 fw_build_id WLAN.HSP.2.0.c1-00441-QCAHSPSWPL_V1_V2_S
+ath11k_pci 0000:01:00.0: boot using board name 'bus=pci,vendor=17cb,device=1103,subsystem-vendor=17cb,subsystem-device=0108,qmi-chip-id
+ath11k_pci 0000:01:00.0: boot board name
+ath11k_pci 0000:01:00.0: boot board name
+ath11k_pci 0000:01:00.0: boot board name
+ath11k_pci 0000:01:00.0: boot board name
+===== Samsung fw + bdwlang.elf2
+ath11k_pci 0000:01:00.0: fw_version 0x200e01bb fw_build_timestamp 2025-04-28 05:42 fw_build_id WLAN.HSP.2.0.c1-00441-QCAHSPSWPL_V1_V2_S
+ath11k_pci 0000:01:00.0: boot using board name 'bus=pci,vendor=17cb,device=1103,subsystem-vendor=17cb,subsystem-device=0108,qmi-chip-id
+ath11k_pci 0000:01:00.0: boot board name
+ath11k_pci 0000:01:00.0: boot board name
+ath11k_pci 0000:01:00.0: boot board name
+ath11k_pci 0000:01:00.0: boot board name
+===== Samsung fw + bdwlang.elf10
+ath11k_pci 0000:01:00.0: fw_version 0x200e01bb fw_build_timestamp 2025-04-28 05:42 fw_build_id WLAN.HSP.2.0.c1-00441-QCAHSPSWPL_V1_V2_S
+ath11k_pci 0000:01:00.0: boot using board name 'bus=pci,vendor=17cb,device=1103,subsystem-vendor=17cb,subsystem-device=0108,qmi-chip-id
+ath11k_pci 0000:01:00.0: boot board name
+ath11k_pci 0000:01:00.0: boot board name
+ath11k_pci 0000:01:00.0: boot board name
+ath11k_pci 0000:01:00.0: boot board name
+===== Samsung fw + bdwlan.elf
+ath11k_pci 0000:01:00.0: fw_version 0x200e01bb fw_build_timestamp 2025-04-28 05:42 fw_build_id WLAN.HSP.2.0.c1-00441-QCAHSPSWPL_V1_V2_S
+ath11k_pci 0000:01:00.0: boot using board name 'bus=pci,vendor=17cb,device=1103,subsystem-vendor=17cb,subsystem-device=0108,qmi-chip-id
+ath11k_pci 0000:01:00.0: boot board name
+ath11k_pci 0000:01:00.0: boot board name
+ath11k_pci 0000:01:00.0: boot board name
+ath11k_pci 0000:01:00.0: boot board name
+      1 2442.0 -73.00 HOME-2G
+DONE

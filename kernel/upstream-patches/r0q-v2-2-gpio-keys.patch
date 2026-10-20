@@ -1,0 +1,77 @@
+Subject: [PATCH v2 2/6] arm64: dts: qcom: r0q: add gpio keys
+
+Add GPIO keys support to Samsung Galaxy S22 (r0q).
+
+Signed-off-by: Eric Gonçalves <ghatto404@xxxxxxxxx>
+---
+ .../boot/dts/qcom/sm8450-samsung-r0q.dts      | 36 +++++++++++++++++++
+ 1 file changed, 36 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts b/arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts
+index a17dcb848fc1..5ca45b040a99 100644
+--- a/arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts
++++ b/arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts
+@@ -2,11 +2,13 @@
+ 
+ /dts-v1/;
+ 
++#include <dt-bindings/input/linux-event-codes.h>
+ #include <dt-bindings/regulator/qcom,rpmh-regulator.h>
+ 
+ #include "sm8450.dtsi"
+ #include "pm8350.dtsi"
+ #include "pm8350c.dtsi"
++#include "pmk8350.dtsi"
+ 
+ / {
+ 	model = "Samsung Galaxy S22 5G";
+@@ -28,6 +30,21 @@ framebuffer: framebuffer@b8000000 {
+ 		};
+ 	};
+ 
++	gpio-keys {
++		compatible = "gpio-keys";
++		autorepeat;
++
++		pinctrl-0 = <&vol_up_n>;
++		pinctrl-names = "default";
++
++		key-vol-up {
++			label = "Volume Up";
++			linux,code = <KEY_VOLUMEUP>;
++			gpios = <&pm8350_gpios 6 GPIO_ACTIVE_LOW>;
++			debounce-interval = <15>;
++		};
++	};
++
+ 	reserved-memory {
+ 		/*
+ 		 * The bootloader will only keep display hardware enabled
+@@ -124,6 +141,25 @@ vreg_l1c_1p8: ldo1 {
+ 	};
+ };
+ 
++&pm8350_gpios {
++	vol_up_n: vol-up-n-state {
++		pins = "gpio6";
++		function = "normal";
++		power-source = <1>;
++		input-enable;
++	};
++};
++
++&pon_pwrkey {
++	status = "okay";
++};
++
++&pon_resin {
++	linux,code = <KEY_VOLUMEDOWN>;
++
++	status = "okay";
++};
++
+ &tlmm {
+ 	gpio-reserved-ranges = <36 4>; /* SPI (Unused) */
+ };
+-- 
+2.51.0

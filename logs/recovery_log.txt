@@ -1,0 +1,2044 @@
+Starting TWRP 3.7.1_12-1_Archer-a28a9f38 on Thu Jan  1 00:21:52 1970
+ (pid 473)
+I:=> product model: 'SM-S901E'
+I:=> using device id: 'SM-S901E'
+I:TW_NO_HAPTICS := true
+TW_NO_REBOOT_BOOTLOADER := true
+RECOVERY_SDCARD_ON_DATA := true
+I:Lun file '/config/usb_gadget/g1/functions/mass_storage.0/lun.0/file' does not exist, USB storage mode disabled
+TW_HAS_DOWNLOAD_MODE := true
+PRODUCT_USE_DYNAMIC_PARTITIONS := true
+I:TW_BRIGHTNESS_PATH := /sys/class/backlight/panel0-backlight/brightness
+I:Found brightness file at '/sys/class/backlight/panel0-backlight/brightness'
+I:TWFunc::Set_Brightness: Setting brightness control to 255
+I:TW_EXCLUDE_ENCRYPTED_BACKUPS := true
+I:LANG: en
+I:TW_NO_LEGACY_PROPS := true
+I:Startup Commands: 
+=> Linking mtab
+=> Processing /etc/recovery.fstab
+I:Reading /etc/twrp.flags
+I:Reading /etc/recovery.fstab
+I:Processing '/system'
+I:Created '/system_root' folder.
+I:Unhandled flag: 'first_stage_mount'
+I:Trying to prepare system from super partition
+I:Symlinking /dev/block/dm-0 => /dev/block/bootdevice/by-name/system 
+I:Found an additional entry for '/system'
+I:Processing '/system'
+I:Found an additional entry for '/system'
+I:Processing '/system'
+I:Processing '/vendor'
+I:Unhandled flag: 'first_stage_mount'
+I:Trying to prepare vendor from super partition
+I:Symlinking /dev/block/dm-4 => /dev/block/bootdevice/by-name/vendor 
+I:Processing '/product'
+I:Created '/product' folder.
+I:Unhandled flag: 'first_stage_mount'
+I:Trying to prepare product from super partition
+I:Symlinking /dev/block/dm-2 => /dev/block/bootdevice/by-name/product 
+I:Processing '/odm'
+I:Unhandled flag: 'first_stage_mount'
+I:Trying to prepare odm from super partition
+I:Symlinking /dev/block/dm-1 => /dev/block/bootdevice/by-name/odm 
+I:Processing '/system_ext'
+I:Unhandled flag: 'first_stage_mount'
+I:Trying to prepare system_ext from super partition
+I:Symlinking /dev/block/dm-3 => /dev/block/bootdevice/by-name/system_ext 
+I:Processing '/vendor_dlkm'
+I:Unhandled flag: 'first_stage_mount'
+I:Trying to prepare vendor_dlkm from super partition
+I:Symlinking /dev/block/dm-5 => /dev/block/bootdevice/by-name/vendor_dlkm 
+I:Processing '/boot'
+I:Unhandled flag: 'recoveryonly'
+I:Processing '/recovery'
+I:Unhandled flag: 'recoveryonly'
+I:Processing '/metadata'
+I:Unhandled flag: 'first_stage_mount'
+I:Processing '/data'
+I:Ignoring the 'fscompress' fstab flag
+I:Processing '/cache'
+I:Created '/cache' folder.
+I:Unhandled flag: 'recoveryonly'
+I:Processing '/efs'
+I:Unhandled flag: 'recoveryonly'
+I:Processing '/sec_efs'
+I:Created '/sec_efs' folder.
+I:Unhandled flag: 'recoveryonly'
+I:Processing '/modem'
+I:Unhandled flag: 'recoveryonly'
+I:Processing '/mdm'
+I:Unhandled flag: 'recoveryonly'
+I:Processing '/dsp'
+I:Unhandled flag: 'recoveryonly'
+I:Processing '/misc'
+I:Unhandled flag: 'recoveryonly'
+I:Processing '/dtbo'
+I:Unhandled flag: 'recoveryonly'
+I:Processing '/prism'
+I:Unhandled flag: 'recoveryonly'
+I:Processing '/optics'
+I:Unhandled flag: 'recoveryonly'
+I:Processing '/vbmeta_system'
+I:Unhandled flag: 'recoveryonly'
+I:Processing '/vendor_boot'
+I:Unhandled flag: 'recoveryonly'
+I:Processing '/vbmeta_samsung'
+I:Unhandled flag: 'recoveryonly'
+I:Processing '/vm-bootsys'
+I:Created '/vm-bootsys' folder.
+I:Unhandled flag: 'recoveryonly'
+I:Processing '/imagefv'
+I:Unhandled flag: 'recoveryonly'
+I:Processing remaining twrp.flags
+I:Processing '/firmware'
+I:Processing '/odm_image'
+I:Processing '/optics_image'
+I:Processing '/persist'
+I:Created '/persist' folder.
+I:TWFunc::Fixup_Time: Pre-fix date and time: 1970-01-01--00-21-53
+I:TWFunc::Fixup_Time: Setting time offset from file /sys/class/rtc/rtc0/since_epoch
+I:TWFunc::Fixup_Time: will attempt to use the ats files now.
+I:TWFunc::Fixup_Time: Setting time offset from file /persist/time/ats_2, offset 1792183632290
+I:TWFunc::Fixup_Time: Date and time corrected: 2026-10-16--21-09-05
+I:Processing '/prism_image'
+I:Processing '/product_image'
+I:Processing '/system_image'
+I:Processing '/usb-otg'
+I:Created '/usb-otg' folder.
+I:Processing '/vendor_image'
+I:Attempting to load modules
+I:Checking directory: /lib/modules
+I:number of modules loaded by init: 419
+I:found module to dedupe: msm_drm.ko
+I:found module to dedupe: stm_ftrace.ko
+I:found module to dedupe: stm_console.ko
+I:found module to dedupe: stm_p_ost.ko
+I:found module to dedupe: stm_p_basic.ko
+I:found module to dedupe: stm_core.ko
+I:found module to dedupe: gh_mem_notifier.ko
+I:found module to dedupe: gh_irq_lend.ko
+I:found module to dedupe: qcom_lpm.ko
+I:found module to dedupe: qcom_edac.ko
+I:found module to dedupe: bt_fm_slim.ko
+I:found module to dedupe: slimbus.ko
+I:found module to dedupe: btpower.ko
+I:found module to dedupe: qti_devfreq_cdev.ko
+I:found module to dedupe: qti_userspace_cdev.ko
+I:found module to dedupe: sdpm_clk.ko
+I:found module to dedupe: policy_engine.ko
+I:found module to dedupe: bcl_soc.ko
+I:found module to dedupe: bcl_pmic5.ko
+I:found module to dedupe: qti_qmi_cdev.ko
+I:found module to dedupe: qti_qmi_sensor_v2.ko
+I:found module to dedupe: qti_battery_charger.ko
+I:found module to dedupe: qcom_ipc_lite.ko
+I:found module to dedupe: usb_f_gsi.ko
+I:found module to dedupe: ipa_fmwk.ko
+I:found module to dedupe: usb_f_cdev.ko
+I:found module to dedupe: usb_f_ccid.ko
+I:found module to dedupe: usb_f_diag.ko
+I:found module to dedupe: ehset.ko
+I:found module to dedupe: repeater.ko
+I:found module to dedupe: msm_sharedmem.ko
+I:found module to dedupe: smsc95xx.ko
+I:found module to dedupe: smsc75xx.ko
+I:found module to dedupe: cnss_prealloc.ko
+I:found module to dedupe: cnss_nl.ko
+I:found module to dedupe: cnss2.ko
+I:found module to dedupe: cnss_plat_ipc_qmi_svc.ko
+I:found module to dedupe: cnss_utils.ko
+I:found module to dedupe: smsc.ko
+I:found module to dedupe: sg.ko
+I:found module to dedupe: lt9611uxc.ko
+I:found module to dedupe: rdbg.ko
+I:found module to dedupe: hvc_gunyah.ko
+I:found module to dedupe: hung_task_enh.ko
+I:found module to dedupe: dmesg_dumper.ko
+I:found module to dedupe: panel_event_notifier.ko
+I:found module to dedupe: memlat.ko
+I:found module to dedupe: qdss_bridge.ko
+I:found module to dedupe: usb_f_qdss.ko
+I:found module to dedupe: usb_bam.ko
+I:found module to dedupe: sps_drv.ko
+I:found module to dedupe: wlan_firmware_service.ko
+I:found module to dedupe: msm_ext_display.ko
+I:found module to dedupe: sys_pm_vx.ko
+I:found module to dedupe: eud.ko
+I:found module to dedupe: msm_show_epoch.ko
+I:found module to dedupe: ucsi_glink.ko
+I:found module to dedupe: cdsprm.ko
+I:found module to dedupe: spcom.ko
+I:found module to dedupe: spss_utils.ko
+I:found module to dedupe: qcom_spss.ko
+I:found module to dedupe: pmic_glink.ko
+I:found module to dedupe: glink_probe.ko
+I:found module to dedupe: qcom_glink_spss.ko
+I:found module to dedupe: glink_pkt.ko
+I:found module to dedupe: qcom_q6v5_pas.ko
+I:found module to dedupe: qcom_pil_info.ko
+I:found module to dedupe: qcom_q6v5.ko
+I:found module to dedupe: smp2p_sleepstate.ko
+I:found module to dedupe: llcc_perfmon.ko
+I:found module to dedupe: microdump_collector.ko
+I:found module to dedupe: dcc_v2.ko
+I:found module to dedupe: core_hang_detect.ko
+I:found module to dedupe: qsee_ipc_irq_bridge.ko
+I:found module to dedupe: sysmon_subsystem_stats.ko
+I:found module to dedupe: adsp_sleepmon.ko
+I:found module to dedupe: subsystem_sleep_stats.ko
+I:found module to dedupe: soc_sleep_stats.ko
+I:found module to dedupe: smp2p.ko
+I:found module to dedupe: boot_stats.ko
+I:found module to dedupe: msm_memshare.ko
+I:found module to dedupe: heap_mem_ext_v01.ko
+I:found module to dedupe: pdr_interface.ko
+I:found module to dedupe: qcom_ramdump.ko
+I:found module to dedupe: bam_dma.ko
+I:found module to dedupe: mhi_dev_netdev.ko
+I:found module to dedupe: mhi_dev_uci.ko
+I:found module to dedupe: mhi_dev_dtr.ko
+I:found module to dedupe: mhi_cntrl_qcom.ko
+I:found module to dedupe: qcom_esoc.ko
+I:found module to dedupe: qcom_sysmon.ko
+I:found module to dedupe: qmi_helpers.ko
+I:found module to dedupe: mhi.ko
+I:found module to dedupe: rproc_qcom_common.ko
+I:found module to dedupe: qcom_smd.ko
+I:found module to dedupe: qcom_glink_smem.ko
+I:found module to dedupe: qcom_glink.ko
+I:found module to dedupe: msm_show_resume_irq.ko
+I:found module to dedupe: msm_sysstats.ko
+I:found module to dedupe: msm_kgsl.ko
+I:found module to dedupe: nvmem_qfprom.ko
+I:found module to dedupe: msm_performance.ko
+I:found module to dedupe: mdt_loader.ko
+I:found module to dedupe: c1dcvs_scmi.ko
+I:found module to dedupe: c1dcvs_vendor.ko
+I:found module to dedupe: qcom_rimps.ko
+I:found module to dedupe: msm_qmp.ko
+I:found module to dedupe: qcom_aoss.ko
+I:found module to dedupe: arm_smmu.ko
+I:found module to dedupe: ufs_qcom.ko
+I:found module to dedupe: socinfo.ko
+I:found module to dedupe: qrtr.ko
+I:found module to dedupe: qti_cpufreq_cdev.ko
+I:found module to dedupe: ddr_cdev.ko
+I:found module to dedupe: thermal_pause.ko
+I:found module to dedupe: msm_lmh_dcvs.ko
+I:found module to dedupe: cpu_hotplug.ko
+I:found module to dedupe: cpu_voltage_cooling.ko
+I:found module to dedupe: qcom_tsens.ko
+I:found module to dedupe: pmu_scmi.ko
+I:found module to dedupe: pmu_vendor.ko
+I:found module to dedupe: qcom_llcc_pmu.ko
+I:found module to dedupe: qcom_iommu_util.ko
+I:found module to dedupe: msm_geni_serial.ko
+I:found module to dedupe: memory_dump_v2.ko
+I:found module to dedupe: mem_buf.ko
+I:found module to dedupe: qcom_dma_heaps.ko
+I:found module to dedupe: msm_dma_iommu_mapping.ko
+I:found module to dedupe: mem_buf_dev.ko
+I:found module to dedupe: secure_buffer.ko
+I:found module to dedupe: mac80211.ko
+I:found module to dedupe: gh_rm_drv.ko
+I:found module to dedupe: gh_msgq.ko
+I:found module to dedupe: gh_dbl.ko
+I:found module to dedupe: gh_ctrl.ko
+I:found module to dedupe: gh_arm_drv.ko
+I:found module to dedupe: cqhci.ko
+I:found module to dedupe: hwkm.ko
+I:found module to dedupe: cfg80211.ko
+I:found module to dedupe: bwmon.ko
+I:found module to dedupe: dcvs_fp.ko
+I:found module to dedupe: qcom_ipcc.ko
+I:found module to dedupe: qcom_rpmh.ko
+I:found module to dedupe: qcom_cpu_vendor_hooks.ko
+I:found module to dedupe: gh_virt_wdt.ko
+I:found module to dedupe: qcom_wdt_core.ko
+I:found module to dedupe: minidump.ko
+I:found module to dedupe: smem.ko
+I:found module to dedupe: qcom_hwspinlock.ko
+I:mounting /tmp/lib/modules on /lib/modules
+I:UnMount: Unable to find partition for path '/lib'
+I:Modules Loaded: 0
+I:Checking directory: /lib/modules/5.10
+I:number of modules loaded by init: 419
+I:found module to dedupe: msm_drm.ko
+I:found module to dedupe: stm_ftrace.ko
+I:found module to dedupe: stm_console.ko
+I:found module to dedupe: stm_p_ost.ko
+I:found module to dedupe: stm_p_basic.ko
+I:found module to dedupe: stm_core.ko
+I:found module to dedupe: gh_mem_notifier.ko
+I:found module to dedupe: gh_irq_lend.ko
+I:found module to dedupe: qcom_lpm.ko
+I:found module to dedupe: qcom_edac.ko
+I:found module to dedupe: bt_fm_slim.ko
+I:found module to dedupe: slimbus.ko
+I:found module to dedupe: btpower.ko
+I:found module to dedupe: qti_devfreq_cdev.ko
+I:found module to dedupe: qti_userspace_cdev.ko
+I:found module to dedupe: sdpm_clk.ko
+I:found module to dedupe: policy_engine.ko
+I:found module to dedupe: bcl_soc.ko
+I:found module to dedupe: bcl_pmic5.ko
+I:found module to dedupe: qti_qmi_cdev.ko
+I:found module to dedupe: qti_qmi_sensor_v2.ko
+I:found module to dedupe: qti_battery_charger.ko
+I:found module to dedupe: qcom_ipc_lite.ko
+I:found module to dedupe: usb_f_gsi.ko
+I:found module to dedupe: ipa_fmwk.ko
+I:found module to dedupe: usb_f_cdev.ko
+I:found module to dedupe: usb_f_ccid.ko
+I:found module to dedupe: usb_f_diag.ko
+I:found module to dedupe: ehset.ko
+I:found module to dedupe: repeater.ko
+I:found module to dedupe: msm_sharedmem.ko
+I:found module to dedupe: smsc95xx.ko
+I:found module to dedupe: smsc75xx.ko
+I:found module to dedupe: cnss_prealloc.ko
+I:found module to dedupe: cnss_nl.ko
+I:found module to dedupe: cnss2.ko
+I:found module to dedupe: cnss_plat_ipc_qmi_svc.ko
+I:found module to dedupe: cnss_utils.ko
+I:found module to dedupe: smsc.ko
+I:found module to dedupe: sg.ko
+I:found module to dedupe: lt9611uxc.ko
+I:found module to dedupe: rdbg.ko
+I:found module to dedupe: hvc_gunyah.ko
+I:found module to dedupe: hung_task_enh.ko
+I:found module to dedupe: dmesg_dumper.ko
+I:found module to dedupe: panel_event_notifier.ko
+I:found module to dedupe: memlat.ko
+I:found module to dedupe: qdss_bridge.ko
+I:found module to dedupe: usb_f_qdss.ko
+I:found module to dedupe: usb_bam.ko
+I:found module to dedupe: sps_drv.ko
+I:found module to dedupe: wlan_firmware_service.ko
+I:found module to dedupe: msm_ext_display.ko
+I:found module to dedupe: sys_pm_vx.ko
+I:found module to dedupe: eud.ko
+I:found module to dedupe: msm_show_epoch.ko
+I:found module to dedupe: ucsi_glink.ko
+I:found module to dedupe: cdsprm.ko
+I:found module to dedupe: spcom.ko
+I:found module to dedupe: spss_utils.ko
+I:found module to dedupe: qcom_spss.ko
+I:found module to dedupe: pmic_glink.ko
+I:found module to dedupe: glink_probe.ko
+I:found module to dedupe: qcom_glink_spss.ko
+I:found module to dedupe: glink_pkt.ko
+I:found module to dedupe: qcom_q6v5_pas.ko
+I:found module to dedupe: qcom_pil_info.ko
+I:found module to dedupe: qcom_q6v5.ko
+I:found module to dedupe: smp2p_sleepstate.ko
+I:found module to dedupe: llcc_perfmon.ko
+I:found module to dedupe: microdump_collector.ko
+I:found module to dedupe: dcc_v2.ko
+I:found module to dedupe: core_hang_detect.ko
+I:found module to dedupe: qsee_ipc_irq_bridge.ko
+I:found module to dedupe: sysmon_subsystem_stats.ko
+I:found module to dedupe: adsp_sleepmon.ko
+I:found module to dedupe: subsystem_sleep_stats.ko
+I:found module to dedupe: soc_sleep_stats.ko
+I:found module to dedupe: smp2p.ko
+I:found module to dedupe: boot_stats.ko
+I:found module to dedupe: msm_memshare.ko
+I:found module to dedupe: heap_mem_ext_v01.ko
+I:found module to dedupe: pdr_interface.ko
+I:found module to dedupe: qcom_ramdump.ko
+I:found module to dedupe: bam_dma.ko
+I:found module to dedupe: mhi_dev_netdev.ko
+I:found module to dedupe: mhi_dev_uci.ko
+I:found module to dedupe: mhi_dev_dtr.ko
+I:found module to dedupe: mhi_cntrl_qcom.ko
+I:found module to dedupe: qcom_esoc.ko
+I:found module to dedupe: qcom_sysmon.ko
+I:found module to dedupe: qmi_helpers.ko
+I:found module to dedupe: mhi.ko
+I:found module to dedupe: rproc_qcom_common.ko
+I:found module to dedupe: qcom_smd.ko
+I:found module to dedupe: qcom_glink_smem.ko
+I:found module to dedupe: qcom_glink.ko
+I:found module to dedupe: msm_show_resume_irq.ko
+I:found module to dedupe: msm_sysstats.ko
+I:found module to dedupe: msm_kgsl.ko
+I:found module to dedupe: nvmem_qfprom.ko
+I:found module to dedupe: msm_performance.ko
+I:found module to dedupe: mdt_loader.ko
+I:found module to dedupe: c1dcvs_scmi.ko
+I:found module to dedupe: c1dcvs_vendor.ko
+I:found module to dedupe: qcom_rimps.ko
+I:found module to dedupe: msm_qmp.ko
+I:found module to dedupe: qcom_aoss.ko
+I:found module to dedupe: arm_smmu.ko
+I:found module to dedupe: ufs_qcom.ko
+I:found module to dedupe: socinfo.ko
+I:found module to dedupe: qrtr.ko
+I:found module to dedupe: qti_cpufreq_cdev.ko
+I:found module to dedupe: ddr_cdev.ko
+I:found module to dedupe: thermal_pause.ko
+I:found module to dedupe: msm_lmh_dcvs.ko
+I:found module to dedupe: cpu_hotplug.ko
+I:found module to dedupe: cpu_voltage_cooling.ko
+I:found module to dedupe: qcom_tsens.ko
+I:found module to dedupe: pmu_scmi.ko
+I:found module to dedupe: pmu_vendor.ko
+I:found module to dedupe: qcom_llcc_pmu.ko
+I:found module to dedupe: qcom_iommu_util.ko
+I:found module to dedupe: msm_geni_serial.ko
+I:found module to dedupe: memory_dump_v2.ko
+I:found module to dedupe: mem_buf.ko
+I:found module to dedupe: qcom_dma_heaps.ko
+I:found module to dedupe: msm_dma_iommu_mapping.ko
+I:found module to dedupe: mem_buf_dev.ko
+I:found module to dedupe: secure_buffer.ko
+I:found module to dedupe: mac80211.ko
+I:found module to dedupe: gh_rm_drv.ko
+I:found module to dedupe: gh_msgq.ko
+I:found module to dedupe: gh_dbl.ko
+I:found module to dedupe: gh_ctrl.ko
+I:found module to dedupe: gh_arm_drv.ko
+I:found module to dedupe: cqhci.ko
+I:found module to dedupe: hwkm.ko
+I:found module to dedupe: cfg80211.ko
+I:found module to dedupe: bwmon.ko
+I:found module to dedupe: dcvs_fp.ko
+I:found module to dedupe: qcom_ipcc.ko
+I:found module to dedupe: qcom_rpmh.ko
+I:found module to dedupe: qcom_cpu_vendor_hooks.ko
+I:found module to dedupe: gh_virt_wdt.ko
+I:found module to dedupe: qcom_wdt_core.ko
+I:found module to dedupe: minidump.ko
+I:found module to dedupe: smem.ko
+I:found module to dedupe: qcom_hwspinlock.ko
+I:mounting /tmp/lib/modules/5.10 on /lib/modules/5.10
+I:UnMount: Unable to find partition for path '/lib'
+I:Modules Loaded: 0
+I:Checking mounted /vendor
+I:Checking mounted /vendor_dlkm
+I:Checking directory: /vendor/lib/modules
+I:number of modules loaded by init: 419
+I:found module to dedupe: msm_drm.ko
+I:found module to dedupe: stm_ftrace.ko
+I:found module to dedupe: stm_console.ko
+I:found module to dedupe: stm_p_ost.ko
+I:found module to dedupe: stm_p_basic.ko
+I:found module to dedupe: stm_core.ko
+I:found module to dedupe: gh_mem_notifier.ko
+I:found module to dedupe: gh_irq_lend.ko
+I:found module to dedupe: qcom_lpm.ko
+I:found module to dedupe: qcom_edac.ko
+I:found module to dedupe: bt_fm_slim.ko
+I:found module to dedupe: slimbus.ko
+I:found module to dedupe: btpower.ko
+I:found module to dedupe: qti_devfreq_cdev.ko
+I:found module to dedupe: qti_userspace_cdev.ko
+I:found module to dedupe: sdpm_clk.ko
+I:found module to dedupe: policy_engine.ko
+I:found module to dedupe: bcl_soc.ko
+I:found module to dedupe: bcl_pmic5.ko
+I:found module to dedupe: qti_qmi_cdev.ko
+I:found module to dedupe: qti_qmi_sensor_v2.ko
+I:found module to dedupe: qti_battery_charger.ko
+I:found module to dedupe: qcom_ipc_lite.ko
+I:found module to dedupe: usb_f_gsi.ko
+I:found module to dedupe: ipa_fmwk.ko
+I:found module to dedupe: usb_f_cdev.ko
+I:found module to dedupe: usb_f_ccid.ko
+I:found module to dedupe: usb_f_diag.ko
+I:found module to dedupe: ehset.ko
+I:found module to dedupe: repeater.ko
+I:found module to dedupe: msm_sharedmem.ko
+I:found module to dedupe: smsc95xx.ko
+I:found module to dedupe: smsc75xx.ko
+I:found module to dedupe: cnss_prealloc.ko
+I:found module to dedupe: cnss_nl.ko
+I:found module to dedupe: cnss2.ko
+I:found module to dedupe: cnss_plat_ipc_qmi_svc.ko
+I:found module to dedupe: cnss_utils.ko
+I:found module to dedupe: smsc.ko
+I:found module to dedupe: sg.ko
+I:found module to dedupe: lt9611uxc.ko
+I:found module to dedupe: rdbg.ko
+I:found module to dedupe: hvc_gunyah.ko
+I:found module to dedupe: hung_task_enh.ko
+I:found module to dedupe: dmesg_dumper.ko
+I:found module to dedupe: panel_event_notifier.ko
+I:found module to dedupe: memlat.ko
+I:found module to dedupe: qdss_bridge.ko
+I:found module to dedupe: usb_f_qdss.ko
+I:found module to dedupe: usb_bam.ko
+I:found module to dedupe: sps_drv.ko
+I:found module to dedupe: wlan_firmware_service.ko
+I:found module to dedupe: msm_ext_display.ko
+I:found module to dedupe: sys_pm_vx.ko
+I:found module to dedupe: eud.ko
+I:found module to dedupe: msm_show_epoch.ko
+I:found module to dedupe: ucsi_glink.ko
+I:found module to dedupe: cdsprm.ko
+I:found module to dedupe: spcom.ko
+I:found module to dedupe: spss_utils.ko
+I:found module to dedupe: qcom_spss.ko
+I:found module to dedupe: pmic_glink.ko
+I:found module to dedupe: glink_probe.ko
+I:found module to dedupe: qcom_glink_spss.ko
+I:found module to dedupe: glink_pkt.ko
+I:found module to dedupe: qcom_q6v5_pas.ko
+I:found module to dedupe: qcom_pil_info.ko
+I:found module to dedupe: qcom_q6v5.ko
+I:found module to dedupe: smp2p_sleepstate.ko
+I:found module to dedupe: llcc_perfmon.ko
+I:found module to dedupe: microdump_collector.ko
+I:found module to dedupe: dcc_v2.ko
+I:found module to dedupe: core_hang_detect.ko
+I:found module to dedupe: qsee_ipc_irq_bridge.ko
+I:found module to dedupe: sysmon_subsystem_stats.ko
+I:found module to dedupe: adsp_sleepmon.ko
+I:found module to dedupe: subsystem_sleep_stats.ko
+I:found module to dedupe: soc_sleep_stats.ko
+I:found module to dedupe: smp2p.ko
+I:found module to dedupe: boot_stats.ko
+I:found module to dedupe: msm_memshare.ko
+I:found module to dedupe: heap_mem_ext_v01.ko
+I:found module to dedupe: pdr_interface.ko
+I:found module to dedupe: qcom_ramdump.ko
+I:found module to dedupe: bam_dma.ko
+I:found module to dedupe: mhi_dev_netdev.ko
+I:found module to dedupe: mhi_dev_uci.ko
+I:found module to dedupe: mhi_dev_dtr.ko
+I:found module to dedupe: mhi_cntrl_qcom.ko
+I:found module to dedupe: qcom_esoc.ko
+I:found module to dedupe: qcom_sysmon.ko
+I:found module to dedupe: qmi_helpers.ko
+I:found module to dedupe: mhi.ko
+I:found module to dedupe: rproc_qcom_common.ko
+I:found module to dedupe: qcom_smd.ko
+I:found module to dedupe: qcom_glink_smem.ko
+I:found module to dedupe: qcom_glink.ko
+I:found module to dedupe: msm_show_resume_irq.ko
+I:found module to dedupe: msm_sysstats.ko
+I:found module to dedupe: msm_kgsl.ko
+I:found module to dedupe: nvmem_qfprom.ko
+I:found module to dedupe: msm_performance.ko
+I:found module to dedupe: mdt_loader.ko
+I:found module to dedupe: c1dcvs_scmi.ko
+I:found module to dedupe: c1dcvs_vendor.ko
+I:found module to dedupe: qcom_rimps.ko
+I:found module to dedupe: msm_qmp.ko
+I:found module to dedupe: qcom_aoss.ko
+I:found module to dedupe: arm_smmu.ko
+I:found module to dedupe: ufs_qcom.ko
+I:found module to dedupe: socinfo.ko
+I:found module to dedupe: qrtr.ko
+I:found module to dedupe: qti_cpufreq_cdev.ko
+I:found module to dedupe: ddr_cdev.ko
+I:found module to dedupe: thermal_pause.ko
+I:found module to dedupe: msm_lmh_dcvs.ko
+I:found module to dedupe: cpu_hotplug.ko
+I:found module to dedupe: cpu_voltage_cooling.ko
+I:found module to dedupe: qcom_tsens.ko
+I:found module to dedupe: pmu_scmi.ko
+I:found module to dedupe: pmu_vendor.ko
+I:found module to dedupe: qcom_llcc_pmu.ko
+I:found module to dedupe: qcom_iommu_util.ko
+I:found module to dedupe: msm_geni_serial.ko
+I:found module to dedupe: memory_dump_v2.ko
+I:found module to dedupe: mem_buf.ko
+I:found module to dedupe: qcom_dma_heaps.ko
+I:found module to dedupe: msm_dma_iommu_mapping.ko
+I:found module to dedupe: mem_buf_dev.ko
+I:found module to dedupe: secure_buffer.ko
+I:found module to dedupe: mac80211.ko
+I:found module to dedupe: gh_rm_drv.ko
+I:found module to dedupe: gh_msgq.ko
+I:found module to dedupe: gh_dbl.ko
+I:found module to dedupe: gh_ctrl.ko
+I:found module to dedupe: gh_arm_drv.ko
+I:found module to dedupe: cqhci.ko
+I:found module to dedupe: hwkm.ko
+I:found module to dedupe: cfg80211.ko
+I:found module to dedupe: bwmon.ko
+I:found module to dedupe: dcvs_fp.ko
+I:found module to dedupe: qcom_ipcc.ko
+I:found module to dedupe: qcom_rpmh.ko
+I:found module to dedupe: qcom_cpu_vendor_hooks.ko
+I:found module to dedupe: gh_virt_wdt.ko
+I:found module to dedupe: qcom_wdt_core.ko
+I:found module to dedupe: minidump.ko
+I:found module to dedupe: smem.ko
+I:found module to dedupe: qcom_hwspinlock.ko
+I:mounting /tmp/vendor/lib/modules on /vendor/lib/modules
+I:Modules Loaded: 49
+I:Checking directory: /vendor/lib/modules/1.1
+I:number of modules loaded by init: 468
+I:found module to dedupe: adsp_loader_dlkm.ko
+I:found module to dedupe: audio_pkt_dlkm.ko
+I:found module to dedupe: hdmi_dlkm.ko
+I:found module to dedupe: ipa_clientsm.ko
+I:found module to dedupe: ipanetm.ko
+I:found module to dedupe: lpass_cdc_tx_macro_dlkm.ko
+I:found module to dedupe: lpass_cdc_va_macro_dlkm.ko
+I:found module to dedupe: lpass_cdc_wsa2_macro_dlkm.ko
+I:found module to dedupe: lpass_cdc_wsa_macro_dlkm.ko
+I:found module to dedupe: machine_dlkm.ko
+I:found module to dedupe: lpass_cdc_rx_macro_dlkm.ko
+I:found module to dedupe: audpkt_ion_dlkm.ko
+I:found module to dedupe: lpass_cdc_dlkm.ko
+I:found module to dedupe: msm_video.ko
+I:found module to dedupe: pinctrl_lpi_dlkm.ko
+I:found module to dedupe: q6_dlkm.ko
+I:found module to dedupe: rmnet_sch.ko
+I:found module to dedupe: swr_dmic_dlkm.ko
+I:found module to dedupe: swr_haptics_dlkm.ko
+I:found module to dedupe: wcd938x_slave_dlkm.ko
+I:found module to dedupe: wsa883x_dlkm.ko
+I:found module to dedupe: rmnet_aps.ko
+I:found module to dedupe: rmnet_offload.ko
+I:found module to dedupe: rmnet_perf.ko
+I:found module to dedupe: rmnet_shs.ko
+I:found module to dedupe: rmnet_perf_tether.ko
+I:found module to dedupe: rmnet_core.ko
+I:found module to dedupe: rmnet_ctl.ko
+I:found module to dedupe: rmnet_wlan.ko
+I:found module to dedupe: rndisipam.ko
+I:found module to dedupe: ipam.ko
+I:found module to dedupe: gsim.ko
+I:found module to dedupe: stub_dlkm.ko
+I:found module to dedupe: swr_ctrl_dlkm.ko
+I:found module to dedupe: redriver.ko
+I:found module to dedupe: wcd938x_dlkm.ko
+I:found module to dedupe: mbhc_dlkm.ko
+I:found module to dedupe: wcd9xxx_dlkm.ko
+I:found module to dedupe: audio_prm_dlkm.ko
+I:found module to dedupe: spf_core_dlkm.ko
+I:found module to dedupe: gpr_dlkm.ko
+I:found module to dedupe: snd_event_dlkm.ko
+I:found module to dedupe: q6_notifier_dlkm.ko
+I:found module to dedupe: q6_pdr_dlkm.ko
+I:found module to dedupe: swr_dlkm.ko
+I:found module to dedupe: wcd_core_dlkm.ko
+I:found module to dedupe: msm_drm.ko
+I:found module to dedupe: stm_ftrace.ko
+I:found module to dedupe: stm_console.ko
+I:found module to dedupe: stm_p_ost.ko
+I:found module to dedupe: stm_p_basic.ko
+I:found module to dedupe: stm_core.ko
+I:found module to dedupe: gh_mem_notifier.ko
+I:found module to dedupe: gh_irq_lend.ko
+I:found module to dedupe: qcom_lpm.ko
+I:found module to dedupe: qcom_edac.ko
+I:found module to dedupe: bt_fm_slim.ko
+I:found module to dedupe: slimbus.ko
+I:found module to dedupe: btpower.ko
+I:found module to dedupe: qti_devfreq_cdev.ko
+I:found module to dedupe: qti_userspace_cdev.ko
+I:found module to dedupe: sdpm_clk.ko
+I:found module to dedupe: policy_engine.ko
+I:found module to dedupe: bcl_soc.ko
+I:found module to dedupe: bcl_pmic5.ko
+I:found module to dedupe: qti_qmi_cdev.ko
+I:found module to dedupe: qti_qmi_sensor_v2.ko
+I:found module to dedupe: qti_battery_charger.ko
+I:found module to dedupe: qcom_ipc_lite.ko
+I:found module to dedupe: usb_f_gsi.ko
+I:found module to dedupe: ipa_fmwk.ko
+I:found module to dedupe: usb_f_cdev.ko
+I:found module to dedupe: usb_f_ccid.ko
+I:found module to dedupe: usb_f_diag.ko
+I:found module to dedupe: ehset.ko
+I:found module to dedupe: repeater.ko
+I:found module to dedupe: msm_sharedmem.ko
+I:found module to dedupe: smsc95xx.ko
+I:found module to dedupe: smsc75xx.ko
+I:found module to dedupe: cnss_prealloc.ko
+I:found module to dedupe: cnss_nl.ko
+I:found module to dedupe: cnss2.ko
+I:found module to dedupe: cnss_plat_ipc_qmi_svc.ko
+I:found module to dedupe: cnss_utils.ko
+I:found module to dedupe: smsc.ko
+I:found module to dedupe: sg.ko
+I:found module to dedupe: lt9611uxc.ko
+I:found module to dedupe: rdbg.ko
+I:found module to dedupe: hvc_gunyah.ko
+I:found module to dedupe: hung_task_enh.ko
+I:found module to dedupe: dmesg_dumper.ko
+I:found module to dedupe: panel_event_notifier.ko
+I:found module to dedupe: memlat.ko
+I:found module to dedupe: qdss_bridge.ko
+I:found module to dedupe: usb_f_qdss.ko
+I:found module to dedupe: usb_bam.ko
+I:found module to dedupe: sps_drv.ko
+I:found module to dedupe: wlan_firmware_service.ko
+I:found module to dedupe: msm_ext_display.ko
+I:found module to dedupe: sys_pm_vx.ko
+I:found module to dedupe: eud.ko
+I:found module to dedupe: msm_show_epoch.ko
+I:found module to dedupe: ucsi_glink.ko
+I:found module to dedupe: cdsprm.ko
+I:found module to dedupe: spcom.ko
+I:found module to dedupe: spss_utils.ko
+I:found module to dedupe: qcom_spss.ko
+I:found module to dedupe: pmic_glink.ko
+I:found module to dedupe: glink_probe.ko
+I:found module to dedupe: qcom_glink_spss.ko
+I:found module to dedupe: glink_pkt.ko
+I:found module to dedupe: qcom_q6v5_pas.ko
+I:found module to dedupe: qcom_pil_info.ko
+I:found module to dedupe: qcom_q6v5.ko
+I:found module to dedupe: smp2p_sleepstate.ko
+I:found module to dedupe: llcc_perfmon.ko
+I:found module to dedupe: microdump_collector.ko
+I:found module to dedupe: dcc_v2.ko
+I:found module to dedupe: core_hang_detect.ko
+I:found module to dedupe: qsee_ipc_irq_bridge.ko
+I:found module to dedupe: sysmon_subsystem_stats.ko
+I:found module to dedupe: adsp_sleepmon.ko
+I:found module to dedupe: subsystem_sleep_stats.ko
+I:found module to dedupe: soc_sleep_stats.ko
+I:found module to dedupe: smp2p.ko
+I:found module to dedupe: boot_stats.ko
+I:found module to dedupe: msm_memshare.ko
+I:found module to dedupe: heap_mem_ext_v01.ko
+I:found module to dedupe: pdr_interface.ko
+I:found module to dedupe: qcom_ramdump.ko
+I:found module to dedupe: bam_dma.ko
+I:found module to dedupe: mhi_dev_netdev.ko
+I:found module to dedupe: mhi_dev_uci.ko
+I:found module to dedupe: mhi_dev_dtr.ko
+I:found module to dedupe: mhi_cntrl_qcom.ko
+I:found module to dedupe: qcom_esoc.ko
+I:found module to dedupe: qcom_sysmon.ko
+I:found module to dedupe: qmi_helpers.ko
+I:found module to dedupe: mhi.ko
+I:found module to dedupe: rproc_qcom_common.ko
+I:found module to dedupe: qcom_smd.ko
+I:found module to dedupe: qcom_glink_smem.ko
+I:found module to dedupe: qcom_glink.ko
+I:found module to dedupe: msm_show_resume_irq.ko
+I:found module to dedupe: msm_sysstats.ko
+I:found module to dedupe: msm_kgsl.ko
+I:found module to dedupe: nvmem_qfprom.ko
+I:found module to dedupe: msm_performance.ko
+I:found module to dedupe: mdt_loader.ko
+I:found module to dedupe: c1dcvs_scmi.ko
+I:found module to dedupe: c1dcvs_vendor.ko
+I:found module to dedupe: qcom_rimps.ko
+I:found module to dedupe: msm_qmp.ko
+I:found module to dedupe: qcom_aoss.ko
+I:found module to dedupe: arm_smmu.ko
+I:found module to dedupe: ufs_qcom.ko
+I:found module to dedupe: socinfo.ko
+I:found module to dedupe: qrtr.ko
+I:found module to dedupe: qti_cpufreq_cdev.ko
+I:found module to dedupe: ddr_cdev.ko
+I:found module to dedupe: thermal_pause.ko
+I:found module to dedupe: msm_lmh_dcvs.ko
+I:found module to dedupe: cpu_hotplug.ko
+I:found module to dedupe: cpu_voltage_cooling.ko
+I:found module to dedupe: qcom_tsens.ko
+I:found module to dedupe: pmu_scmi.ko
+I:found module to dedupe: pmu_vendor.ko
+I:found module to dedupe: qcom_llcc_pmu.ko
+I:found module to dedupe: qcom_iommu_util.ko
+I:found module to dedupe: msm_geni_serial.ko
+I:found module to dedupe: memory_dump_v2.ko
+I:found module to dedupe: mem_buf.ko
+I:found module to dedupe: qcom_dma_heaps.ko
+I:found module to dedupe: msm_dma_iommu_mapping.ko
+I:found module to dedupe: mem_buf_dev.ko
+I:found module to dedupe: secure_buffer.ko
+I:found module to dedupe: mac80211.ko
+I:found module to dedupe: gh_rm_drv.ko
+I:found module to dedupe: gh_msgq.ko
+I:found module to dedupe: gh_dbl.ko
+I:found module to dedupe: gh_ctrl.ko
+I:found module to dedupe: gh_arm_drv.ko
+I:found module to dedupe: cqhci.ko
+I:found module to dedupe: hwkm.ko
+I:found module to dedupe: cfg80211.ko
+I:found module to dedupe: bwmon.ko
+I:found module to dedupe: dcvs_fp.ko
+I:found module to dedupe: qcom_ipcc.ko
+I:found module to dedupe: qcom_rpmh.ko
+I:found module to dedupe: qcom_cpu_vendor_hooks.ko
+I:found module to dedupe: gh_virt_wdt.ko
+I:found module to dedupe: qcom_wdt_core.ko
+I:found module to dedupe: minidump.ko
+I:found module to dedupe: smem.ko
+I:found module to dedupe: qcom_hwspinlock.ko
+I:mounting /tmp/vendor/lib/modules/1.1 on /vendor/lib/modules/1.1
+I:Modules Loaded: 0
+I:Checking directory: /vendor_dlkm/lib/modules
+I:number of modules loaded by init: 468
+I:found module to dedupe: adsp_loader_dlkm.ko
+I:found module to dedupe: audio_pkt_dlkm.ko
+I:found module to dedupe: hdmi_dlkm.ko
+I:found module to dedupe: ipa_clientsm.ko
+I:found module to dedupe: ipanetm.ko
+I:found module to dedupe: lpass_cdc_tx_macro_dlkm.ko
+I:found module to dedupe: lpass_cdc_va_macro_dlkm.ko
+I:found module to dedupe: lpass_cdc_wsa2_macro_dlkm.ko
+I:found module to dedupe: lpass_cdc_wsa_macro_dlkm.ko
+I:found module to dedupe: machine_dlkm.ko
+I:found module to dedupe: lpass_cdc_rx_macro_dlkm.ko
+I:found module to dedupe: audpkt_ion_dlkm.ko
+I:found module to dedupe: lpass_cdc_dlkm.ko
+I:found module to dedupe: msm_video.ko
+I:found module to dedupe: pinctrl_lpi_dlkm.ko
+I:found module to dedupe: q6_dlkm.ko
+I:found module to dedupe: rmnet_sch.ko
+I:found module to dedupe: swr_dmic_dlkm.ko
+I:found module to dedupe: swr_haptics_dlkm.ko
+I:found module to dedupe: wcd938x_slave_dlkm.ko
+I:found module to dedupe: wsa883x_dlkm.ko
+I:found module to dedupe: rmnet_aps.ko
+I:found module to dedupe: rmnet_offload.ko
+I:found module to dedupe: rmnet_perf.ko
+I:found module to dedupe: rmnet_shs.ko
+I:found module to dedupe: rmnet_perf_tether.ko
+I:found module to dedupe: rmnet_core.ko
+I:found module to dedupe: rmnet_ctl.ko
+I:found module to dedupe: rmnet_wlan.ko
+I:found module to dedupe: rndisipam.ko
+I:found module to dedupe: ipam.ko
+I:found module to dedupe: gsim.ko
+I:found module to dedupe: stub_dlkm.ko
+I:found module to dedupe: swr_ctrl_dlkm.ko
+I:found module to dedupe: redriver.ko
+I:found module to dedupe: wcd938x_dlkm.ko
+I:found module to dedupe: mbhc_dlkm.ko
+I:found module to dedupe: wcd9xxx_dlkm.ko
+I:found module to dedupe: audio_prm_dlkm.ko
+I:found module to dedupe: spf_core_dlkm.ko
+I:found module to dedupe: gpr_dlkm.ko
+I:found module to dedupe: snd_event_dlkm.ko
+I:found module to dedupe: q6_notifier_dlkm.ko
+I:found module to dedupe: q6_pdr_dlkm.ko
+I:found module to dedupe: swr_dlkm.ko
+I:found module to dedupe: wcd_core_dlkm.ko
+I:found module to dedupe: msm_drm.ko
+I:found module to dedupe: stm_ftrace.ko
+I:found module to dedupe: stm_console.ko
+I:found module to dedupe: stm_p_ost.ko
+I:found module to dedupe: stm_p_basic.ko
+I:found module to dedupe: stm_core.ko
+I:found module to dedupe: gh_mem_notifier.ko
+I:found module to dedupe: gh_irq_lend.ko
+I:found module to dedupe: qcom_lpm.ko
+I:found module to dedupe: qcom_edac.ko
+I:found module to dedupe: bt_fm_slim.ko
+I:found module to dedupe: slimbus.ko
+I:found module to dedupe: btpower.ko
+I:found module to dedupe: qti_devfreq_cdev.ko
+I:found module to dedupe: qti_userspace_cdev.ko
+I:found module to dedupe: sdpm_clk.ko
+I:found module to dedupe: policy_engine.ko
+I:found module to dedupe: bcl_soc.ko
+I:found module to dedupe: bcl_pmic5.ko
+I:found module to dedupe: qti_qmi_cdev.ko
+I:found module to dedupe: qti_qmi_sensor_v2.ko
+I:found module to dedupe: qti_battery_charger.ko
+I:found module to dedupe: qcom_ipc_lite.ko
+I:found module to dedupe: usb_f_gsi.ko
+I:found module to dedupe: ipa_fmwk.ko
+I:found module to dedupe: usb_f_cdev.ko
+I:found module to dedupe: usb_f_ccid.ko
+I:found module to dedupe: usb_f_diag.ko
+I:found module to dedupe: ehset.ko
+I:found module to dedupe: repeater.ko
+I:found module to dedupe: msm_sharedmem.ko
+I:found module to dedupe: smsc95xx.ko
+I:found module to dedupe: smsc75xx.ko
+I:found module to dedupe: cnss_prealloc.ko
+I:found module to dedupe: cnss_nl.ko
+I:found module to dedupe: cnss2.ko
+I:found module to dedupe: cnss_plat_ipc_qmi_svc.ko
+I:found module to dedupe: cnss_utils.ko
+I:found module to dedupe: smsc.ko
+I:found module to dedupe: sg.ko
+I:found module to dedupe: lt9611uxc.ko
+I:found module to dedupe: rdbg.ko
+I:found module to dedupe: hvc_gunyah.ko
+I:found module to dedupe: hung_task_enh.ko
+I:found module to dedupe: dmesg_dumper.ko
+I:found module to dedupe: panel_event_notifier.ko
+I:found module to dedupe: memlat.ko
+I:found module to dedupe: qdss_bridge.ko
+I:found module to dedupe: usb_f_qdss.ko
+I:found module to dedupe: usb_bam.ko
+I:found module to dedupe: sps_drv.ko
+I:found module to dedupe: wlan_firmware_service.ko
+I:found module to dedupe: msm_ext_display.ko
+I:found module to dedupe: sys_pm_vx.ko
+I:found module to dedupe: eud.ko
+I:found module to dedupe: msm_show_epoch.ko
+I:found module to dedupe: ucsi_glink.ko
+I:found module to dedupe: cdsprm.ko
+I:found module to dedupe: spcom.ko
+I:found module to dedupe: spss_utils.ko
+I:found module to dedupe: qcom_spss.ko
+I:found module to dedupe: pmic_glink.ko
+I:found module to dedupe: glink_probe.ko
+I:found module to dedupe: qcom_glink_spss.ko
+I:found module to dedupe: glink_pkt.ko
+I:found module to dedupe: qcom_q6v5_pas.ko
+I:found module to dedupe: qcom_pil_info.ko
+I:found module to dedupe: qcom_q6v5.ko
+I:found module to dedupe: smp2p_sleepstate.ko
+I:found module to dedupe: llcc_perfmon.ko
+I:found module to dedupe: microdump_collector.ko
+I:found module to dedupe: dcc_v2.ko
+I:found module to dedupe: core_hang_detect.ko
+I:found module to dedupe: qsee_ipc_irq_bridge.ko
+I:found module to dedupe: sysmon_subsystem_stats.ko
+I:found module to dedupe: adsp_sleepmon.ko
+I:found module to dedupe: subsystem_sleep_stats.ko
+I:found module to dedupe: soc_sleep_stats.ko
+I:found module to dedupe: smp2p.ko
+I:found module to dedupe: boot_stats.ko
+I:found module to dedupe: msm_memshare.ko
+I:found module to dedupe: heap_mem_ext_v01.ko
+I:found module to dedupe: pdr_interface.ko
+I:found module to dedupe: qcom_ramdump.ko
+I:found module to dedupe: bam_dma.ko
+I:found module to dedupe: mhi_dev_netdev.ko
+I:found module to dedupe: mhi_dev_uci.ko
+I:found module to dedupe: mhi_dev_dtr.ko
+I:found module to dedupe: mhi_cntrl_qcom.ko
+I:found module to dedupe: qcom_esoc.ko
+I:found module to dedupe: qcom_sysmon.ko
+I:found module to dedupe: qmi_helpers.ko
+I:found module to dedupe: mhi.ko
+I:found module to dedupe: rproc_qcom_common.ko
+I:found module to dedupe: qcom_smd.ko
+I:found module to dedupe: qcom_glink_smem.ko
+I:found module to dedupe: qcom_glink.ko
+I:found module to dedupe: msm_show_resume_irq.ko
+I:found module to dedupe: msm_sysstats.ko
+I:found module to dedupe: msm_kgsl.ko
+I:found module to dedupe: nvmem_qfprom.ko
+I:found module to dedupe: msm_performance.ko
+I:found module to dedupe: mdt_loader.ko
+I:found module to dedupe: c1dcvs_scmi.ko
+I:found module to dedupe: c1dcvs_vendor.ko
+I:found module to dedupe: qcom_rimps.ko
+I:found module to dedupe: msm_qmp.ko
+I:found module to dedupe: qcom_aoss.ko
+I:found module to dedupe: arm_smmu.ko
+I:found module to dedupe: ufs_qcom.ko
+I:found module to dedupe: socinfo.ko
+I:found module to dedupe: qrtr.ko
+I:found module to dedupe: qti_cpufreq_cdev.ko
+I:found module to dedupe: ddr_cdev.ko
+I:found module to dedupe: thermal_pause.ko
+I:found module to dedupe: msm_lmh_dcvs.ko
+I:found module to dedupe: cpu_hotplug.ko
+I:found module to dedupe: cpu_voltage_cooling.ko
+I:found module to dedupe: qcom_tsens.ko
+I:found module to dedupe: pmu_scmi.ko
+I:found module to dedupe: pmu_vendor.ko
+I:found module to dedupe: qcom_llcc_pmu.ko
+I:found module to dedupe: qcom_iommu_util.ko
+I:found module to dedupe: msm_geni_serial.ko
+I:found module to dedupe: memory_dump_v2.ko
+I:found module to dedupe: mem_buf.ko
+I:found module to dedupe: qcom_dma_heaps.ko
+I:found module to dedupe: msm_dma_iommu_mapping.ko
+I:found module to dedupe: mem_buf_dev.ko
+I:found module to dedupe: secure_buffer.ko
+I:found module to dedupe: mac80211.ko
+I:found module to dedupe: gh_rm_drv.ko
+I:found module to dedupe: gh_msgq.ko
+I:found module to dedupe: gh_dbl.ko
+I:found module to dedupe: gh_ctrl.ko
+I:found module to dedupe: gh_arm_drv.ko
+I:found module to dedupe: cqhci.ko
+I:found module to dedupe: hwkm.ko
+I:found module to dedupe: cfg80211.ko
+I:found module to dedupe: bwmon.ko
+I:found module to dedupe: dcvs_fp.ko
+I:found module to dedupe: qcom_ipcc.ko
+I:found module to dedupe: qcom_rpmh.ko
+I:found module to dedupe: qcom_cpu_vendor_hooks.ko
+I:found module to dedupe: gh_virt_wdt.ko
+I:found module to dedupe: qcom_wdt_core.ko
+I:found module to dedupe: minidump.ko
+I:found module to dedupe: smem.ko
+I:found module to dedupe: qcom_hwspinlock.ko
+I:mounting /tmp/vendor_dlkm/lib/modules on /vendor_dlkm/lib/modules
+I:Modules Loaded: 0
+I:Deleting property 'ro.crypto.dm_default_key.options_format.version'
+I:Deleting property 'ro.crypto.volume.metadata.method'
+I:Deleting property 'ro.crypto.volume.options'
+I:Setting 'external_storage.projid.enabled' to '1' from /vendor/build.prop
+I:Setting 'external_storage.casefold.enabled' to '1' from /vendor/build.prop
+I:Setting 'external_storage.sdcardfs.enabled' to '0' from /vendor/build.prop
+I:GetFstabPath: /odm/etc/fstab.default
+I:GetFstabPath: /vendor/etc/fstab.default
+I:GetFstabPath: /system/etc/fstab.default
+I:GetFstabPath: /first_stage_ramdisk/system/etc/fstab.default
+I:GetFstabPath: /fstab.default
+I:GetFstabPath: /first_stage_ramdisk/fstab.default
+I:GetFstabPath: /odm/etc/fstab.qcom
+I:GetFstabPath: /vendor/etc/fstab.qcom
+I:Fstab: /vendor/etc/fstab.qcom
+I:Reading /etc/additional.fstab
+I:Processing '/metadata'
+I:Unhandled flag: 'first_stage_mount'
+I:Processing '/data'
+I:Unhandled flag: 'latemount'
+I:Unhandled flag: 'reservedsize=128M'
+I:Unhandled flag: 'sysfs_path=/sys/devices/platform/soc/1d84000.ufshc'
+I:Unhandled flag: 'checkpoint=fs'
+I:FBE contents 'aes-256-xts', filenames 'aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0'
+I:Metadata contents 'aes-256-xts', filenames 'wrappedkey_v0'
+I:Ignoring the 'fscompress' fstab flag
+I:setting Key_Directory to: /metadata/vold/metadata_encryption
+I:Done processing fstab files
+I:Property ro.boot.product.vendor.sku not found, trying to get vintf manifest file name from ro.board.platform
+I:Separate manifest doesn't exist for 'android.hardware.keymaster'
+I:/vendor/etc/vintf/manifest_waipio.xml not found. Using default path for manifest.xml
+I:Keymaster_Ver::Unable to find vendor manifest on the device, and no default value set. Checking the ramdisk manifest
+I:Property ro.boot.product.vendor.sku not found, trying to get vintf manifest file name from ro.board.platform
+I:Separate manifest doesn't exist for 'android.hardware.keymaster'
+I:/vendor/etc/vintf/manifest_waipio.xml not found. Using default path for manifest.xml
+I:PageManager::LoadFileToBuffer loading filename: '/vendor/etc/vintf/manifest.xml' directly
+I:Looking for 'android.hardware.keymaster' service in manifest
+I:Found version in manifest: 4.0
+I:Keymaster_Ver::Using keymaster version '4.x' for decryption
+Starting the UI...
+Skipping adf graphics -- not present in build tree
+setting DRM_FORMAT_XBGR8888 and GGL_PIXEL_FORMAT_RGBA_8888
+setting DRM_FORMAT_XBGR8888 and GGL_PIXEL_FORMAT_RGBA_8888
+Using drm graphics.
+I:TWFunc::Set_Brightness: Setting brightness control to 255
+TW_SCREEN_BLANK_ON_BOOT := true
+I:TWFunc::Set_Brightness: Setting brightness control to 0
+I:TWFunc::Set_Brightness: Setting brightness control to 255
+I:Loading package: splash (/twres/splash.xml)
+I:Load XML directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/splash.xml' directly
+I:Checking resolution...
+I:Scaling theme width 1.000000x and height 1.218750x, offsets x: 0 y: 0 w: 0 h: 0
+I:Loading resources...
+I:Loading variables...
+I:Loading mouse cursor...
+I:Loading pages...
+I:Loading page splash
+I:Switching packages (splash)
+I:Setting up '/data' as data/media emulated storage.
+I:Can't probe device /dev/block/sda40
+I:Unable to mount '/data'
+I:Actual block device: '/dev/block/sda40', current file system: 'f2fs'
+I:Adding user-defined path '/data/fonts' to the backup exclusions
+I:Can't probe device /dev/block/sda40
+Failed to mount '/data' (Invalid argument)
+I:Actual block device: '/dev/block/sda40', current file system: 'f2fs'
+Unable to recreate /data/media folder.
+I:Apex is disabled in this build
+I:Backup folder set to '/data/media/TWRP/BACKUPS/SM-S901E'
+Updating partition details...
+I:checking for twrp app
+I:Can't probe device /dev/block/sda40
+Failed to mount '/data' (Invalid argument)
+I:Actual block device: '/dev/block/sda40', current file system: 'f2fs'
+...done
+I:Can't probe device /dev/block/sda40
+I:Unable to mount '/data'
+I:Actual block device: '/dev/block/sda40', current file system: 'f2fs'
+Unable to mount storage
+/super | /dev/block/by-name/super | Size: 0MB
+   Flags: Can_Be_Backed_Up IsPresent Can_Flash_Img 
+   Alternate_Block_Device: /dev/block/by-name/super
+   Display_Name: super
+   Backup_Path: /super
+   Backup_Name: super
+   Backup_Display_Name: Super (system vendor product odm)
+   Current_File_System: emmc
+   Backup_Method: dd
+
+I:Unmounting main partitions...
+I:Loading package: TWRP (/data/media/TWRP/theme/ui.zip)
+I:Loading zip theme
+I:Loading package: TWRP (/twres/ui.xml)
+I:Load XML directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/zh_TW.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/zh_CN.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/uk.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/tr.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/sv.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/sl.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/sk.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/ru.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/pt_PT.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/pt_BR.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/pl.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/nl.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/lk.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/ja.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/it.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/id.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/hu.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/fr.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/es.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/en.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/el.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/de.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/cz.xml' directly
+I:PageManager::LoadFileToBuffer loading filename: '/twres/languages/en.xml' directly
+parsing languageFile
+parsing languageFile done
+I:PageManager::LoadFileToBuffer loading filename: '/twres/ui.xml' directly
+I:Checking resolution...
+I:Scaling theme width 1.000000x and height 1.218750x, offsets x: 0 y: 0 w: 0 h: 0
+I:Loading resources...
+I:Failed to load image from indeterminate013, error -1
+I:Loading variables...
+I:Loading mouse cursor...
+I:Loading pages...
+I:Including file: /twres/portrait.xml...
+I:PageManager::LoadFileToBuffer loading filename: '/twres/portrait.xml' directly
+I:Loading resources...
+I:Loading variables...
+I:Loading mouse cursor...
+I:Loading pages...
+I:Loading page main
+I:Loading page main2
+I:Loading page install
+I:Loading page flash_confirm
+I:Loading page flash_zip
+I:Loading page flash_done
+I:Loading page flash_sleep_and_reboot
+I:Loading page flashimage_confirm
+I:Loading page clear_vars
+I:Loading page reboot_system_routine
+I:Loading page confirm_action
+I:Loading page action_page
+I:Loading page singleaction_page
+I:Loading page action_complete
+I:Loading page filecheck
+I:Loading page rebootcheck
+I:Loading page wipe
+I:Loading page advancedwipe
+I:Loading page formatdata
+I:Loading page formatdata_confirm
+I:Loading page checkpartitionlist
+I:Loading page partitionoptions
+I:Loading page refreshfilesystem
+I:Loading page selectfilesystem
+I:Loading page backup
+I:Loading page multiuser_warning
+I:Loading page backup_options
+I:Loading page backupname1
+I:Loading page backupname2
+I:Loading page backupencryption
+I:Loading page backupencryption2
+I:Loading page checkbackuppassword
+I:Loading page backup_run
+I:Loading page restore
+I:Unable to open '/data/media/TWRP/BACKUPS/SM-S901E'
+I:Loading page restore_force
+I:Unable to open '/data/media/TWRP/BACKUPS'
+I:Loading page restore_read
+I:Loading page restore_decrypt
+I:Loading page try_restore_decrypt
+I:Loading page restore_select
+I:Loading page renamebackup
+I:Loading page restore_run
+I:Loading page mount
+I:Loading page usb_mount
+I:Loading page usb_umount
+I:Loading page system_readonly_check
+I:Loading page fastbootreboot
+I:Loading page reboot
+I:Loading page installapp
+I:Loading page system_readonly
+I:Loading page settings
+I:Loading page settings_timezone
+I:Loading page settings_screen
+I:Loading page settings_vibration
+I:Loading page settings_language
+I:Loading page copylog
+I:Loading page advanced
+I:Loading page partsdcardsel
+I:Loading page partsdcardcheck
+I:Loading page partsdcard
+I:Loading page repackselect
+I:Loading page repackconfirm
+I:Loading page lock
+I:Loading page filemanagerlist
+I:Loading page filemanageroptions
+I:Loading page choosedestinationfolder
+I:Loading page filemanagerrenamefile
+I:Loading page filemanagerrenamefolder
+I:Loading page filemanagerchmod
+I:Loading page filemanagerconfirm
+I:Loading page filemanageraction
+I:Loading page decrypt
+I:Loading page decrypt_pattern
+I:Loading page decrypt_pin
+I:Loading page trydecrypt
+I:Loading page canceldecrypt
+I:Loading page terminalcommand
+I:Loading page fastboot
+I:Loading page sideload
+I:Loading page fixcontexts
+I:Loading page slideout
+I:Loading page select_storage
+I:Loading page select_language
+I:Loading page decrypt_users
+I:Loading page changeTwrpFolder
+I:Loading page restore_keymaster
+I:Set page: 'clear_vars'
+I:Set page: 'main2'
+I:Switching packages (TWRP)
+ro.boot.cm.param.offset=9437632
+ro.boot.em.did=REDACTED
+ro.boot.em.model=SM-S901E
+ro.boot.em.status=0x0
+ro.boot.em.rdx_dump=false
+ro.boot.im.param.offset=9437232
+ro.boot.kg=0x1
+ro.boot.kg.ap=REDACTED
+ro.boot.kg.bit=00
+ro.boot.me.param.offset=9437312
+ro.boot.pd.param.offset=9445516
+ro.boot.pr.param.offset=9437472
+ro.boot.rp=12
+ro.boot.sb.debug0=0x0,0,0,0
+ro.boot.sn.param.offset=9437392
+ro.boot.wb.hs=E02
+ro.boot.wb.snapQB=99421987R
+ro.boot.wc.param.offset=9437228
+ro.boot.sku.param.offset=9437552
+ro.boot.svb.ver=SVB1.0
+ro.boot.appcb=3
+ro.boot.memcg=1
+ro.boot.sales.param.offset=9437648
+ro.boot.ulcnt=1
+ro.boot.subpcb=7
+ro.boot.dtb_idx=0
+ro.boot.sec_atd.tty=/dev/ttyHS5
+ro.boot.selinux=permissive
+ro.boot.baseband=msm
+ro.boot.dtbo_idx=4
+ro.boot.hardware=qcom
+ro.boot.prodcode.param.offset=9445416
+ro.boot.revision=13
+ro.boot.slavepcb=3
+ro.boot.ucs_mode=0
+ro.boot.ap_serial=REDACTED
+ro.boot.carrierid=XSA
+ro.boot.carrierid.param.offset=9437644
+ro.boot.dram_info=01,08,00,8G
+ro.boot.edtbo_ver=0
+ro.boot.fastbootd=false
+ro.boot.keymaster=1
+ro.boot.prototype.param.offset=9437660
+ro.boot.bootdevice=1d84000.ufshc
+ro.boot.bootloader=S901EXXSCFYH1
+ro.boot.hdm_status=NONE
+ro.boot.sales_code=XSA
+ro.boot.swp_config=0
+ro.boot.debug_level=0x4f4c
+ro.boot.windowcolor.param.offset=9445496
+ro.boot.boot_devices=soc/1d84000.ufshc
+ro.boot.cp_force_ssr=0xDEADDEAD
+ro.boot.edtbo_offset=9438216
+ro.boot.force_upload=0x0
+ro.boot.warranty_bit=1
+ro.boot.boot_recovery=1
+ro.boot.upload_offset=9438196
+ro.boot.usbcontroller=a600000.dwc3
+ro.boot.cp_debug_level=0x55FF
+ro.boot.ddr_start_type=1
+ro.boot.cp_reserved_mem=off
+ro.boot.init_fatal_panic=true
+ro.boot.verifiedbootstate=orange
+ro.boot.reserve_mem_region=0x0
+ro.boot.first_stage_console=2
+ro.baseband=msm
+ro.bootmode=unknown
+ro.hardware=qcom
+ro.revision=13
+ro.bootloader=S901EXXSCFYH1
+ro.boottime.adbd=4327987862
+ro.boottime.init=711676666
+ro.boottime.init.modules=1339
+ro.boottime.init.selinux=60089583
+ro.boottime.init.first_stage=3361756717
+ro.boottime.init.cold_boot_wait=162
+ro.boottime.logd=4312475258
+ro.boottime.ueventd=4147328123
+ro.boottime.recovery=4320914477
+ro.boottime.health-hal-2-1=4327040414
+ro.boottime.servicemanager=4313900362
+ro.boottime.hwservicemanager=4313327394
+ro.boottime.vndservicemanager=4314511039
+ro.odm.build.date=Tue Jul  2 06:27:02 UTC 2024
+ro.odm.build.date.utc=1719901622
+ro.odm.build.version.incremental=eng.runner.20240702.062932
+ro.odm.build.fingerprint=samsung/twrp_r0q/r0q:12.1.0/SP2A.220405.004/runner07020627:eng/test-keys
+ro.product.odm.name=twrp_r0q
+ro.product.odm.brand=samsung
+ro.product.odm.model=SM-S901E
+ro.product.odm.device=r0q
+ro.product.odm.manufacturer=samsung
+ro.build.id=SP2A.220405.004
+ro.build.date=Tue Jul  2 06:27:02 UTC 2024
+ro.build.date.utc=1719901622
+ro.build.host=fv-az701-83
+ro.build.tags=test-keys
+ro.build.type=eng
+ro.build.user=runner
+ro.build.flavor=twrp_r0q-eng
+ro.build.display.id=twrp_r0q-eng 12.1.0 SP2A.220405.004 eng.runner.20240702.062932 test-keys
+ro.build.product=r0q
+ro.build.version.sdk=32
+ro.build.version.base_os=
+ro.build.version.release=12
+ro.build.version.codename=REL
+ro.build.version.incremental=eng.runner.20240702.062932
+ro.build.version.preview_sdk=0
+ro.build.version.all_codenames=REL
+ro.build.version.security_patch=2029-12-31
+ro.build.version.release_or_codename=12.1.0
+ro.build.version.preview_sdk_fingerprint=REL
+ro.build.version.min_supported_target_sdk=23
+ro.build.description=twrp_r0q-eng 12.1.0 SP2A.220405.004 eng.runner.20240702.062932 test-keys
+ro.build.characteristics=default
+ro.secure=0
+ro.system.build.id=SP2A.220405.004
+ro.system.build.date=Tue Jul  2 06:27:02 UTC 2024
+ro.system.build.date.utc=1719901622
+ro.system.build.tags=test-keys
+ro.system.build.type=eng
+ro.system.build.version.sdk=32
+ro.system.build.version.release=12
+ro.system.build.version.incremental=eng.runner.20240702.062932
+ro.system.build.version.release_or_codename=12.1.0
+ro.system.build.fingerprint=samsung/twrp_r0q/r0q:12.1.0/SP2A.220405.004/runner07020627:eng/test-keys
+ro.treble.enabled=false
+ro.product.cpu.abi=arm64-v8a
+ro.product.cpu.abilist=arm64-v8a,armeabi-v7a,armeabi
+ro.product.cpu.abilist32=armeabi-v7a,armeabi
+ro.product.cpu.abilist64=arm64-v8a
+ro.product.name=twrp_r0q
+ro.product.brand=samsung
+ro.product.build.id=SP2A.220405.004
+ro.product.build.date=Tue Jul  2 06:27:02 UTC 2024
+ro.product.build.date.utc=1719901622
+ro.product.build.tags=test-keys
+ro.product.build.type=eng
+ro.product.build.version.sdk=32
+ro.product.build.version.release=12
+ro.product.build.version.incremental=eng.runner.20240702.062932
+ro.product.build.version.release_or_codename=12.1.0
+ro.product.build.fingerprint=samsung/twrp_r0q/r0q:12.1.0/SP2A.220405.004/runner07020627:eng/test-keys
+ro.product.model=SM-S901E
+ro.product.device=r0q
+ro.product.system.name=twrp_r0q
+ro.product.system.brand=samsung
+ro.product.system.model=SM-S901E
+ro.product.system.device=r0q
+ro.product.system.manufacturer=samsung
+ro.product.product.name=twrp_r0q
+ro.product.product.brand=samsung
+ro.product.product.model=SM-S901E
+ro.product.product.device=r0q
+ro.product.product.manufacturer=samsung
+ro.product.system_ext.name=twrp_r0q
+ro.product.system_ext.brand=samsung
+ro.product.system_ext.model=SM-S901E
+ro.product.system_ext.device=r0q
+ro.product.system_ext.manufacturer=samsung
+ro.product.manufacturer=samsung
+ro.debuggable=1
+ro.system_ext.build.id=SP2A.220405.004
+ro.system_ext.build.date=Tue Jul  2 06:27:02 UTC 2024
+ro.system_ext.build.date.utc=1719901622
+ro.system_ext.build.tags=test-keys
+ro.system_ext.build.type=eng
+ro.system_ext.build.version.sdk=32
+ro.system_ext.build.version.release=12
+ro.system_ext.build.version.incremental=eng.runner.20240702.062932
+ro.system_ext.build.version.release_or_codename=12.1.0
+ro.system_ext.build.fingerprint=samsung/twrp_r0q/r0q:12.1.0/SP2A.220405.004/runner07020627:eng/test-keys
+ro.actionable_compatible_property.enabled=true
+ro.vendor.build.id=SP2A.220405.004
+ro.vendor.build.date=Tue Jul  2 06:27:02 UTC 2024
+ro.vendor.build.date.utc=1719901622
+ro.vendor.build.tags=test-keys
+ro.vendor.build.type=eng
+ro.vendor.build.version.sdk=32
+ro.vendor.build.version.release=12
+ro.vendor.build.version.incremental=eng.runner.20240702.062932
+ro.vendor.build.version.release_or_codename=12.1.0
+ro.vendor.build.fingerprint=samsung/twrp_r0q/r0q:12.1.0/SP2A.220405.004/runner07020627:eng/test-keys
+ro.vendor.product.cpu.abilist=arm64-v8a,armeabi-v7a,armeabi
+ro.vendor.product.cpu.abilist32=armeabi-v7a,armeabi
+ro.vendor.product.cpu.abilist64=arm64-v8a
+ro.product.board=waipio
+ro.product.vendor.name=twrp_r0q
+ro.product.vendor.brand=samsung
+ro.product.vendor.model=SM-S901E
+ro.product.vendor.device=r0q
+ro.product.vendor.manufacturer=samsung
+ro.cold_boot_done=true
+ro.bionic.arch=arm64
+ro.bionic.2nd_arch=arm
+ro.bionic.cpu_variant=kryo300
+ro.bionic.2nd_cpu_variant=cortex-a75
+ro.dalvik.vm.native.bridge=0
+ro.zygote=zygote64_32
+dalvik.vm.isa.arm.variant=cortex-a75
+dalvik.vm.isa.arm.features=default
+dalvik.vm.isa.arm64.variant=kryo300
+dalvik.vm.isa.arm64.features=default
+dalvik.vm.dexopt.secondary=true
+dalvik.vm.dexopt.thermal-cutoff=2
+dalvik.vm.usejit=true
+dalvik.vm.madvise.artfile.size=4294967295
+dalvik.vm.madvise.odexfile.size=104857600
+dalvik.vm.madvise.vdexfile.size=104857600
+dalvik.vm.lockprof.threshold=500
+dalvik.vm.dex2oat-Xms=64m
+dalvik.vm.dex2oat-Xmx=512m
+dalvik.vm.minidebuginfo=true
+dalvik.vm.appimageformat=lz4
+dalvik.vm.usejitprofiles=true
+dalvik.vm.image-dex2oat-Xms=64m
+dalvik.vm.image-dex2oat-Xmx=64m
+dalvik.vm.image-dex2oat-filter=extract
+dalvik.vm.dex2oat-minidebuginfo=true
+dalvik.vm.dex2oat-max-image-block-size=524288
+dalvik.vm.dex2oat-resolve-startup-strings=true
+dalvik.vm.dex2oat-updatable-bcp-packages-file=/system/etc/updatable-bcp-packages.txt
+persist.sys.dalvik.vm.lib.2=libart.so
+debug.atrace.tags.enableflags=0
+ro.twrp.boot=1
+ro.twrp.version=3.7.1_12-1_Archer
+ro.twrp.fastbootd=0
+ro.wifi.channels=
+ro.allow.mock.location=1
+ro.build.selinux=1
+ro.iorapd.enable=true
+ro.kernel.android.checkjni=1
+ro.kernel.version=5.10
+ro.system.product.cpu.abilist=arm64-v8a,armeabi-v7a,armeabi
+ro.system.product.cpu.abilist32=armeabi-v7a,armeabi
+ro.system.product.cpu.abilist64=arm64-v8a
+ro.display.series=Samsung S22
+ro.product.locale=en-US
+ro.security.keystore.keytype=sakv2,gak,sgak,rkp
+ro.postinstall.fstab.prefix=/system
+fbe.contents=aes-256-xts
+fbe.filenames=aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0
+twrp.super.symlinks_created=true
+twrp.modules.loaded=true
+twrp.crash_counter=0
+twrp.action_complete=0
+fstab.additional=1
+metadata.contents=aes-256-xts
+metadata.filenames=wrappedkey_v0
+prepdecrypt.setpatch=true
+keymaster_ver=4.x
+ro.boot.fstab_suffix=default
+ro.boot.dynamic_partitions=true
+ro.hwui.use_vulkan=
+ro.board.platform=waipio
+ro.build.ab_update=false
+ro.carrier=unknown
+ro.hardware.keystore=mdfpp
+ro.hardware.gatekeeper=mdfpp
+pm.dexopt.ab-ota=speed-profile
+pm.dexopt.shared=speed
+pm.dexopt.cmdline=verify
+pm.dexopt.install=speed-profile
+pm.dexopt.inactive=verify
+pm.dexopt.bg-dexopt=speed-profile
+pm.dexopt.first-boot=extract
+pm.dexopt.install-bulk=speed-profile
+pm.dexopt.install-fast=skip
+pm.dexopt.install-bulk-secondary=verify
+pm.dexopt.install-bulk-downgraded=verify
+pm.dexopt.install-bulk-secondary-downgraded=extract
+ro.build.fingerprint=samsung/twrp_r0q/r0q:12.1.0/SP2A.220405.004/eng.runner.20240702.062932:eng/test-keys
+ro.gsid.image_running=0
+gsid.image_installed=0
+hwservicemanager.ready=true
+sys.init.perf_lsm_hooks=1
+init.svc.logd=running
+init.svc.ueventd=running
+init.svc.recovery=running
+init.svc.health-hal-2-1=running
+init.svc.servicemanager=running
+init.svc.hwservicemanager=running
+init.svc.vndservicemanager=running
+init.svc.adbd=restarting
+init.svc_debug_pid.adbd=475
+init.svc_debug_pid.logd=466
+init.svc_debug_pid.ueventd=456
+init.svc_debug_pid.recovery=473
+init.svc_debug_pid.health-hal-2-1=474
+init.svc_debug_pid.servicemanager=468
+init.svc_debug_pid.hwservicemanager=467
+init.svc_debug_pid.vndservicemanager=469
+keyguard.no_require_sim=true
+log.tag.stats_log=I
+ro.logd.size.stats=64K
+ro.logd.kernel=true
+persist.debug.dalvik.vm.core_platform_api_policy=just-warn
+pm.dexopt.post-boot=extract
+pm.dexopt.boot-after-ota=extract
+ro.property_service.version=2
+ro.minui.pixel_format=RGBX_8888
+ro.minui.overscan_percent=0
+ro.boot.serialno=REDACTED-SERIAL
+ro.serialno=REDACTED-SERIAL
+service.adb.root=1
+external_storage.projid.enabled=1
+external_storage.casefold.enabled=1
+external_storage.sdcardfs.enabled=0
+dev.mnt.blk.efs=
+dev.mnt.blk.odm=
+dev.mnt.blk.cache=sda
+dev.mnt.blk.vendor=
+dev.mnt.blk.vendor.firmware_mnt=sda
+dev.mnt.blk.persist=
+dev.mnt.blk.sec_efs=
+dev.mnt.blk.system_root=
+dev.mnt.blk.vendor_dlkm=
+net.bt.name=Android
+persist.sys.usb.config=adb
+persist.sys.fuse.passthrough.enable=true
+persist.sys.disable_rescue=true
+ro.config.ringtone=Ring_Synth_04.ogg
+ro.config.alarm_alert=Alarm_Classic.ogg
+ro.config.notification_sound=OnTheHunt.ogg
+ro.com.android.dataroaming=true
+tombstoned.max_tombstone_count=50
+persist.traced.enable=1
+sys.usb.state=adb
+sys.usb.config=adb
+sys.usb.configfs=0
+sys.usb.controller=a600000.dwc3
+ro.odm.build.id=SP2A.220405.004
+ro.odm.build.tags=test-keys
+ro.odm.build.type=eng
+ro.odm.build.version.sdk=32
+ro.odm.build.version.release=12
+ro.odm.build.version.release_or_codename=12.1.0
+ro.odm.product.cpu.abilist=arm64-v8a,armeabi-v7a,armeabi
+ro.odm.product.cpu.abilist32=armeabi-v7a,armeabi
+ro.odm.product.cpu.abilist64=arm64-v8a
+ro.vendor.build.security_patch=2029-12-31
+ro.crypto.volume.filenames_mode=aes-256-cts
+ro.crypto.allow_encrypt_override=true
+
+I:Overriding ro.build.date.utc with value: "0"
+I:Overriding ro.bootimage.build.date.utc with value: "0"
+I:Overriding ro.vendor.build.date.utc with value: "0"
+I:Overriding ro.system.build.date.utc with value: "0"
+I:Overriding ro.system_ext.build.date.utc with value: "0"
+I:Overriding ro.product.build.date.utc with value: "0"
+I:Overriding ro.odm.build.date.utc with value: "0"
+Updating partition details...
+I:checking for twrp app
+I:Can't probe device /dev/block/sda40
+Failed to mount '/data' (Invalid argument)
+I:Actual block device: '/dev/block/sda40', current file system: 'f2fs'
+...done
+I:Can't probe device /dev/block/sda40
+I:Unable to mount '/data'
+I:Actual block device: '/dev/block/sda40', current file system: 'f2fs'
+Unable to mount storage
+tw_get_context failed to get selinux context, file /data/media
+I:Failed to get default contexts and file mode for storage files.
+SELinux contexts loaded from /file_contexts
+Full SELinux support is present.
+I:Switching packages (TWRP)
+
+
+Partition Logs:
+/system_root | /dev/block/dm-0 | Size: 5771MB Used: 5770MB Free: 1MB Backup Size: 5770MB
+   Flags: Can_Be_Mounted IsPresent Mount_Read_Only Is_Super 
+   Primary_Block_Device: /dev/block/dm-0
+   Display_Name: System
+   Storage_Name: System
+   Backup_Path: /system_root
+   Backup_Name: system
+   Backup_Display_Name: System
+   Storage_Path: /system_root
+   Current_File_System: f2fs
+   Fstab_File_System: f2fs
+   Backup_Method: files
+
+/vendor | /dev/block/dm-4 | Size: 2045MB Used: 2042MB Free: 3MB Backup Size: 2042MB
+   Flags: Can_Be_Mounted IsPresent Mount_Read_Only Is_Super 
+   Primary_Block_Device: /dev/block/dm-4
+   Display_Name: Vendor
+   Storage_Name: Vendor
+   Backup_Path: /vendor
+   Backup_Name: vendor
+   Backup_Display_Name: Vendor
+   Storage_Path: /vendor
+   Current_File_System: f2fs
+   Fstab_File_System: f2fs
+   Backup_Method: files
+
+/product | /dev/block/dm-2 | Size: 1403MB Used: 1401MB Free: 2MB Backup Size: 1401MB
+   Flags: Can_Be_Mounted IsPresent Mount_Read_Only Is_Super 
+   Primary_Block_Device: /dev/block/dm-2
+   Display_Name: Product
+   Storage_Name: Product
+   Backup_Path: /product
+   Backup_Name: Product
+   Backup_Display_Name: Product
+   Storage_Path: /product
+   Current_File_System: f2fs
+   Fstab_File_System: f2fs
+   Backup_Method: files
+
+/odm | /dev/block/dm-1 | Size: 19MB Used: 15MB Free: 4MB Backup Size: 15MB
+   Flags: Can_Be_Mounted IsPresent Mount_Read_Only Is_Super 
+   Primary_Block_Device: /dev/block/dm-1
+   Display_Name: ODM
+   Storage_Name: ODM
+   Backup_Path: /odm
+   Backup_Name: ODM
+   Backup_Display_Name: ODM
+   Storage_Path: /odm
+   Current_File_System: f2fs
+   Fstab_File_System: f2fs
+   Backup_Method: files
+
+/system_ext | /dev/block/dm-3 | Size: 187MB Used: 184MB Free: 3MB Backup Size: 184MB
+   Flags: Can_Be_Mounted IsPresent Mount_Read_Only Is_Super 
+   Primary_Block_Device: /dev/block/dm-3
+   Display_Name: System_EXT
+   Storage_Name: System_EXT
+   Backup_Path: /system_ext
+   Backup_Name: System_EXT
+   Backup_Display_Name: System_EXT
+   Storage_Path: /system_ext
+   Current_File_System: f2fs
+   Fstab_File_System: f2fs
+   Backup_Method: files
+
+/vendor_dlkm | /dev/block/dm-5 | Size: 63MB Used: 62MB Free: 1MB Backup Size: 62MB
+   Flags: Can_Be_Mounted IsPresent Mount_Read_Only Is_Super 
+   Primary_Block_Device: /dev/block/dm-5
+   Display_Name: Vendor DLKM
+   Storage_Name: Vendor DLKM
+   Backup_Path: /vendor_dlkm
+   Backup_Name: vendor_dlkm
+   Backup_Display_Name: Vendor DLKM
+   Storage_Path: /vendor_dlkm
+   Current_File_System: f2fs
+   Fstab_File_System: f2fs
+   Backup_Method: files
+
+/boot | /dev/block/sda25 | Size: 96MB
+   Flags: Can_Be_Backed_Up IsPresent Can_Flash_Img 
+   Primary_Block_Device: /dev/block/sda25
+   Display_Name: Boot
+   Storage_Name: boot
+   Backup_Path: /boot
+   Backup_Name: boot
+   Backup_Display_Name: Boot
+   Storage_Path: /boot
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/recovery | /dev/block/sda26 | Size: 100MB
+   Flags: Can_Be_Backed_Up IsPresent Can_Flash_Img 
+   Primary_Block_Device: /dev/block/sda26
+   Display_Name: Recovery
+   Storage_Name: recovery
+   Backup_Path: /recovery
+   Backup_Name: recovery
+   Backup_Display_Name: Recovery
+   Storage_Path: /recovery
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/cache | /dev/block/sda32 | Size: 779MB Used: 0MB Free: 779MB Backup Size: 0MB
+   Flags: Can_Be_Mounted Can_Be_Wiped Can_Be_Backed_Up Wipe_During_Factory_Reset Wipe_Available_in_GUI IsPresent 
+   Primary_Block_Device: /dev/block/sda32
+   Display_Name: Cache
+   Storage_Name: Cache
+   Backup_Path: /cache
+   Backup_Name: cache
+   Backup_Display_Name: Cache
+   Storage_Path: /cache
+   Current_File_System: ext4
+   Fstab_File_System: ext4
+   Backup_Method: files
+
+/efs | /dev/block/sda6 | Size: 15MB Used: 0MB Free: 15MB Backup Size: 0MB
+   Flags: Can_Be_Mounted Can_Be_Wiped Can_Be_Backed_Up IsPresent 
+   Primary_Block_Device: /dev/block/sda6
+   Display_Name: EFS
+   Storage_Name: efs
+   Backup_Path: /efs
+   Backup_Name: efs
+   Backup_Display_Name: efs
+   Storage_Path: /efs
+   Current_File_System: ext4
+   Fstab_File_System: ext4
+   Backup_Method: files
+
+/sec_efs | /dev/block/sda9 | Size: 15MB Used: 5MB Free: 10MB Backup Size: 5MB
+   Flags: Can_Be_Mounted Can_Be_Wiped Can_Be_Backed_Up IsPresent 
+   Primary_Block_Device: /dev/block/sda9
+   Display_Name: SEC EFS
+   Storage_Name: sec_efs
+   Backup_Path: /sec_efs
+   Backup_Name: sec_efs
+   Backup_Display_Name: sec_efs
+   Storage_Path: /sec_efs
+   Current_File_System: ext4
+   Fstab_File_System: ext4
+   Backup_Method: files
+
+/modem | /dev/block/sda24 | Size: 164MB
+   Flags: Can_Be_Backed_Up IsPresent 
+   Primary_Block_Device: /dev/block/sda24
+   Display_Name: Modem
+   Storage_Name: modem
+   Backup_Path: /modem
+   Backup_Name: modem
+   Backup_Display_Name: modem
+   Storage_Path: /modem
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/mdm | /dev/block/sda24 | Size: 164MB
+   Flags: IsPresent 
+   Primary_Block_Device: /dev/block/sda24
+   Display_Name: mdm
+   Storage_Name: mdm
+   Backup_Path: /mdm
+   Backup_Name: mdm
+   Backup_Display_Name: mdm
+   Storage_Path: /mdm
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/dsp | /dev/block/sda17 | Size: 64MB
+   Flags: IsPresent 
+   Primary_Block_Device: /dev/block/sda17
+   Display_Name: dsp
+   Storage_Name: dsp
+   Backup_Path: /dsp
+   Backup_Name: dsp
+   Backup_Display_Name: dsp
+   Storage_Path: /dsp
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/misc | /dev/block/sda10 | Size: 1MB
+   Flags: IsPresent 
+   Primary_Block_Device: /dev/block/sda10
+   Display_Name: misc
+   Storage_Name: misc
+   Backup_Path: /misc
+   Backup_Name: misc
+   Backup_Display_Name: misc
+   Storage_Path: /misc
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/dtbo | /dev/block/sda36 | Size: 8MB
+   Flags: Can_Be_Backed_Up IsPresent Can_Flash_Img 
+   Primary_Block_Device: /dev/block/sda36
+   Display_Name: Dtbo
+   Storage_Name: dtbo
+   Backup_Path: /dtbo
+   Backup_Name: dtbo
+   Backup_Display_Name: dtbo
+   Storage_Path: /dtbo
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/prism | /dev/block/sda30 | Size: 968MB Used: 546MB Free: 422MB Backup Size: 546MB
+   Flags: Can_Be_Mounted Can_Be_Wiped IsPresent 
+   Primary_Block_Device: /dev/block/sda30
+   Display_Name: prism
+   Storage_Name: prism
+   Backup_Path: /prism
+   Backup_Name: prism
+   Backup_Display_Name: prism
+   Storage_Path: /prism
+   Current_File_System: ext4
+   Fstab_File_System: ext4
+   Backup_Method: files
+
+/optics | /dev/block/sda31 | Size: 19MB Used: 2MB Free: 17MB Backup Size: 2MB
+   Flags: Can_Be_Mounted Can_Be_Wiped IsPresent 
+   Primary_Block_Device: /dev/block/sda31
+   Display_Name: optics
+   Storage_Name: optics
+   Backup_Path: /optics
+   Backup_Name: optics
+   Backup_Display_Name: optics
+   Storage_Path: /optics
+   Current_File_System: ext4
+   Fstab_File_System: ext4
+   Backup_Method: files
+
+/vbmeta_system | /dev/block/sda22 | Size: 0MB
+   Flags: IsPresent 
+   Primary_Block_Device: /dev/block/sda22
+   Display_Name: vbmeta_system
+   Storage_Name: vbmeta_system
+   Backup_Path: /vbmeta_system
+   Backup_Name: vbmeta_system
+   Backup_Display_Name: vbmeta_system
+   Storage_Path: /vbmeta_system
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/vendor_boot | /dev/block/sda27 | Size: 96MB
+   Flags: Can_Be_Backed_Up IsPresent Can_Flash_Img 
+   Primary_Block_Device: /dev/block/sda27
+   Display_Name: Vendor Boot
+   Storage_Name: vendor_boot
+   Backup_Path: /vendor_boot
+   Backup_Name: vendor_boot
+   Backup_Display_Name: vendor_boot
+   Storage_Path: /vendor_boot
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/vbmeta_samsung |  | Size: 0MB
+   Flags: 
+   Primary_Block_Device: /dev/block/bootdevice/by-name/vbmeta_samsung
+   Display_Name: vbmeta_samsung
+   Storage_Name: vbmeta_samsung
+   Backup_Path: /vbmeta_samsung
+   Backup_Name: vbmeta_samsung
+   Backup_Display_Name: vbmeta_samsung
+   Storage_Path: /vbmeta_samsung
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/vm-bootsys | /dev/block/sda28 | Size: 247MB Used: 237MB Free: 10MB Backup Size: 237MB
+   Flags: Can_Be_Mounted Can_Be_Wiped IsPresent 
+   Primary_Block_Device: /dev/block/sda28
+   Display_Name: vm-bootsys
+   Storage_Name: vm-bootsys
+   Backup_Path: /vm-bootsys
+   Backup_Name: vm-bootsys
+   Backup_Display_Name: vm-bootsys
+   Storage_Path: /vm-bootsys
+   Current_File_System: ext4
+   Fstab_File_System: ext4
+   Backup_Method: files
+
+/imagefv | /dev/block/sde22 | Size: 10MB
+   Flags: IsPresent 
+   Primary_Block_Device: /dev/block/sde22
+   Display_Name: imagefv
+   Storage_Name: imagefv
+   Backup_Path: /imagefv
+   Backup_Name: imagefv
+   Backup_Display_Name: imagefv
+   Storage_Path: /imagefv
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/firmware | /dev/block/sda19 | Size: 150MB
+   Flags: Can_Be_Backed_Up IsPresent 
+   Primary_Block_Device: /dev/block/sda19
+   Display_Name: Firmware
+   Storage_Name: Firmware
+   Backup_Path: /firmware
+   Backup_Name: firmware
+   Backup_Display_Name: Firmware
+   Storage_Path: /firmware
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/odm_image | /dev/block/dm-1 | Size: 20MB
+   Flags: IsPresent Can_Flash_Img 
+   Primary_Block_Device: /dev/block/dm-1
+   Display_Name: Odm Image
+   Storage_Name: Odm Image
+   Backup_Path: /odm_image
+   Backup_Name: odm_image
+   Backup_Display_Name: Odm Image
+   Storage_Path: /odm_image
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/optics_image | /dev/block/sda31 | Size: 20MB
+   Flags: Can_Be_Backed_Up IsPresent Can_Flash_Img 
+   Primary_Block_Device: /dev/block/sda31
+   Display_Name: Optics Image
+   Storage_Name: Optics Image
+   Backup_Path: /optics_image
+   Backup_Name: optics_image
+   Backup_Display_Name: Optics Image
+   Storage_Path: /optics_image
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/persist | /dev/block/sda5 | Size: 27MB Used: 1MB Free: 26MB Backup Size: 1MB
+   Flags: Can_Be_Mounted Can_Be_Wiped IsPresent Mount_Read_Only 
+   Primary_Block_Device: /dev/block/sda5
+   Display_Name: Persist
+   Storage_Name: Persist
+   Backup_Path: /persist
+   Backup_Name: persist
+   Backup_Display_Name: Persist
+   Storage_Path: /persist
+   Current_File_System: ext4
+   Fstab_File_System: ext4
+   Backup_Method: files
+
+/prism_image | /dev/block/sda30 | Size: 1000MB
+   Flags: Can_Be_Backed_Up IsPresent Can_Flash_Img 
+   Primary_Block_Device: /dev/block/sda30
+   Display_Name: Prism Image
+   Storage_Name: Prism Image
+   Backup_Path: /prism_image
+   Backup_Name: prism_image
+   Backup_Display_Name: Prism Image
+   Storage_Path: /prism_image
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/product_image | /dev/block/dm-2 | Size: 1426MB
+   Flags: IsPresent Can_Flash_Img 
+   Primary_Block_Device: /dev/block/dm-2
+   Display_Name: Product Image
+   Storage_Name: Product Image
+   Backup_Path: /product_image
+   Backup_Name: product_image
+   Backup_Display_Name: Product Image
+   Storage_Path: /product_image
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/system_image | /dev/block/dm-0 | Size: 5864MB
+   Flags: IsPresent Can_Flash_Img 
+   Primary_Block_Device: /dev/block/dm-0
+   Display_Name: System Image
+   Storage_Name: System Image
+   Backup_Path: /system_image
+   Backup_Name: system_image
+   Backup_Display_Name: System Image
+   Storage_Path: /system_image
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/usb-otg |  | Size: 0MB Used: 0MB Free: 0MB Backup Size: 0MB
+   Flags: Can_Be_Mounted Can_Be_Wiped Wipe_Available_in_GUI Removable Is_Storage 
+   Primary_Block_Device: /dev/block/sdg1
+   Alternate_Block_Device: /dev/block/sdg
+   Display_Name: USB-OTG
+   Storage_Name: USB-OTG
+   Backup_Path: /usb-otg
+   Backup_Name: usb-otg
+   Backup_Display_Name: USB-OTG
+   Storage_Path: /usb-otg
+   Current_File_System: vfat
+   Fstab_File_System: vfat
+   Backup_Method: files
+   MTP_Storage_ID: 65537
+
+/vendor_image | /dev/block/dm-4 | Size: 2078MB
+   Flags: IsPresent Can_Flash_Img 
+   Primary_Block_Device: /dev/block/dm-4
+   Display_Name: Vendor Image
+   Storage_Name: Vendor Image
+   Backup_Path: /vendor_image
+   Backup_Name: vendor_image
+   Backup_Display_Name: Vendor Image
+   Storage_Path: /vendor_image
+   Current_File_System: emmc
+   Fstab_File_System: emmc
+   Backup_Method: dd
+
+/metadata | /dev/block/sda23 | Size: 27MB Used: 0MB Free: 27MB Backup Size: 0MB
+   Flags: Can_Be_Mounted Can_Be_Wiped Wipe_Available_in_GUI IsPresent 
+   Primary_Block_Device: /dev/block/sda23
+   Display_Name: Metadata
+   Storage_Name: Metadata
+   Backup_Path: /metadata
+   Backup_Name: metadata
+   Backup_Display_Name: Metadata
+   Storage_Path: /metadata
+   Current_File_System: ext4
+   Fstab_File_System: ext4
+   Backup_Method: files
+   Mount_Flags: 1046, Mount_Options: noauto_da_alloc,discard,journal_checksum,data=ordered
+
+/data | /dev/block/sda40 | Size: 0MB Used: 0MB Free: 0MB Backup Size: 0MB
+   Flags: Can_Be_Mounted Can_Be_Wiped Can_Be_Backed_Up Wipe_During_Factory_Reset Wipe_Available_in_GUI IsPresent Has_Data_Media Can_Encrypt_Backup Use_Userdata_Encryption Is_Storage Is_Settings_Storage 
+   Symlink_Path: /data/media
+   Symlink_Mount_Point: /sdcard
+   Primary_Block_Device: /dev/block/sda40
+   Display_Name: Data
+   Storage_Name: Internal Storage
+   Backup_Path: /data
+   Backup_Name: data
+   Backup_Display_Name: Data
+   Storage_Path: /data/media
+   Current_File_System: f2fs
+   Fstab_File_System: f2fs
+   Backup_Method: files
+   Mount_Flags: 1030, Mount_Options: discard,usrquota,grpquota,fsync_mode=nobarrier,reserve_root=32768,resgid=5678,inlinecrypt
+   MTP_Storage_ID: 65538
+   Metadata Key Directory: /metadata/vold/metadata_encryption
+
+/super | /dev/block/by-name/super | Size: 11500MB
+   Flags: Can_Be_Backed_Up IsPresent Can_Flash_Img 
+   Alternate_Block_Device: /dev/block/by-name/super
+   Display_Name: super
+   Backup_Path: /super
+   Backup_Name: super
+   Backup_Display_Name: Super (system vendor product odm)
+   Current_File_System: emmc
+   Backup_Method: dd
+
+I:Attempt to load settings from settings file...
+I:InfoManager file '.twrps' not found.
+I:Backup folder set to '/data/media/TWRP/BACKUPS/SM-S901E'
+I:Version number saved to '/cache/recovery/.version'
+I:Unable to mount '/usb-otg'
+I:Actual block device: '', current file system: 'vfat'
+I:Can't probe device /dev/block/sda40
+I:Unable to mount '/data'
+I:Actual block device: '/dev/block/sda40', current file system: 'f2fs'
+I:TWFunc::Set_Brightness: Setting brightness control to 255
+I:Starting MTP
+I:Cannot find file /sys/class/android_usb/android0/idVendor
+I:Cannot find file /sys/class/android_usb/android0/idProduct
+I:[MTP] Starting MTP
+I:Can't probe device /dev/block/sda40
+I:Unable to mount '/data'
+I:Actual block device: '/dev/block/sda40', current file system: 'f2fs'
+MTP Enabled
+I:Path /cache/recovery/log.gz does not exist. Unable to copy file to /cache/recovery/last_log.gz

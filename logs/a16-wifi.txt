@@ -1,0 +1,19 @@
+Sun Oct 18 00:38:56 AEDT 2026
+cammo    /usr/sbin/kwin_wayland --wayland-fd 7 --socket wayl
+cammo    /usr/bin/plasmashell
+cammo    /lib/libexec/kf6/kioworker /usr/lib/qt6/plugins/kf6
+[   44.618491] ath11k_pci 0000:01:00.0: BAR 0 [mem 0x60400000-0x605fffff 64bit]: assigned
+[   44.618587] ath11k_pci 0000:01:00.0: enabling device (0000 -> 0002)
+[   44.619374] ath11k_pci 0000:01:00.0: MSI vectors: 32
+[   44.619406] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[   44.778743] mhi mhi0: Requested to power ON
+[   44.778771] mhi mhi0: Power on setup success
+[   66.529075] mhi mhi0: MHI did not load image over BHI, ret: -5
+[   66.530370] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[   66.530379] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[   66.530383] ath11k_pci 0000:01:00.0: failed to power up :-110
+[   66.536118] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[   66.536144] ath11k_pci 0000:01:00.0: failed to init core: -110
+[   66.696053] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110
+/sys/class/power_supply/max170xx_battery Full 99
+/sys/class/power_supply/max77705-charger Full 

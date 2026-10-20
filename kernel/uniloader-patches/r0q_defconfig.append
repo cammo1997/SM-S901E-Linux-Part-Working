@@ -1,0 +1,3 @@
+CONFIG_DTB_RELOCATE=y
+CONFIG_DTB_ENTRY=0xb6000000
+# add to configs/r0q_defconfig; patch from aaronsb/sm-x800-linux (GPL-2.0)

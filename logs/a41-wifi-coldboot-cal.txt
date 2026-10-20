@@ -1,0 +1,20 @@
+amss.bin
+board-2.bin
+board.bin
+m3.bin
+regdb.bin
+ath11k_pci 0000:01:00.0: boot failed to load firmware-2.bin: -2
+mhi mhi0: BHIe programming for RDDM
+mhi mhi0: Wait for device to enter SBL or Mission mode
+mhi mhi0: Received EE event: MISSION MODE
+mhi mhi0: Processing Mission Mode transition
+ath11k_pci 0000:01:00.0: boot notify status reason MHI_CB_EE_MISSION_MODE
+ath11k_pci 0000:01:00.0: fw_version 0x200e01bb fw_build_timestamp 2025-04-28 05:42 fw_build_id WLAN.HSP.2.0.c1-00441-QCAHSPSW
+ath11k_pci 0000:01:00.0: qmi wlan mode req mode 7
+ath11k_pci 0000:01:00.0: qmi Coldboot calibration wait started
+ath11k_pci 0000:01:00.0: qmi cold boot calibration done
+ath11k_pci 0000:01:00.0: qmi Coldboot calibration done
+ath11k_pci 0000:01:00.0: qmi wlan mode req mode 0
+Device "wlan0" does not exist.
+Error: Connection activation failed: No suitable device found for this connectio
+Device "wlan0" does not exist.

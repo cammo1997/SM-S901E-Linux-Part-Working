@@ -1,0 +1,14 @@
+ath11k_pci 0000:01:00.0: boot failed to load firmware-2.bin: -2
+mhi mhi0: BHIe programming for RDDM
+ath11k_pci 0000:01:00.0: fw_version 0x200e01bb fw_build_timestamp 2025-04-28 05:42 fw_build_id WLAN.HSP.2
+ath11k_pci 0000:01:00.0: qmi wlan mode req mode 7
+ath11k_pci 0000:01:00.0: qmi cold boot calibration done
+ath11k_pci 0000:01:00.0: qmi Coldboot calibration done
+mhi mhi0: BHIe programming for RDDM
+ath11k_pci 0000:01:00.0: fw_version 0x200e01bb fw_build_timestamp 2025-04-28 05:42 fw_build_id WLAN.HSP.2
+ath11k_pci 0000:01:00.0: qmi firmware start
+ath11k_pci 0000:01:00.0: qmi wlan mode req mode 0
+wlan0            DOWN           48:BC:E1:XX:XX:XX <NO-CARRIER,BROADCAST,MULTICAST,UP> 
+Error: Connection activation failed: The Wi-Fi network could not be found
+wlan0: authentication with XX:XX:XX:XX:XX:XX timed out
+wlan0            DOWN           

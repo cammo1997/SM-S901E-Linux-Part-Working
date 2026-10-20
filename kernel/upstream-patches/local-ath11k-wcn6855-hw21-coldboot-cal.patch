@@ -1,0 +1,14 @@
+--- a/drivers/net/wireless/ath/ath11k/core.c
++++ b/drivers/net/wireless/ath/ath11k/core.c
+@@ -531,9 +531,9 @@
+ 		.supports_shadow_regs = true,
+ 		.idle_ps = true,
+ 		.supports_sta_ps = true,
+-		.coldboot_cal_mm = false,
++		.coldboot_cal_mm = true, /* r0q test: stock qcom,wlan-cbc-enabled */
+ 		.coldboot_cal_ftm = false,
+-		.cbcal_restart_fw = false,
++		.cbcal_restart_fw = true, /* r0q test: restart after cold boot calibration */
+ 		.fw_mem_mode = 0,
+ 		.num_vdevs = 4,
+ 		.num_peers = 512,

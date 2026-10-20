@@ -1,0 +1,31 @@
+--- a/drivers/gpu/drm/panel/panel-samsung-s6e3fac.c
++++ b/drivers/gpu/drm/panel/panel-samsung-s6e3fac.c
+@@ -302,12 +302,27 @@
+ 	.get_modes = s6e3fac_get_modes,
+ };
+ 
++#define S6E3FAC_MIN_DBV	6
++
+ static int s6e3fac_bl_update_status(struct backlight_device *bl)
+ {
+ 	struct mipi_dsi_device *dsi = bl_get_data(bl);
+ 	struct mipi_dsi_multi_context dsi_ctx = { .dsi = dsi };
+ 	u16 brightness = backlight_get_brightness(bl);
+-	u8 wrdisbv[] = { 0x51, brightness >> 8, brightness & 0xff };
++	u8 wrdisbv[3];
++
++	/*
++	 * DBV below S6E3FAC_MIN_DBV shows a fully black screen on this panel (checked by eye on r0q),
++	 * so map the whole slider onto [S6E3FAC_MIN_DBV, max]. Blanking still writes 0.
++	 */
++	if (!backlight_is_blank(bl))
++		brightness = S6E3FAC_MIN_DBV +
++			     brightness * (bl->props.max_brightness - S6E3FAC_MIN_DBV) /
++			     bl->props.max_brightness;
++
++	wrdisbv[0] = 0x51;
++	wrdisbv[1] = brightness >> 8;
++	wrdisbv[2] = brightness & 0xff;
+ 
+ 	dsi->mode_flags &= ~MIPI_DSI_MODE_LPM;
+ 

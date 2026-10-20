@@ -1,0 +1,36 @@
+ 23:39:40 up 0 min,  0 users,  load average: 0.78, 0.20, 0.06
+panel_vddr 1300000 enabled
+smps12 1352000 enabled
+smps2 1012000 enabled
+smps1 1904000 enabled
+ldo12 1800000 enabled
+panel_vdd3 1800000 enabled
+panel_vci 3000000 enabled
+card0
+renderD128
+version
+[    0.074393] /soc@0/display-subsystem@ae00000/display-controller@ae01000: Fixed dependency cycle(s) with /soc@0/display-subsystem@ae00000/dsi@ae94000
+[    0.074520] /soc@0/display-subsystem@ae00000/dsi@ae94000: Fixed dependency cycle(s) with /soc@0/display-subsystem@ae00000/dsi@ae94000/panel@0
+[    0.074628] /soc@0/display-subsystem@ae00000/dsi@ae94000: Fixed dependency cycle(s) with /soc@0/display-subsystem@ae00000/display-controller@ae01000
+[    0.074932] /soc@0/display-subsystem@ae00000/dsi@ae94000/panel@0: Fixed dependency cycle(s) with /soc@0/display-subsystem@ae00000/dsi@ae94000
+[    0.088031] /soc@0/display-subsystem@ae00000/display-controller@ae01000: Fixed dependency cycle(s) with /soc@0/display-subsystem@ae00000/dsi@ae94000
+[    0.088203] /soc@0/display-subsystem@ae00000/dsi@ae94000: Fixed dependency cycle(s) with /soc@0/display-subsystem@ae00000/dsi@ae94000/panel@0
+[    0.088351] /soc@0/display-subsystem@ae00000/dsi@ae94000: Fixed dependency cycle(s) with /soc@0/display-subsystem@ae00000/display-controller@ae01000
+[    0.088808] /soc@0/display-subsystem@ae00000/dsi@ae94000/panel@0: Fixed dependency cycle(s) with /soc@0/display-subsystem@ae00000/dsi@ae94000
+[   15.844947] msm-mdss ae00000.display-subsystem: deferred probe timeout, ignoring dependency
+[   15.844983] msm-mdss ae00000.display-subsystem: probe with driver msm-mdss failed with error -110
+== wifi
+[   41.914907] ath11k_pci 0000:01:00.0: BAR 0 [mem 0x60400000-0x605fffff 64bit]: assigned
+[   41.915123] ath11k_pci 0000:01:00.0: enabling device (0000 -> 0002)
+[   41.916987] ath11k_pci 0000:01:00.0: MSI vectors: 32
+[   41.917034] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[   42.075317] mhi mhi0: Requested to power ON
+[   42.075334] mhi mhi0: Power on setup success
+[   62.436119] mhi mhi0: Device link is not accessible
+[   62.436162] mhi mhi0: MHI did not enter READY state
+[   62.438637] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[   62.438659] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[   62.438670] ath11k_pci 0000:01:00.0: failed to power up :-110
+[   62.464939] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[   62.464975] ath11k_pci 0000:01:00.0: failed to init core: -110
+[   62.608601] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110

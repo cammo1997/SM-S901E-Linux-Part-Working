@@ -1,0 +1,24 @@
+===== B2: upstream fw + Samsung bdwlang.elf (forced)
+ath11k_pci 0000:01:00.0: boot firmware request ath11k/WCN6855/hw2.1/board-2.bin size 18
+ath11k_pci 0000:01:00.0: boot firmware request ath11k/WCN6855/hw2.1/board-2.bin size 18
+ath11k_pci 0000:01:00.0: boot firmware request ath11k/WCN6855/hw2.1/board-2.bin size 18
+ath11k_pci 0000:01:00.0: boot firmware request ath11k/WCN6855/hw2.1/board-2.bin size 18
+ath11k_pci 0000:01:00.0: boot firmware request ath11k/WCN6855/hw2.1/board-2.bin size 18
+ath11k_pci 0000:01:00.0: boot firmware request ath11k/WCN6855/hw2.1/board.bin size 59924
+Error: Connection activation failed: No suitable device found for this connection (device usb0 not available because profile is not compatible with device (mismatching interface name)).
+Device "wlan0" does not exist.
+===== C2: Samsung fw + Samsung bdwlang.elf (forced)
+ath11k_pci 0000:01:00.0: boot firmware request ath11k/WCN6855/hw2.1/board-2.bin size 18
+ath11k_pci 0000:01:00.0: boot firmware request ath11k/WCN6855/hw2.1/board-2.bin size 18
+ath11k_pci 0000:01:00.0: boot firmware request ath11k/WCN6855/hw2.1/board-2.bin size 18
+ath11k_pci 0000:01:00.0: boot firmware request ath11k/WCN6855/hw2.1/board-2.bin size 18
+ath11k_pci 0000:01:00.0: boot firmware request ath11k/WCN6855/hw2.1/board-2.bin size 18
+ath11k_pci 0000:01:00.0: boot firmware request ath11k/WCN6855/hw2.1/board.bin size 59924
+      1 2442.0 -35.00 HOME-2G
+      1 5240.0 -51.00 HOME-5G
+Error: Timeout expired (25 seconds)
+wlan0: send auth to XX:XX:XX:XX:XX:XX (try 2/3)
+wlan0: send auth to XX:XX:XX:XX:XX:XX (try 3/3)
+wlan0: authentication with XX:XX:XX:XX:XX:XX timed out
+wlan0            DOWN           
+DONE

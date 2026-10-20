@@ -1,0 +1,35 @@
+ae00000.display-subsystem
+card0
+card1
+card1-DSI-1
+card1-Writeback-1
+renderD128
+version
+/sys/class/drm/card1-DSI-1: connected 1080x2340
+/sys/class/drm/card1-Writeback-1: unknown 
+ae94000.dsi.0
+panel_samsung_s6e3fac    16384  0
+backlight              20480  1 panel_samsung_s6e3fac
+dispcc_sm8450          45056  15
+drm_display_helper    212992  2 msm,panel_samsung_s6e3fac
+[  135.985630] debugfs: '0-0036-max17042' already exists in 'regmap'
+[  135.991566] debugfs: '0-0036-max17042' already exists in 'regmap'
+[  139.023573] /soc@0/display-subsystem@ae00000/display-controller@ae01000: Fixed dependency cycle(s) with /soc@0/display-subsystem@ae00000/dsi@ae94000
+[  139.027797] /soc@0/display-subsystem@ae00000/display-controller@ae01000: Fixed dependency cycle(s) with /soc@0/display-subsystem@ae00000/dsi@ae94000
+[  139.027958] /soc@0/display-subsystem@ae00000/dsi@ae94000: Fixed dependency cycle(s) with /soc@0/display-subsystem@ae00000/dsi@ae94000/panel@0
+[  139.027999] /soc@0/display-subsystem@ae00000/dsi@ae94000: Fixed dependency cycle(s) with /soc@0/display-subsystem@ae00000/display-controller@ae01000
+[  139.028137] /soc@0/display-subsystem@ae00000/dsi@ae94000/panel@0: Fixed dependency cycle(s) with /soc@0/display-subsystem@ae00000/dsi@ae94000
+[  139.031007] debugfs: '0-0036-max17042' already exists in 'regmap'
+[  139.035980] msm_dsi ae94000.dsi: supply refgen not found, using dummy regulator
+[  139.036549] /soc@0/display-subsystem@ae00000/dsi@ae94000: Fixed dependency cycle(s) with /soc@0/display-subsystem@ae00000/dsi@ae94000/panel@0
+[  139.036688] /soc@0/display-subsystem@ae00000/dsi@ae94000/panel@0: Fixed dependency cycle(s) with /soc@0/display-subsystem@ae00000/dsi@ae94000
+[  139.040356] debugfs: '0-0036-max17042' already exists in 'regmap'
+[  139.080448] msm_dpu ae01000.display-controller: bound ae94000.dsi (ops dsi_ops [msm])
+[  139.081519] [drm:dpu_kms_hw_init:1168] dpu hardware revision:0x80010000
+[  139.083315] [drm] Initialized msm-kms 1.13.0 for ae01000.display-controller on minor 1
+[  139.083335] msm_dpu ae01000.display-controller: no GPU device was found
+[  139.303541] Console: switching to colour frame buffer device 135x146
+[  139.303617] fb0: sys_imageblit: framebuffer is not in virtual address space.
+[  139.329309] fb0: sys_fillrect: framebuffer is not in virtual address space.
+[  139.335141] msm_dpu ae01000.display-controller: [drm] fb0: msm-kmsdrmfb frame buffer device
+[  139.337224] debugfs: '0-0036-max17042' already exists in 'regmap'

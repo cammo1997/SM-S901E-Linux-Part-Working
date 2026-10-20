@@ -1,0 +1,13 @@
+[ 1231.437533] ath11k_pci 0000:01:00.0: BAR 0 [mem 0x60400000-0x605fffff 64bit]: assigned
+[ 1231.448203] ath11k_pci 0000:01:00.0: MSI vectors: 32
+[ 1231.450967] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[ 1231.611435] mhi mhi0: Requested to power ON
+[ 1231.616908] mhi mhi0: Power on setup success
+[ 1252.327940] mhi mhi0: Device link is not accessible
+[ 1252.332906] mhi mhi0: MHI did not enter READY state
+[ 1252.338156] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[ 1252.338652] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[ 1252.339069] ath11k_pci 0000:01:00.0: failed to power up :-110
+[ 1252.360974] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[ 1252.361436] ath11k_pci 0000:01:00.0: failed to init core: -110
+[ 1252.465910] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110

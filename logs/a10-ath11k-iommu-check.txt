@@ -1,0 +1,16 @@
+[ 1165.216969] ath11k_pci 0000:01:00.0: BAR 0 [mem 0x60400000-0x605fffff 64bit]: assigned
+[ 1165.222853] ath11k_pci 0000:01:00.0: MSI vectors: 32
+[ 1165.225519] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[ 1165.387738] mhi mhi0: Requested to power ON
+[ 1165.392921] mhi mhi0: Power on setup success
+[ 1186.786026] mhi mhi0: MHI did not load image over BHI, ret: -5
+[ 1186.789141] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[ 1186.790910] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[ 1186.792578] ath11k_pci 0000:01:00.0: failed to power up :-110
+[ 1186.813985] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[ 1186.816177] ath11k_pci 0000:01:00.0: failed to init core: -110
+[ 1186.923815] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110
+== iommu group of wifi:
+7
+0000:00:00.0
+0000:01:00.0

@@ -1,0 +1,12 @@
+#!/bin/sh
+# Galaxy S22 bring-up: the bootloader does not pass the Bluetooth address, so hci0 comes up unconfigured.
+# Set the phone's own address (from EFS /bluetooth/bt_addr). Retry until the QCA firmware setup has finished.
+( for i in $(seq 1 45); do
+	if [ -e /sys/class/bluetooth/hci0 ] && btmgmt --index 0 public-addr XX:XX:XX:XX:XX:XX 2>/dev/null | grep -q complete; then
+		sleep 2
+		rc-service bluetooth restart >/dev/null 2>&1
+		btmgmt --index 0 power on >/dev/null 2>&1
+		break
+	fi
+	sleep 2
+done ) &

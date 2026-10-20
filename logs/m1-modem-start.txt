@@ -1,0 +1,9 @@
+ * Starting tqftpserv ... [ ok ]
+ * Starting RMTFS ... [ ok ]
+state: running
+3518 /usr/bin/rmtfs
+3490 /usr/bin/tqftpserv
+[   53.982589] remoteproc remoteproc0: powering up modem
+[   53.983036] remoteproc remoteproc0: Booting fw image qcom/sm8450/samsung/r0q/modem.mdt, size 5584
+[   55.145864] remoteproc remoteproc0: remote processor modem is now up
+DONE

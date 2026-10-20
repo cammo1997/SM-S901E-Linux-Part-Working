@@ -1,0 +1,31 @@
+BEFORE
+181: 0 bwctrl;
+T2
+181: 2 bwctrl;182: 0 bhi;183: 0 mhi;184: 0 mhi;185: 0 ce0;186: 0 ce1;187: 0 ce2;188: 0 ce3;189: 0 ce5;190: 0 ce7;191: 0 ce8;196: 0 DP_EXT_IRQ;197: 0 DP_EXT_IRQ;198: 0 DP_EXT_IRQ;200: 0 DP_EXT_IRQ;201: 0 DP_EXT_IRQ;202: 0 DP_EXT_IRQ;203: 0 DP_EXT_IRQ;204: 0 DP_EXT_IRQ;205: 0 DP_EXT_IRQ;206: 0 DP_EXT_IRQ;
+T5
+181: 2 bwctrl;182: 0 bhi;183: 0 mhi;184: 0 mhi;185: 0 ce0;186: 0 ce1;187: 0 ce2;188: 0 ce3;189: 0 ce5;190: 0 ce7;191: 0 ce8;196: 0 DP_EXT_IRQ;197: 0 DP_EXT_IRQ;198: 0 DP_EXT_IRQ;200: 0 DP_EXT_IRQ;201: 0 DP_EXT_IRQ;202: 0 DP_EXT_IRQ;203: 0 DP_EXT_IRQ;204: 0 DP_EXT_IRQ;205: 0 DP_EXT_IRQ;206: 0 DP_EXT_IRQ;
+T10
+181: 2 bwctrl;182: 0 bhi;183: 0 mhi;184: 0 mhi;185: 0 ce0;186: 0 ce1;187: 0 ce2;188: 0 ce3;189: 0 ce5;190: 0 ce7;191: 0 ce8;196: 0 DP_EXT_IRQ;197: 0 DP_EXT_IRQ;198: 0 DP_EXT_IRQ;200: 0 DP_EXT_IRQ;201: 0 DP_EXT_IRQ;202: 0 DP_EXT_IRQ;203: 0 DP_EXT_IRQ;204: 0 DP_EXT_IRQ;205: 0 DP_EXT_IRQ;206: 0 DP_EXT_IRQ;
+T20
+181: 2 bwctrl;182: 0 bhi;183: 0 mhi;184: 0 mhi;185: 0 ce0;186: 0 ce1;187: 0 ce2;188: 0 ce3;189: 0 ce5;190: 0 ce7;191: 0 ce8;196: 0 DP_EXT_IRQ;197: 0 DP_EXT_IRQ;198: 0 DP_EXT_IRQ;200: 0 DP_EXT_IRQ;201: 0 DP_EXT_IRQ;202: 0 DP_EXT_IRQ;203: 0 DP_EXT_IRQ;204: 0 DP_EXT_IRQ;205: 0 DP_EXT_IRQ;206: 0 DP_EXT_IRQ;
+T28
+181: 2 bwctrl;182: 0 bhi;183: 0 mhi;184: 0 mhi;185: 0 ce0;186: 0 ce1;187: 0 ce2;188: 0 ce3;189: 0 ce5;190: 0 ce7;191: 0 ce8;196: 0 DP_EXT_IRQ;197: 0 DP_EXT_IRQ;198: 0 DP_EXT_IRQ;200: 0 DP_EXT_IRQ;201: 0 DP_EXT_IRQ;202: 0 DP_EXT_IRQ;203: 0 DP_EXT_IRQ;204: 0 DP_EXT_IRQ;205: 0 DP_EXT_IRQ;206: 0 DP_EXT_IRQ;
+[   35.828458] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[   35.828475] ath11k_pci 0000:01:00.0: failed to init core: -110
+[   36.092232] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110
+	Capabilities: [50] MSI: Enable+ Count=32/32 Maskable+ 64bit-
+		Address: fffff040  Data: 0000
+	Capabilities: [50] MSI: Enable+ Count=1/32 Maskable+ 64bit+
+		Address: 00000000fffff040  Data: 0000
+0000:00:00.0 grp=9 type=DMA
+0000:01:00.0 grp=9 type=DMA
+181: 4 aerdrv, PCIe bwctrl
+182: 0 0 Edge bhi
+183: 0 1 Edge mhi
+184: 0 2 Edge mhi
+[    0.477877] arm-smmu 15000000.iommu: Unhandled context fault: fsr=0x402, iova=0xb8280000, fsynr=0x220021, cbfrsynra=0x2800, cb=2
+[    0.477958] arm-smmu 15000000.iommu: Unhandled context fault: fsr=0x402, iova=0xb82b6b00, fsynr=0x220021, cbfrsynra=0x2c00, cb=2
+[    0.478039] arm-smmu 15000000.iommu: Unhandled context fault: fsr=0x402, iova=0xb82f2700, fsynr=0x220021, cbfrsynra=0x2c00, cb=2
+[    0.478120] arm-smmu 15000000.iommu: Unhandled context fault: fsr=0x402, iova=0xb8327300, fsynr=0x220021, cbfrsynra=0x2c00, cb=2
+[    5.361290] pci 0000:00:00.0: Adding to iommu group 9
+[    5.377070] pci 0000:01:00.0: Adding to iommu group 9

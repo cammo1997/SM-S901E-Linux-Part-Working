@@ -1,0 +1,1285 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
+/dts-v1/;
+
+#include <dt-bindings/interconnect/qcom,sm8450.h>
+#include <dt-bindings/regulator/qcom,rpmh-regulator.h>
+#include <dt-bindings/usb/pd.h>
+
+#include "sm8450.dtsi"
+#include "pm8350.dtsi"
+#include "pm8350c.dtsi"
+#include "pmk8350.dtsi"
+
+/*
+ * Samsung's firmware does not reserve the reference-board MTE tag storage
+ * (stock Android uses 0xc0000000 + 512 MiB as normal RAM).
+ */
+/delete-node/ &mte_mem;
+
+/ {
+	model = "Samsung Galaxy S22 5G";
+	compatible = "samsung,r0q", "qcom,sm8450";
+	chassis-type = "handset";
+
+	chosen {
+		bootargs = "pmos_boot_uuid=BOOT-PARTITION-UUID pmos_root_uuid=ROOT-PARTITION-UUID pmos_rootfsopts=defaults clk_ignore_unused pd_ignore_unused ignore_loglevel console=tty0 panic=0 log_buf_len=4M";
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		framebuffer: framebuffer@b8000000 {
+			compatible = "simple-framebuffer";
+			reg = <0x0 0xb8000000 0x0 0x2b00000>;
+			width = <1080>;
+			height = <2340>;
+			stride = <(1080 * 4)>;
+			format = "a8r8g8b8";
+			/* Real panel size, so simpledrm reports correct physical dimensions (default assumes 96 dpi) */
+			panel = <&panel_size>;
+		};
+	};
+
+	aliases {
+		serial1 = &uart20;
+	};
+
+	/* Stock S22 battery: 3700 mAh (stock float 4.42 V / 3.15 A); limited here to 4.35 V / 1.5 A */
+	battery: battery {
+		compatible = "simple-battery";
+		constant-charge-current-max-microamp = <1500000>;
+		charge-full-design-microamp-hours = <3700000>;
+		voltage-min-design-microvolt = <3400000>;
+		voltage-max-design-microvolt = <4350000>;
+	};
+
+	/* QCA6490 (WCN6855 family) Wi-Fi/BT: same GPIOs and rails as sm8450-hdk, verified against the stock cnss node */
+	wcn6855-pmu {
+		compatible = "qcom,wcn6855-pmu";
+
+		pinctrl-0 = <&bt_en>, <&wlan_en>, <&xo_clk_default>;
+		pinctrl-names = "default";
+
+		wlan-enable-gpios = <&tlmm 80 GPIO_ACTIVE_HIGH>;
+		bt-enable-gpios = <&tlmm 81 GPIO_ACTIVE_HIGH>;
+		swctrl-gpios = <&tlmm 82 GPIO_ACTIVE_HIGH>;
+		xo-clk-gpios = <&tlmm 204 GPIO_ACTIVE_HIGH>;
+
+		vddio-supply = <&vreg_s10b_1p8>;
+		vddaon-supply = <&vreg_s11b_0p95>;
+		vddpmu-supply = <&vreg_s12b_1p25>;
+		vddpmumx-supply = <&vreg_s2e_0p85>;
+		vddpmucx-supply = <&vreg_s11b_0p95>;
+		vddrfa0p95-supply = <&vreg_s11b_0p95>;
+		vddrfa1p3-supply = <&vreg_s12b_1p25>;
+		vddrfa1p9-supply = <&vreg_s1c_1p86>;
+		vddpcie1p3-supply = <&vreg_s12b_1p25>;
+		vddpcie1p9-supply = <&vreg_s1c_1p86>;
+
+		regulators {
+			vreg_pmu_rfa_cmn_0p8: ldo0 {
+				regulator-name = "vreg_pmu_rfa_cmn_0p8";
+			};
+
+			vreg_pmu_aon_0p8: ldo1 {
+				regulator-name = "vreg_pmu_aon_0p8";
+			};
+
+			vreg_pmu_wlcx_0p8: ldo2 {
+				regulator-name = "vreg_pmu_wlcx_0p8";
+			};
+
+			vreg_pmu_wlmx_0p8: ldo3 {
+				regulator-name = "vreg_pmu_wlmx_0p8";
+			};
+
+			vreg_pmu_btcmx_0p8: ldo4 {
+				regulator-name = "vreg_pmu_btcmx_0p8";
+			};
+
+			vreg_pmu_pcie_1p8: ldo5 {
+				regulator-name = "vreg_pmu_pcie_1p8";
+			};
+
+			vreg_pmu_pcie_0p9: ldo6 {
+				regulator-name = "vreg_pmu_pcie_0p9";
+			};
+
+			vreg_pmu_rfa_0p8: ldo7 {
+				regulator-name = "vreg_pmu_rfa_0p8";
+			};
+
+			vreg_pmu_rfa_1p2: ldo8 {
+				regulator-name = "vreg_pmu_rfa_1p2";
+			};
+
+			vreg_pmu_rfa_1p7: ldo9 {
+				regulator-name = "vreg_pmu_rfa_1p7";
+			};
+		};
+	};
+
+	/*
+	 * Touchscreen (STM FTS2BA61Y) on SPI 8. The hardware SPI 8 bus does not work right now, so use spi-gpio
+	 * (upstream r0q series v2 3/6). Supplies match stock tsp_io_ldo (pm8350c_l8) / tsp_avdd_ldo (pm8350c_l11).
+	 */
+	spi8 {
+		compatible = "spi-gpio";
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&spi_clk_tsp_active &spi_mosi_tsp_active &spi_miso_tsp_active>;
+		pinctrl-1 = <&spi_clk_tsp_sleep &spi_mosi_tsp_sleep &spi_miso_tsp_sleep>;
+
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		sck-gpios = <&tlmm 30 GPIO_ACTIVE_HIGH>;
+		mosi-gpios = <&tlmm 29 GPIO_ACTIVE_HIGH>;
+		miso-gpios = <&tlmm 28 GPIO_ACTIVE_HIGH>;
+		cs-gpios = <&tlmm 31 GPIO_ACTIVE_LOW>;
+
+		num-chipselects = <1>;
+
+		touchscreen@0 {
+			compatible = "st,fts2ba61y";
+			reg = <0>;
+			spi-max-frequency = <5000000>;
+
+			vdd-supply = <&vreg_l8c_1p8>;
+			avdd-supply = <&vreg_l11c_3p0>;
+
+			interrupt-parent = <&tlmm>;
+			interrupts = <46 IRQ_TYPE_LEVEL_LOW>;
+
+			pinctrl-names = "default", "sleep";
+			pinctrl-0 = <&tsp_int_active>;
+			pinctrl-1 = <&tsp_int_sleep>;
+		};
+	};
+
+	/* S22 panel: 64 x 140 mm (stock qcom,mdss-pan-physical-width/height). Only used for width-mm/height-mm. */
+	panel_size: panel-size {
+		width-mm = <64>;
+		height-mm = <140>;
+	};
+
+	/*
+	 * Panel rails: GPIO-switched supplies (stock fixed_regulator@0-2). Always on for now so the
+	 * bootloader-lit panel keeps power if the DSI path does not probe (simple-framebuffer fallback).
+	 */
+	vreg_panel_vdd3: regulator-panel-vdd3 {
+		compatible = "regulator-fixed";
+		regulator-name = "panel_vdd3";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		gpio = <&tlmm 21 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		pinctrl-0 = <&panel_vdd3_en>;
+		pinctrl-names = "default";
+		regulator-boot-on;
+		regulator-always-on;
+	};
+
+	vreg_panel_vddr: regulator-panel-vddr {
+		compatible = "regulator-fixed";
+		regulator-name = "panel_vddr";
+		regulator-min-microvolt = <1300000>;
+		regulator-max-microvolt = <1300000>;
+		gpio = <&tlmm 62 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		pinctrl-0 = <&panel_vddr_en>;
+		pinctrl-names = "default";
+		regulator-boot-on;
+		regulator-always-on;
+	};
+
+	vreg_panel_vci: regulator-panel-vci {
+		compatible = "regulator-fixed";
+		regulator-name = "panel_vci";
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+		gpio = <&tlmm 20 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		pinctrl-0 = <&panel_vci_en>;
+		pinctrl-names = "default";
+		regulator-boot-on;
+		regulator-always-on;
+	};
+
+	vph_pwr: regulator-vph-pwr {
+		compatible = "regulator-fixed";
+		regulator-name = "vph_pwr";
+		regulator-min-microvolt = <3700000>;
+		regulator-max-microvolt = <3700000>;
+		regulator-always-on;
+		regulator-boot-on;
+	};
+
+	reserved-memory {
+		/*
+		 * The bootloader will only keep display hardware enabled
+		 * if this memory region is named exactly 'splash_region'
+		 */
+		splash-region@b8000000 {
+			reg = <0x0 0xb8000000 0x0 0x2b00000>;
+			no-map;
+		};
+
+		/* Samsung-specific carve-outs from the stock device tree; touching these can hang the SoC */
+		samsung-xbl-ramdump@a7d00000 {
+			reg = <0x0 0xa7d00000 0x0 0x300000>;
+			no-map;
+		};
+
+		samsung-kaslr@b01ff000 {
+			reg = <0x0 0xb01ff000 0x0 0x1000>;
+			no-map;
+		};
+
+		samsung-uh-heap@b0200000 {
+			reg = <0x0 0xb0200000 0x0 0x40000>;
+			no-map;
+		};
+
+		samsung-uh-guest@b1000000 {
+			reg = <0x0 0xb1000000 0x0 0x1400000>;
+			no-map;
+		};
+
+		samsung-sec-debug@800100000 {
+			reg = <0x8 0x00100000 0x0 0xa00000>;
+			no-map;
+		};
+
+		samsung-debug-kinfo@800b00000 {
+			reg = <0x8 0x00b00000 0x0 0x2000>;
+			no-map;
+		};
+
+		samsung-rdx-bootdev@800c00000 {
+			reg = <0x8 0x00c00000 0x0 0xad00000>;
+			no-map;
+		};
+
+
+		/* Debug: kernel log that survives a warm reset, readable from TWRP in /sys/fs/pstore */
+		ramoops@83a000000 {
+			compatible = "ramoops";
+			reg = <0x8 0x3a000000 0x0 0x400000>;
+			record-size = <0x10000>;
+			console-size = <0x100000>;
+			pmsg-size = <0x10000>;
+			no-map;
+		};
+	};
+};
+
+/*
+ * The Samsung bootloader fills in RAM only in its own DTB (from vendor_boot), not in the
+ * DTB embedded in uniLoader, so describe it here. Ranges from the ABL "RAM Partitions" log
+ * and the stock device tree memory node.
+ */
+&{/memory@a0000000} {
+	reg = <0x0 0x80000000 0x0 0x6a000000>,
+	      <0x0 0xf1c00000 0x0 0x0e400000>,
+	      <0x8 0x00000000 0x0 0x3ab00000>,
+	      <0x8 0x3b100000 0x0 0x01e00000>,
+	      <0x8 0x40000000 0x1 0x40000000>;
+};
+
+/* Full 32 MiB as stock cdsp_region; uniLoader now relocates the DTB out of it (attempt 29) */
+&cdsp_mem {
+	reg = <0x0 0x89900000 0x0 0x2000000>;
+};
+
+&apps_rsc {
+	regulators-0 {
+		compatible = "qcom,pm8350-rpmh-regulators";
+		qcom,pmic-id = "b";
+
+		vdd-s1-supply = <&vph_pwr>;
+		vdd-s2-supply = <&vph_pwr>;
+		vdd-s3-supply = <&vph_pwr>;
+		vdd-s4-supply = <&vph_pwr>;
+		vdd-s5-supply = <&vph_pwr>;
+		vdd-s6-supply = <&vph_pwr>;
+		vdd-s7-supply = <&vph_pwr>;
+		vdd-s8-supply = <&vph_pwr>;
+		vdd-s9-supply = <&vph_pwr>;
+		vdd-s10-supply = <&vph_pwr>;
+		vdd-s11-supply = <&vph_pwr>;
+		vdd-s12-supply = <&vph_pwr>;
+
+		vdd-l2-l7-supply = <&vreg_bob>;
+		vdd-l3-l5-supply = <&vreg_bob>;
+		vdd-l6-l9-l10-supply = <&vreg_s12b_1p25>;
+
+		/* S12, L6, L7, L9: UFS supplies, same rails and voltages as the stock S22 device tree */
+		vreg_s10b_1p8: smps10 {
+			regulator-min-microvolt = <1800000>;
+			regulator-max-microvolt = <1800000>;
+		};
+
+		vreg_s11b_0p95: smps11 {
+			regulator-min-microvolt = <966000>;
+			regulator-max-microvolt = <1104000>;
+		};
+
+		/* Stock cnss vdd-wlan-rfa2: 1.35 V (hdk value 1.224 V) */
+		vreg_s12b_1p25: smps12 {
+			regulator-min-microvolt = <1350000>;
+			regulator-max-microvolt = <1400000>;
+		};
+
+		vreg_l6b_1p2: ldo6 {
+			regulator-min-microvolt = <1200000>;
+			regulator-max-microvolt = <1200000>;
+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+		};
+
+		vreg_l7b_2p5: ldo7 {
+			regulator-min-microvolt = <2504000>;
+			regulator-max-microvolt = <2504000>;
+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+		};
+
+		vreg_l9b_1p2: ldo9 {
+			regulator-min-microvolt = <1200000>;
+			regulator-max-microvolt = <1200000>;
+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+		};
+
+		vreg_l2b_3p07: ldo2 {
+			regulator-min-microvolt = <3072000>;
+			regulator-max-microvolt = <3072000>;
+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+		};
+
+		vreg_l5b_0p88: ldo5 {
+			regulator-min-microvolt = <880000>;
+			regulator-max-microvolt = <888000>;
+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+		};
+	};
+
+	regulators-1 {
+		compatible = "qcom,pm8350c-rpmh-regulators";
+		qcom,pmic-id = "c";
+
+		vdd-s1-supply = <&vph_pwr>;
+		vdd-s2-supply = <&vph_pwr>;
+		vdd-s3-supply = <&vph_pwr>;
+		vdd-s4-supply = <&vph_pwr>;
+		vdd-s5-supply = <&vph_pwr>;
+		vdd-s6-supply = <&vph_pwr>;
+		vdd-s7-supply = <&vph_pwr>;
+		vdd-s8-supply = <&vph_pwr>;
+		vdd-s9-supply = <&vph_pwr>;
+		vdd-s10-supply = <&vph_pwr>;
+
+		vdd-l1-l12-supply = <&vreg_bob>;
+		vdd-l2-l8-supply = <&vreg_bob>;
+		vdd-l3-l4-l5-l7-l13-supply = <&vreg_bob>;
+		vdd-l6-l9-l11-supply = <&vreg_bob>;
+
+		vdd-bob-supply = <&vph_pwr>;
+
+		/* Stock cnss vdd-wlan-rfa1: 1.9-2.1 V (hdk value 1.8 V) */
+		vreg_s1c_1p86: smps1 {
+			regulator-min-microvolt = <1800000>;
+			regulator-max-microvolt = <2024000>;
+		};
+
+		vreg_bob: bob {
+			regulator-min-microvolt = <3008000>;
+			regulator-max-microvolt = <3960000>;
+			regulator-initial-mode = <RPMH_REGULATOR_MODE_AUTO>;
+		};
+
+		vreg_l8c_1p8: ldo8 {
+			regulator-min-microvolt = <1800000>;
+			regulator-max-microvolt = <1800000>;
+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+		};
+
+		vreg_l11c_3p0: ldo11 {
+			regulator-min-microvolt = <3000000>;
+			regulator-max-microvolt = <3000000>;
+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+		};
+
+		/* Display vddio (stock: always on) */
+		vreg_l12c_1p8: ldo12 {
+			regulator-min-microvolt = <1800000>;
+			regulator-max-microvolt = <1800000>;
+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+			regulator-always-on;
+		};
+
+		vreg_l1c_1p8: ldo1 {
+			regulator-min-microvolt = <1800000>;
+			regulator-max-microvolt = <1800000>;
+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+		};
+	};
+
+	regulators-2 {
+		compatible = "qcom,pmr735a-rpmh-regulators";
+		qcom,pmic-id = "e";
+
+		vdd-s1-supply = <&vph_pwr>;
+		vdd-s2-supply = <&vph_pwr>;
+		vdd-s3-supply = <&vph_pwr>;
+		vdd-l7-bob-supply = <&vreg_bob>;
+
+		/* WLAN/BT antenna switch, always on (stock: pmr735a_l7, 2.8 V) */
+		vreg_l7e_2p8: ldo7 {
+			regulator-min-microvolt = <2800000>;
+			regulator-max-microvolt = <2800000>;
+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+			regulator-always-on;
+		};
+
+		/* Stock cnss vdd-wlan-aon: 1.012 V. With min 0.5 V it sat at 0.5 V and the WLAN firmware never booted over BHI */
+		vreg_s2e_0p85: smps2 {
+			regulator-min-microvolt = <500000>;
+			regulator-max-microvolt = <1040000>;
+		};
+	};
+};
+
+&pon_pwrkey {
+	status = "okay";
+};
+
+&pon_resin {
+	linux,code = <KEY_VOLUMEDOWN>;
+	status = "okay";
+};
+
+/*
+ * Display: MDSS/DPU -> DSI0 -> Samsung S6E3FAC (AMB606AW01), command mode with dual DSC.
+ * dispcc_sm8450 is still blacklisted on the phone, so by default this stays deferred and the
+ * simple-framebuffer keeps working; "modprobe dispcc_sm8450" brings the real display path up.
+ */
+&mdss {
+	status = "okay";
+};
+
+&mdss_dsi0 {
+	vdda-supply = <&vreg_l6b_1p2>;
+	status = "okay";
+
+	panel@0 {
+		compatible = "samsung,s6e3fac-amb606aw01";
+		reg = <0>;
+
+		vddio-supply = <&vreg_l12c_1p8>;
+		vdd3-supply = <&vreg_panel_vdd3>;
+		vddr-supply = <&vreg_panel_vddr>;
+		vci-supply = <&vreg_panel_vci>;
+
+		reset-gpios = <&tlmm 34 GPIO_ACTIVE_LOW>;
+
+		pinctrl-0 = <&panel_reset_active>, <&panel_te_active>;
+		pinctrl-names = "default";
+
+		port {
+			panel_in: endpoint {
+				remote-endpoint = <&mdss_dsi0_out>;
+			};
+		};
+	};
+};
+
+&mdss_dsi0_out {
+	remote-endpoint = <&panel_in>;
+	data-lanes = <0 1 2 3>;
+};
+
+&mdss_dsi0_phy {
+	vdds-supply = <&vreg_l5b_0p88>;
+	status = "okay";
+};
+
+/*
+ * Adreno 730 GPU. msm is loaded with separate_gpu_kms=1, so the GPU (renderD128) and the display
+ * (MDSS, above) are separate DRM devices. Zap shader is the phone's own Samsung-signed
+ * a730_zap (from /vendor/firmware_mnt/image).
+ */
+&gpu {
+	status = "okay";
+};
+
+&gpu_zap_shader {
+	firmware-name = "qcom/sm8450/samsung/r0q/a730_zap.mdt";
+};
+
+&i2c5 {
+	status = "okay";
+
+	/* Samsung MAX77705: charger/fuel gauge/USB-C chip (S9 sdm845-samsung-starqltechn.dts as template) */
+	max77705: pmic@66 {
+		compatible = "maxim,max77705";
+		reg = <0x66>;
+		#interrupt-cells = <1>;
+		interrupt-parent = <&pm8350c_gpios>;
+		interrupts = <5 IRQ_TYPE_LEVEL_LOW>;
+		interrupt-controller;
+		pinctrl-0 = <&max77705_int_default>;
+		pinctrl-names = "default";
+	};
+
+	max77705_charger: charger@69 {
+		compatible = "maxim,max77705-charger";
+		reg = <0x69>;
+		monitored-battery = <&battery>;
+		interrupt-parent = <&max77705>;
+		interrupts = <0>;
+
+		/* OTG VBUS for host mode, switched by the Type-C driver */
+		max77705_otg_vbus: usb-otg-vbus {
+			regulator-name = "usb_otg_vbus";
+		};
+	};
+
+	/*
+	 * MAX77705 CCIC (Type-C/PD, same chip as the Galaxy Tab S8+ port): gives dwc3 the
+	 * attach event through the role switch, so USB no longer needs a replug after boot.
+	 */
+	typec@25 {
+		compatible = "maxim,max77705-usbc";
+		reg = <0x25>;
+		interrupt-parent = <&max77705>;
+		interrupts = <3>;
+		vbus-supply = <&max77705_otg_vbus>;
+		maxim,charger = <&max77705_charger>;
+
+		connector {
+			compatible = "usb-c-connector";
+			label = "USB-C";
+			power-role = "dual";
+			data-role = "dual";
+			try-power-role = "sink";
+			sink-pdos = <PDO_FIXED(5000, 3000, PDO_FIXED_DUAL_ROLE |
+						PDO_FIXED_HIGHER_CAP |
+						PDO_FIXED_USB_COMM |
+						PDO_FIXED_DATA_SWAP)
+				     PDO_FIXED(9000, 2000, 0)>;
+			op-sink-microwatt = <15000000>;
+
+			ports {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				port@0 {
+					reg = <0>;
+
+					max77705_typec_hs: endpoint {
+						remote-endpoint = <&usb_1_dwc3_hs>;
+					};
+				};
+			};
+		};
+	};
+
+	fuel-gauge@36 {
+		compatible = "maxim,max77705-battery";
+		reg = <0x36>;
+		/* The charger driver loads now (attempt 15 test), so link them again: the battery then reports charging state */
+		power-supplies = <&max77705_charger>;
+		maxim,rsns-microohm = <5000>;
+		interrupt-parent = <&max77705>;
+		interrupts = <2>;
+	};
+};
+
+&pcie0 {
+	max-link-speed = <2>;
+
+	/*
+	 * No dma-coherent (like mainline/hdk): with it the SBL crashed right after M0,
+	 * suspected unflushed MHI context tables.
+	 */
+
+	status = "okay";
+};
+
+&pcie0_phy {
+	vdda-phy-supply = <&vreg_l5b_0p88>;
+	vdda-pll-supply = <&vreg_l6b_1p2>;
+
+	status = "okay";
+};
+
+&pcieport0 {
+	wifi_dev: wifi@0 {
+		compatible = "pci17cb,1103";
+		reg = <0x10000 0x0 0x0 0x0 0x0>;
+
+		vddrfacmn-supply = <&vreg_pmu_rfa_cmn_0p8>;
+		vddaon-supply = <&vreg_pmu_aon_0p8>;
+		vddwlcx-supply = <&vreg_pmu_wlcx_0p8>;
+		vddwlmx-supply = <&vreg_pmu_wlmx_0p8>;
+		vddpcie1p8-supply = <&vreg_pmu_pcie_1p8>;
+		vddpcie0p9-supply = <&vreg_pmu_pcie_0p9>;
+		vddrfa0p8-supply = <&vreg_pmu_rfa_0p8>;
+		vddrfa1p2-supply = <&vreg_pmu_rfa_1p2>;
+		vddrfa1p8-supply = <&vreg_pmu_rfa_1p7>;
+	};
+};
+
+&pm8350c_gpios {
+	max77705_int_default: max77705-int-default-state {
+		pins = "gpio5";
+		function = "normal";
+		input-enable;
+		bias-disable;
+		power-source = <1>; /* stock if_pmic_irq */
+	};
+};
+
+&pmk8350_rtc {
+	status = "okay";
+};
+
+&qupv3_id_0 {
+	status = "okay";
+};
+
+&qupv3_id_2 {
+	status = "okay";
+};
+
+/* Samsung-signed modem firmware from the phone's own modem partition (image/modem.mdt) */
+&remoteproc_mpss {
+	firmware-name = "qcom/sm8450/samsung/r0q/modem.mdt";
+
+	status = "okay";
+};
+
+/* Stock reserved-memory layout around the ADSP (Samsung's ADSP image is 59 MiB of relocatable segments) */
+&adsp_mem {
+	reg = <0x0 0x84500000 0x0 0x3b00000>;
+};
+
+&video_mem {
+	reg = <0x0 0x83e00000 0x0 0x700000>;
+};
+
+&cdsp_secure_heap {
+	reg = <0x0 0x80c00000 0x0 0x600000>;
+};
+
+/* Samsung-signed ADSP firmware from the phone's own apnhlos partition */
+&remoteproc_adsp {
+	firmware-name = "qcom/sm8450/samsung/r0q/adsp.mdt";
+
+	status = "okay";
+};
+
+&remoteproc_cdsp {
+	firmware-name = "qcom/sm8450/samsung/r0q/cdsp.mdt";
+
+	status = "okay";
+};
+
+&i2c4 {
+	clock-frequency = <1000000>;
+	status = "okay";
+
+	/*
+	 * Two Cirrus CS35L41 amps on Primary MI2S (stock: 4-slot TDM, here 2-channel I2S).
+	 * Samsung leaves the boost inductor/capacitor to its DSP tuning; these are the Cirrus
+	 * reference values (1 uH, 15 uF) with Samsung's own 4.1 A peak limit.
+	 */
+	cs35l41_rcv: amplifier@41 {
+		compatible = "cirrus,cs35l41";
+		reg = <0x41>;
+		#sound-dai-cells = <1>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <19 IRQ_TYPE_LEVEL_LOW>;
+		reset-gpios = <&tlmm 18 GPIO_ACTIVE_HIGH>;
+		pinctrl-0 = <&cs35l41_default>;
+		pinctrl-names = "default";
+		sound-name-prefix = "Earpiece";
+		cirrus,boost-type = <0>;
+		cirrus,boost-peak-milliamp = <4100>;
+		cirrus,boost-ind-nanohenry = <1000>;
+		cirrus,boost-cap-microfarad = <15>;
+		cirrus,asp-sdout-hiz = <3>;
+		cirrus,gpio2-src-select = <2>;
+		cirrus,gpio2-output-enable;
+	};
+
+	cs35l41_spk: amplifier@40 {
+		compatible = "cirrus,cs35l41";
+		reg = <0x40>;
+		#sound-dai-cells = <1>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <19 IRQ_TYPE_LEVEL_LOW>;
+		reset-gpios = <&tlmm 183 GPIO_ACTIVE_HIGH>;
+		sound-name-prefix = "Speaker";
+		/* Stock: the bottom speaker is the right channel, the top (earpiece) the left */
+		cirrus,right-channel-amp;
+		cirrus,boost-type = <0>;
+		cirrus,boost-peak-milliamp = <4100>;
+		cirrus,boost-ind-nanohenry = <1000>;
+		cirrus,boost-cap-microfarad = <15>;
+		cirrus,asp-sdout-hiz = <3>;
+		cirrus,gpio2-src-select = <2>;
+		cirrus,gpio2-output-enable;
+	};
+};
+
+/*
+ * Microphones: DMICs on LPASS LPI gpio6/7 (dmic01), 8/9 (dmic23), 12/13 (dmic45), stock cdc-dmic01/23/45,
+ * into the VA macro - same wiring as the Galaxy Tab S8+. L12C (1.8 V, always-on) powers them.
+ */
+&lpass_tlmm {
+	dmic45_default: dmic45-default-state {
+		clk-pins {
+			pins = "gpio12";
+			function = "dmic3_clk";
+			drive-strength = <8>;
+			output-high;
+		};
+
+		data-pins {
+			pins = "gpio13";
+			function = "dmic3_data";
+			drive-strength = <8>;
+			input-enable;
+		};
+	};
+};
+
+&vamacro {
+	pinctrl-0 = <&dmic01_default>, <&dmic23_default>, <&dmic45_default>;
+	pinctrl-names = "default";
+	vdd-micb-supply = <&vreg_l12c_1p8>;
+	qcom,dmic-sample-rate = <2400000>;
+
+	status = "okay";
+};
+
+&sound {
+	compatible = "qcom,sm8450-sndcard";
+	model = "Samsung-Galaxy-S22";
+	pinctrl-0 = <&pri_mi2s_active>;
+	pinctrl-names = "default";
+
+	speaker-playback-dai-link {
+		link-name = "CS35L41 Speaker Playback";
+
+		cpu {
+			sound-dai = <&q6apmbedai PRIMARY_MI2S_RX>;
+		};
+
+		codec {
+			sound-dai = <&cs35l41_spk 0>, <&cs35l41_rcv 0>;
+		};
+
+		platform {
+			sound-dai = <&q6apm>;
+		};
+	};
+
+	va-capture-dai-link {
+		link-name = "Internal DMIC Capture";
+
+		cpu {
+			sound-dai = <&q6apmbedai VA_CODEC_DMA_TX_0>;
+		};
+
+		codec {
+			sound-dai = <&vamacro 0>;
+		};
+
+		platform {
+			sound-dai = <&q6apm>;
+		};
+	};
+};
+
+&tlmm {
+	gpio-reserved-ranges = <36 4>; /* SPI (not linked to anything) */
+
+	panel_vci_en: panel-vci-en-state {
+		pins = "gpio20";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	panel_vdd3_en: panel-vdd3-en-state {
+		pins = "gpio21";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	panel_reset_active: panel-reset-active-state {
+		pins = "gpio34";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-disable;
+	};
+
+	panel_vddr_en: panel-vddr-en-state {
+		pins = "gpio62";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	panel_te_active: panel-te-active-state {
+		pins = "gpio86";
+		function = "mdp_vsync";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+
+	bt_en: bt-en-state {
+		pins = "gpio81";
+		function = "gpio";
+		drive-strength = <16>;
+		output-low;
+		bias-pull-down;
+	};
+
+	uart20_default: uart20-default-state {
+		cts-pins {
+			pins = "gpio76";
+			function = "qup20";
+			bias-disable;
+		};
+
+		rts-pins {
+			pins = "gpio77";
+			function = "qup20";
+			bias-disable;
+		};
+
+		rx-pins {
+			pins = "gpio78";
+			function = "qup20";
+			bias-disable;
+		};
+
+		tx-pins {
+			pins = "gpio79";
+			function = "qup20";
+			bias-disable;
+		};
+	};
+
+	spi_clk_tsp_active: spi-clk-tsp-active-state {
+		pins = "gpio30";
+		function = "gpio";
+		drive-strength = <6>;
+		bias-disable;
+	};
+
+	spi_clk_tsp_sleep: spi-clk-tsp-sleep-state {
+		pins = "gpio30";
+		function = "gpio";
+		drive-strength = <6>;
+		input-enable;
+		bias-pull-down;
+	};
+
+	spi_cs_tsp_active: spi-cs-tsp-active-state {
+		pins = "gpio31";
+		function = "gpio";
+		drive-strength = <6>;
+		bias-disable;
+	};
+
+	spi_cs_tsp_sleep: spi-cs-tsp-sleep-state {
+		pins = "gpio31";
+		function = "gpio";
+		drive-strength = <6>;
+		input-enable;
+		bias-pull-down;
+	};
+
+	spi_miso_tsp_active: spi-miso-tsp-active-state {
+		pins = "gpio28";
+		function = "gpio";
+		drive-strength = <6>;
+		bias-disable;
+	};
+
+	spi_miso_tsp_sleep: spi-miso-tsp-sleep-state {
+		pins = "gpio28";
+		function = "gpio";
+		drive-strength = <6>;
+		input-enable;
+		bias-pull-down;
+	};
+
+	spi_mosi_tsp_active: spi-mosi-tsp-active-state {
+		pins = "gpio29";
+		function = "gpio";
+		drive-strength = <6>;
+		bias-disable;
+	};
+
+	spi_mosi_tsp_sleep: spi-mosi-tsp-sleep-state {
+		pins = "gpio29";
+		function = "gpio";
+		drive-strength = <6>;
+		input-enable;
+		bias-pull-down;
+	};
+
+	tsp_int_active: tsp-int-active-state {
+		pins = "gpio46";
+		function = "gpio";
+		drive-strength = <2>;
+		input-enable;
+		bias-disable;
+	};
+
+	tsp_int_sleep: tsp-int-sleep-state {
+		pins = "gpio46";
+		function = "gpio";
+		drive-strength = <2>;
+		input-enable;
+		bias-disable;
+	};
+
+	wlan_en: wlan-en-state {
+		pins = "gpio80";
+		function = "gpio";
+		drive-strength = <16>;
+		output-low;
+		bias-pull-down;
+	};
+
+	xo_clk_default: xo-clk-state {
+		pins = "gpio204";
+		function = "gpio";
+		drive-strength = <16>;
+		output-low;
+		bias-pull-down;
+	};
+
+	/* Primary MI2S to the CS35L41 amps (stock pri_tdm_*_active; same pins as the Galaxy Tab S8+) */
+	pri_mi2s_active: pri-mi2s-active-state {
+		clk-pins {
+			pins = "gpio126";
+			function = "mi2s0_sck";
+			drive-strength = <2>;
+			bias-disable;
+			output-high;
+		};
+
+		ws-pins {
+			pins = "gpio129";
+			function = "mi2s0_ws";
+			drive-strength = <2>;
+			bias-disable;
+			output-high;
+		};
+
+		din-pins {
+			pins = "gpio127";
+			function = "mi2s0_data0";
+			drive-strength = <2>;
+			bias-disable;
+		};
+
+		dout-pins {
+			pins = "gpio128";
+			function = "mi2s0_data1";
+			drive-strength = <2>;
+			bias-disable;
+		};
+	};
+
+	/* CS35L41 resets (gpio18 earpiece, gpio183 speaker) and shared IRQ (gpio19), stock cs35l41_gpio_default */
+	cs35l41_default: cs35l41-default-state {
+		pins = "gpio18", "gpio19", "gpio183";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+};
+
+&uart20 {
+	pinctrl-0 = <&uart20_default>;
+	pinctrl-names = "default";
+
+	status = "okay";
+
+	bluetooth {
+		compatible = "qcom,wcn6855-bt";
+
+		vddrfacmn-supply = <&vreg_pmu_rfa_cmn_0p8>;
+		vddaon-supply = <&vreg_pmu_aon_0p8>;
+		vddwlcx-supply = <&vreg_pmu_wlcx_0p8>;
+		vddwlmx-supply = <&vreg_pmu_wlmx_0p8>;
+		vddbtcmx-supply = <&vreg_pmu_btcmx_0p8>;
+		vddrfa0p8-supply = <&vreg_pmu_rfa_0p8>;
+		vddrfa1p2-supply = <&vreg_pmu_rfa_1p2>;
+		vddrfa1p7-supply = <&vreg_pmu_rfa_1p7>;
+	};
+};
+
+&ufs_mem_hc {
+	reset-gpios = <&tlmm 210 GPIO_ACTIVE_LOW>;
+
+	vcc-supply = <&vreg_l7b_2p5>;
+	vcc-max-microamp = <1100000>;
+	vccq-supply = <&vreg_l9b_1p2>;
+	vccq-max-microamp = <1200000>;
+	vdd-hba-supply = <&vreg_l9b_1p2>;
+
+	status = "okay";
+};
+
+&ufs_mem_phy {
+	vdda-phy-supply = <&vreg_l5b_0p88>;
+	vdda-pll-supply = <&vreg_l6b_1p2>;
+
+	status = "okay";
+};
+
+&usb_1 {
+	/* Keep USB 2.0 only for now */
+	qcom,select-utmi-as-pipe-clk;
+
+	/* Roles come from the MAX77705 CCIC role switch (was fixed "peripheral") */
+	dr_mode = "otg";
+	/* Start as a gadget like before, so the initramfs USB network still comes up before the CCIC driver loads */
+	role-switch-default-mode = "peripheral";
+	maximum-speed = "high-speed";
+	/* Remove USB3 phy */
+	phys = <&usb_1_hsphy>;
+	phy-names = "usb2-phy";
+
+	status = "okay";
+};
+
+&usb_1_dwc3_hs {
+	remote-endpoint = <&max77705_typec_hs>;
+};
+
+&usb_1_hsphy {
+	vdda-pll-supply = <&vreg_l5b_0p88>;
+	vdda18-supply = <&vreg_l1c_1p8>;
+	vdda33-supply = <&vreg_l2b_3p07>;
+
+	status = "okay";
+};
+
+/* Volume up: plain gpio-keys line on pm8350 gpio6, active low with pull-up (stock vol_up; same as the Galaxy Tab S8+) */
+/ {
+	gpio-keys {
+		compatible = "gpio-keys";
+		pinctrl-0 = <&vol_up_default>;
+		pinctrl-names = "default";
+
+		key-volume-up {
+			label = "Volume Up";
+			gpios = <&pm8350_gpios 6 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_VOLUMEUP>;
+			debounce-interval = <15>;
+		};
+	};
+};
+
+&pm8350_gpios {
+	vol_up_default: vol-up-default-state {
+		pins = "gpio6";
+		function = "normal";
+		power-source = <1>;
+		bias-pull-up;
+		input-enable;
+	};
+};
+
+/*
+ * Memory bandwidth voting (attempt 31). Mainline sm8450.dtsi has no bwmon nodes and no GPU interconnect, so nothing
+ * votes for DDR; the bus only ran fast because it was stuck at max (interconnect sync_state blocked by the qcrypto node).
+ * Addresses/interrupts from stock qcom,bwmon-llcc@190b6400 (bwmon4) and qcom,bwmon-ddr@19091000 (bwmon5); the steps are
+ * stock ddr/llcc freq tables x bus width, in the mainline (x 0.9537) convention used by sm8550.dtsi.
+ */
+&soc {
+	pmu@19091000 {
+		compatible = "qcom,sc7280-llcc-bwmon";
+		reg = <0 0x19091000 0 0x1000>;
+		interrupts = <GIC_SPI 81 IRQ_TYPE_LEVEL_HIGH>;
+		interconnects = <&mc_virt MASTER_LLCC QCOM_ICC_TAG_ACTIVE_ONLY
+				 &mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ACTIVE_ONLY>;
+		operating-points-v2 = <&llcc_bwmon_opp_table>;
+
+		llcc_bwmon_opp_table: opp-table {
+			compatible = "operating-points-v2";
+
+			opp-0 { opp-peak-kBps = <2086000>; };
+			opp-1 { opp-peak-kBps = <2929000>; };
+			opp-2 { opp-peak-kBps = <5931000>; };
+			opp-3 { opp-peak-kBps = <6515000>; };
+			opp-4 { opp-peak-kBps = <7980000>; };
+			opp-5 { opp-peak-kBps = <10437000>; };
+			opp-6 { opp-peak-kBps = <12191000>; };
+		};
+	};
+
+	pmu@190b6400 {
+		compatible = "qcom,sdm845-bwmon";
+		reg = <0 0x190b6400 0 0x600>;
+		interrupts = <GIC_SPI 581 IRQ_TYPE_LEVEL_HIGH>;
+		interconnects = <&gem_noc MASTER_APPSS_PROC QCOM_ICC_TAG_ACTIVE_ONLY
+				 &gem_noc SLAVE_LLCC QCOM_ICC_TAG_ACTIVE_ONLY>;
+		operating-points-v2 = <&cpu_bwmon_opp_table>;
+
+		cpu_bwmon_opp_table: opp-table {
+			compatible = "operating-points-v2";
+
+			opp-0 { opp-peak-kBps = <4577000>; };
+			opp-1 { opp-peak-kBps = <7110000>; };
+			opp-2 { opp-peak-kBps = <9155000>; };
+			opp-3 { opp-peak-kBps = <12298000>; };
+			opp-4 { opp-peak-kBps = <14236000>; };
+			opp-5 { opp-peak-kBps = <16265000>; };
+		};
+	};
+};
+
+/* GPU DDR votes: stock qcom,gpu-pwrlevels bus-freq index -> qcom,bus-table-ddr (kBps) */
+&gpu {
+	interconnects = <&gem_noc MASTER_GFX3D QCOM_ICC_TAG_ALWAYS
+			 &mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ALWAYS>;
+	interconnect-names = "gfx-mem";
+};
+
+&gpu_opp_table {
+	opp-818000000 { opp-peak-kBps = <13085937>; };
+	opp-791000000 { opp-peak-kBps = <13085937>; };
+	opp-734000000 { opp-peak-kBps = <12484375>; };
+	opp-640000000 { opp-peak-kBps = <12484375>; };
+	opp-599000000 { opp-peak-kBps = <8171875>; };
+	opp-545000000 { opp-peak-kBps = <8171875>; };
+	opp-492000000 { opp-peak-kBps = <6074218>; };
+	opp-421000000 { opp-peak-kBps = <6074218>; };
+	opp-350000000 { opp-peak-kBps = <2136718>; };
+	opp-317000000 { opp-peak-kBps = <1761718>; };
+	opp-285000000 { opp-peak-kBps = <1761718>; };
+	opp-220000000 { opp-peak-kBps = <1761718>; };
+};
+
+/*
+ * qcrypto stays blocked on this device. With the node enabled but never bound, the interconnect sync_state() never ran
+ * and the memory bus stayed at maximum bandwidth. Safe now that bwmon + GPU votes exist (attempt 31): attempt 32.
+ */
+&crypto {
+	status = "disabled";
+};
+
+/*
+ * Haptics: Cirrus CS40L26 on QUP SE9 (i2c9, gpio32/33) at 0x40, as stock cs40l26a@40 (attempt 33).
+ * No mainline driver yet: only the bus is enabled and the reset (tlmm 180, active low) held deasserted so the chip
+ * can be probed from userspace. Stock interrupt is pm8350 gpio9 (pull-up), not used yet.
+ */
+&qupv3_id_1 {
+	status = "okay";
+};
+
+&i2c9 {
+	clock-frequency = <400000>;
+	pinctrl-0 = <&qup_i2c9_data_clk &cs40l26_reset_deassert>;
+	pinctrl-names = "default";
+
+	status = "okay";
+
+	/* Bound by the out-of-tree cs40l26-rom-vibra driver (ROM effects, attempt 34) */
+	haptics@40 {
+		compatible = "cirrus,cs40l26a";
+		reg = <0x40>;
+	};
+};
+
+&tlmm {
+	cs40l26_reset_deassert: cs40l26-reset-deassert-state {
+		pins = "gpio180";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+		output-high;
+	};
+};
+
+/*
+ * Cameras, phase 1 (attempt 35): CAMSS + CCI only, no sensors yet. SM8450 CAMSS support and camcc fixes from the
+ * Galaxy Tab S8+ port (sm8450-camss, camcc-sm8450-shared-rcg, camcc-sm8450-retain-ff). CSIPHY rails as the Tab.
+ * Stock sensors: main csiphy1/cci0/mclk2, ultrawide csiphy2/cci0/mclk1, tele csiphy0/cci1/mclk3, front csiphy4/cci1/mclk4.
+ */
+&camss {
+	vdda-phy-supply = <&vreg_l5b_0p88>;
+	vdda-pll-supply = <&vreg_l6b_1p2>;
+
+	status = "okay";
+};
+
+&cci0 {
+	status = "okay";
+};
+
+&cci1 {
+	status = "okay";
+};
+
+/*
+ * Samsung S2MPB02 camera PMIC (attempt 36): stock s2mpb02_pmic@59 on an i2c-gpio bus (tlmm 175 SDA, 176 SCL),
+ * driven by the out-of-tree s2mpb02-regulator module. Front camera (IMX374) rails as stock cam-sensor1:
+ * vdig LDO5 1.05 V, vio LDO9 1.8 V, vana LDO15 2.8 V.
+ */
+/ {
+	i2c-cam-pmic {
+		compatible = "i2c-gpio";
+		sda-gpios = <&tlmm 175 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&tlmm 176 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+		i2c-gpio,delay-us = <2>;
+		pinctrl-0 = <&cam_pmic_i2c_default>;
+		pinctrl-names = "default";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		pmic@59 {
+			compatible = "samsung,s2mpb02";
+			reg = <0x59>;
+
+			regulators {
+				vreg_cam_front_vdig: ldo5 {
+					regulator-name = "s2mpb02-l5";
+					regulator-min-microvolt = <1050000>;
+					regulator-max-microvolt = <1050000>;
+				};
+
+				vreg_cam_front_vio: ldo9 {
+					regulator-name = "s2mpb02-l9";
+					regulator-min-microvolt = <1800000>;
+					regulator-max-microvolt = <1800000>;
+				};
+
+				vreg_cam_front_vana: ldo15 {
+					regulator-name = "s2mpb02-l15";
+					regulator-min-microvolt = <2800000>;
+					regulator-max-microvolt = <2800000>;
+				};
+			};
+		};
+	};
+};
+
+&tlmm {
+	cam_pmic_i2c_default: cam-pmic-i2c-default-state {
+		pins = "gpio175", "gpio176";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+};

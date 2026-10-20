@@ -1,0 +1,15 @@
+aspm: 0 0 0 0 0 0 
+link: LnkSta:	Speed 2.5GT/s (downgraded), Width x1
+SYS_CTRL 0000365e
+MHISTATUS 0xff05 state 255 syserr 1 BHIOFF 0x100
+EXECENV 0x1
+link after: LnkSta:	Speed 2.5GT/s (downgraded), Width x1
+[  325.274285] mhi mhi0: Power on setup success
+[  325.399701] mhi mhi0: Wait for device to enter SBL or Mission mode
+[  347.117030] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[  347.117059] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[  347.117070] ath11k_pci 0000:01:00.0: failed to power up :-110
+[  347.140390] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[  347.140424] ath11k_pci 0000:01:00.0: failed to init core: -110
+[  347.422590] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110
+DONE

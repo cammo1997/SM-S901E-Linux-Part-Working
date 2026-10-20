@@ -1,0 +1,9 @@
+1
+[    5.675348] coresight cti_sys4: CTI initialized
+[    5.683905] coresight stm0: STM32 initialized
+[   15.849260] gcc-sm8450 100000.clock-controller: sync_state() pending due to 3d6a000.gmu
+[   15.860067] sm8450-gpucc 3d90000.clock-controller: sync_state() pending due to 3d6a000.gmu
+[   15.870363] gcc-sm8450 100000.clock-controller: sync_state() pending due to af00000.clock-controller
+[   15.880387] qcom-rpmhpd 17a00000.rsc:power-controller: sync_state() pending due to af00000.clock-controller
+[   15.890383] qnoc-sm8450 interconnect-1: sync_state() pending due to 1dfa000.crypto
+[   15.900313] qnoc-sm8450 1700000.interconnect: sync_state() pending due to 1dfa000.crypto

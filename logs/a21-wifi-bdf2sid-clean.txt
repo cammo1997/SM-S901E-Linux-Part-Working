@@ -1,0 +1,12 @@
+before [(7, '0xffe54300')]
+[   26.138382] ath11k_pci 0000:01:00.0: enabling device (0000 -> 0002)
+[   26.139164] ath11k_pci 0000:01:00.0: MSI vectors: 32
+[   26.139195] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[   26.387815] mhi mhi0: r0q BHI poll: ret 1 status 2 after 40 ms
+[   26.419815] mhi mhi0: Wait for device to enter SBL or Mission mode
+[   48.096935] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[   48.096966] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[   48.096979] ath11k_pci 0000:01:00.0: failed to power up :-110
+[   48.117165] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[   48.117238] ath11k_pci 0000:01:00.0: failed to init core: -110
+[   48.421567] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110

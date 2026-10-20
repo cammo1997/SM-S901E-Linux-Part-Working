@@ -1,0 +1,16 @@
+1
+[  382.376690] pci 0000:00:00.0: bridge window [mem 0x60600000-0x607fffff 64bit pref]: assigned
+[  382.379498] pci 0000:00:00.0: BAR 0 [mem 0x60300000-0x60300fff]: assigned
+[  382.382247] pci 0000:00:00.0: bridge window [io  0x1000-0x1fff]: assigned
+[  382.384989] pci 0000:01:00.0: BAR 0 [mem 0x60400000-0x605fffff 64bit]: assigned
+[  382.387590] pci 0000:00:00.0: PCI bridge to [bus 01-ff]
+[  382.390120] pci 0000:00:00.0:   bridge window [io  0x1000-0x1fff]
+[  382.392698] pci 0000:00:00.0:   bridge window [mem 0x60400000-0x605fffff]
+[  382.395252] pci 0000:00:00.0:   bridge window [mem 0x60600000-0x607fffff 64bit pref]
+[  382.411683] pcieport 0000:00:00.0: PME: Signaling with IRQ 171
+[  382.414798] pcieport 0000:00:00.0: AER: enabled with IRQ 171
+==deferred
+0-0036	i2c: supplier 0-0069 not ready
+==lspci
+00:00.0 PCI bridge: Qualcomm Technologies, Inc SM8475 PCIe Root Complex [Snapdragon 8+ Gen 1]
+01:00.0 Network controller: Qualcomm Technologies, Inc QCNFA765 Wireless Network Adapter (rev 01)

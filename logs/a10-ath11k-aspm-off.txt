@@ -1,0 +1,21 @@
+aspm policy before: [default] performance powersave powersupersave 
+aspm policy now:    default [performance] powersave powersupersave 
+		LnkCap:	Port #0, Speed 8GT/s, Width x1, ASPM L0s L1, Exit Latency L0s <1us, L1 <64us
+			ClockPM- Surprise- LLActRep- BwNot- ASPMOptComp+
+		LnkCtl:	ASPM Disabled; RCB 128 bytes, LnkDisable- CommClk+
+		LnkSta:	Speed 5GT/s (downgraded), Width x1
+[ 1290.891051] ath11k_pci 0000:01:00.0: BAR 0 [mem 0x60400000-0x605fffff 64bit]: assigned
+[ 1290.897921] ath11k_pci 0000:01:00.0: MSI vectors: 32
+[ 1290.898626] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[ 1291.055595] mhi mhi0: Requested to power ON
+[ 1291.058080] mhi mhi0: Power on setup success
+[ 1311.715607] mhi mhi0: MHI did not load image over BHI, ret: -5
+[ 1311.722505] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[ 1311.724401] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[ 1311.726296] ath11k_pci 0000:01:00.0: failed to power up :-110
+[ 1311.752978] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[ 1311.755407] ath11k_pci 0000:01:00.0: failed to init core: -110
+[ 1311.861088] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110
+==
+lo
+usb0

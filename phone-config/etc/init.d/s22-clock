@@ -1,0 +1,20 @@
+#!/sbin/openrc-run
+# Galaxy S22: the RTC cannot be set, so restore the last saved time at boot (never backwards) and save it at shutdown.
+description="Restore/save system time (no usable RTC)"
+depend() {
+	need root
+	before logger chronyd
+}
+start() {
+	if [ -s /var/lib/s22-time ]; then
+		saved=$(cat /var/lib/s22-time)
+		now=$(date +%s)
+		[ "$saved" -gt "$now" ] && date -s "@$saved" >/dev/null
+	fi
+	return 0
+}
+stop() {
+	n=$(date +%s)
+	[ "$n" -gt 1790000000 ] && echo "$n" > /var/lib/s22-time
+	return 0
+}

@@ -1,0 +1,16 @@
+--- a/sound/soc/codecs/cs35l41.c
++++ b/sound/soc/codecs/cs35l41.c
+@@ -914,6 +914,13 @@
+ 		regmap_update_bits(cs35l41->regmap, CS35L41_SP_HIZ_CTRL, CS35L41_ASP_DOUT_HIZ_MASK,
+ 				   hw_cfg->dout_hiz);
+ 
++	/* Stereo pairs on one I2S link: the right-channel amp plays slot 1 */
++	if (device_property_read_bool(cs35l41->dev, "cirrus,right-channel-amp")) {
++		unsigned int rx_slot = 1;
++
++		cs35l41_set_channels(cs35l41->dev, cs35l41->regmap, 0, NULL, 1, &rx_slot);
++	}
++
+ 	return 0;
+ }
+ 

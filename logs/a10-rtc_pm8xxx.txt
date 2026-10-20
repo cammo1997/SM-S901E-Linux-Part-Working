@@ -1,0 +1,11 @@
+1
+[   17.726611] qnoc-sm8450 1680000.interconnect: sync_state() pending due to 994000.i2c
+[   17.730005] qnoc-sm8450 interconnect-0: sync_state() pending due to 994000.i2c
+[   17.733048] gcc-sm8450 100000.clock-controller: sync_state() pending due to 994000.i2c
+[   17.736168] qcom-pcie 1c00000.pcie: supply vddpe-3v3 not found, using dummy regulator
+[   17.736956] qcom-pcie 1c00000.pcie: Failed to get clocks
+[  104.541794] rtc-pm8xxx c400000.spmi:pmic@0:rtc@6100: registered as rtc0
+[  104.542543] rtc-pm8xxx c400000.spmi:pmic@0:rtc@6100: setting system clock to 1970-01-01T05:38:10 UTC (20290)
+[  104.544818] qcom-pcie 1c00000.pcie: supply vdda not found, using dummy regulator
+[  104.545502] qcom-pcie 1c00000.pcie: supply vddpe-3v3 not found, using dummy regulator
+[  104.546029] qcom-pcie 1c00000.pcie: Failed to get clocks

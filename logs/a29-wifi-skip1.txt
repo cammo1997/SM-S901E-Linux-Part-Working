@@ -1,0 +1,10 @@
+no SBL wait seen, skip BAR read
+[  262.213455] mhi mhi0: Requested to power ON
+[  262.213484] mhi mhi0: SECONDARY BOOTLOADER is not a valid EE for power on
+[  262.213498] ath11k_pci 0000:01:00.0: failed to power up mhi: -5
+[  262.213511] ath11k_pci 0000:01:00.0: failed to start mhi: -5
+[  262.213519] ath11k_pci 0000:01:00.0: failed to power up :-5
+[  262.226901] ath11k_pci 0000:01:00.0: failed to create soc core: -5
+[  262.226922] ath11k_pci 0000:01:00.0: failed to init core: -5
+[  262.356219] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -5
+DONE

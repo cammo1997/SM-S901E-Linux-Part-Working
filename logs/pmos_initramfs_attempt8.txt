@@ -1,0 +1,51 @@
+postmarketOS debug shell
+https://postmarketos.org/debug-shell
+  Device: Galaxy S22 (samsung-r0q)
+  Kernel: 7.2.11-dirty
+  OS ver: edge
+  initrd: 3.12.5-r0
+Run 'pmos_continue_boot' to continue booting.
+Read the initramfs log with 'cat /pmOS_init.log'.
+Run 'pmos_logdump' to generate a log dump and expose it over USB.
+You can expose storage devices over USB with
+'setup_usb_storage_configfs /dev/DEVICE'
+~ # 
+[6necho ===CMDLINE; cat /proc/cmdline; echo ===INITLOG; cat /pmOS_init.log; ech
+o ===BLKID; blkid | grep -iE "pmos|userdata|sda40|loop|dm-"; echo ===MOUNTS; cat
+ /proc/mounts | grep -vE "proc|sys|devpts|tmpfs|configfs"; echo ===END
+===CMDLINE
+pmos_boot_uuid=20ef0c96-cdbf-4f90-b6f6-2d13a308938a pmos_root_uuid=be4488a5-28c6-44b6-adf3-8efca31e0cf0 pmos_rootfsopts=defaults clk_ignore_unused pd_ignore_unused ignore_loglevel console=tty0 panic=0 log_buf_len=4M
+===INITLOG
+ PMOS STAGE 1 
+initramfs version: 3.12.5-r0
+ PMOS STAGE 2 
+  Setting up USB gadget through configfs
+Trying to start server with parameters: Server IP addr: 172.16.42.1:67, client IP addr: 172.16.42.2, interface: usb0
+Trying to mount subpartitions for 10 seconds...
+ERROR: failed to mount subpartitions!
+Creating logs disk
+32+0 records in
+32+0 records out
+33554432 bytes (32.0MB) copied, 0.040429 seconds, 791.5MB/s
+modprobe: FATAL: Module vfat not found in directory /lib/modules/7.2.11-dirty
+./_info
+./blkid.txt
+./cmdline.txt
+./dmesg.txt
+./fdt.dtb
+./partitions.txt
+./pmOS_init.txt
+Making logs available via mass storage
+Entering debug shell
+/usr/bin/buffyboard
+modprobe: FATAL: Module uinput not found in directory /lib/modules/7.2.11-dirty
+Ignoring invalid config file /usr/share/buffyboard/buffyboard.conf
+Ignoring invalid config file /etc/buffyboard.conf
+Could not open /dev/uinput
+===BLKID
+/dev/loop0: LABEL_FATBOOT="PMOS_LOGS" LABEL="PMOS_LOGS" UUID="0000-0CAF" BLOCK_SIZE="512" TYPE="vfat"
+/dev/sda40: PTTYPE="PMBR" PARTLABEL="userdata" PARTUUID="1b81e7e6-f50d-419b-a739-2aeef8da3335"
+===MOUNTS
+rootfs / rootfs rw,size=3195800k,nr_inodes=798950 0 0
+===END
+~ # 

@@ -1,0 +1,30 @@
+Subject: [PATCH v2 0/6] arm64: dts: qcom: r0q: enable more peripherals
+
+This patchset adds support for multiple devices found on the Galaxy S22,
+side buttons, touchscreen, max77705 charger/fuelgauge, RTC and UFS. It
+depends on "Input: add support for the STM FTS2BA61Y touchscreen" for
+TS to be enabled - and for the fuelgauge/charger to work,
+"mfd: max77705: support revision 0x2" is needed too.
+
+Thanks!
+
+Changes in v2:
+- split the gpio keys patch into 2 for small refactor
+- rename spi-gpio: spi-gpio@0 to spi8
+- use tabs instead of spaces on max77705 nodes
+- added new patch that fixes adsp_mem and video_mem memory regions
+I couldn't find the clock-frequency for i2c5 bus :(
+
+Eric Gonçalves (6):
+  arm64: dts: qcom: r0q: small refactor
+  arm64: dts: qcom: r0q: add gpio keys
+  arm64: dts: qcom: r0q: add touchscreen support
+  arm64: dts: qcom: r0q: enable max77705 fuelgauge
+  arm64: dts: qcom: r0q: enable ufs storage
+  arm64: dts: qcom: r0q: fix reserved memory regions
+
+ .../boot/dts/qcom/sm8450-samsung-r0q.dts      | 278 +++++++++++++++++-
+ 1 file changed, 270 insertions(+), 8 deletions(-)
+
+-- 
+2.51.0

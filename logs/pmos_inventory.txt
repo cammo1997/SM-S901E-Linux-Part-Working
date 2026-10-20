@@ -1,0 +1,39 @@
+== clock before: Thu Jan  1 00:05:31 UTC 1970
+== clock after:  Sat Oct 17 09:26:18 UTC 2026
+== zram:
+ * Starting zram swap ... [ !! ]
+ * ERROR: postmarketos-zram-swap failed to start
+ * rc-update: postmarketos-zram-swap already installed in runlevel `default'; skipping
+Swap:             0           0           0
+== devices with a driver bound: 72
+== platform devices WITHOUT a driver:
+ash: line 0: can't open /sys/bus/platform/devices/qcom-socinfo/of_node/compatible: no such file
+ash: line 0: can't open /sys/bus/platform/devices/qcom_llcc_edac/of_node/compatible: no such file
+ash: line 0: can't open /sys/bus/platform/devices/qcomtee/of_node/compatible: no such file
+10c3000.rng [qcom,sm8450-trng]
+146aa000.sram [qcom,sm8450-imem]
+146aa94c.pil-reloc [qcom,pil-reloc-info]
+1dfa000.crypto [qcom,sm8450-qce]
+1fc0000.syscon [qcom,sm8450-tcsr]
+31e0000.codec [qcom,sm8450-lpass-wsa-macro]
+3200000.codec [qcom,sm8450-lpass-rx-macro]
+3220000.codec [qcom,sm8450-lpass-tx-macro]
+3240000.codec [qcom,sm8450-lpass-wsa-macro]
+3440000.pinctrl [qcom,sm8450-lpass-lpi-pinctrl]
+3d6a000.gmu [qcom,adreno-gmu-730.1]
+9fd00000.memory [qcom,rmtfs-mem]
+af00000.clock-controller [qcom,sm8450-dispcc]
+c3f0000.sram [qcom,rpmh-stats]
+c400000.spmi:pmic@0:adc@3100 [qcom,spmi-adc7]
+c400000.spmi:pmic@1:temp-alarm@a00 [qcom,spmi-temp-alarm]
+c400000.spmi:pmic@2:temp-alarm@a00 [qcom,spmi-temp-alarm]
+ete-0 [arm,embedded-trace-extension]
+ete-1 [arm,embedded-trace-extension]
+ete-2 [arm,embedded-trace-extension]
+ete-3 [arm,embedded-trace-extension]
+ete-4 [arm,embedded-trace-extension]
+ete-5 [arm,embedded-trace-extension]
+ete-6 [arm,embedded-trace-extension]
+ete-7 [arm,embedded-trace-extension]
+funnel-ete [arm,coresight-static-funnel]
+timer [arm,armv8-timer]

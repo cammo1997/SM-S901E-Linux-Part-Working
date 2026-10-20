@@ -1,0 +1,26 @@
+loaded: 1
+[  514.665195] Bluetooth: Core ver 2.22
+[  514.665813] NET: Registered PF_BLUETOOTH protocol family
+[  514.666188] Bluetooth: HCI device and connection manager initialized
+[  514.666530] Bluetooth: HCI socket layer initialized
+[  514.666855] Bluetooth: L2CAP socket layer initialized
+[  514.667174] Bluetooth: SCO socket layer initialized
+[  514.668615] Bluetooth: HCI UART driver ver 2.3
+[  514.668976] Bluetooth: HCI UART protocol H4 registered
+[  514.669605] Bluetooth: HCI UART protocol LL registered
+[  514.670257] Bluetooth: HCI UART protocol Broadcom registered
+[  514.670786] Bluetooth: HCI UART protocol QCA registered
+[  514.671277] Bluetooth: HCI UART protocol Marvell registered
+[  514.671436] Bluetooth: hci0: setting up wcn6855
+[  514.739655] Bluetooth: hci0: QCA Product ID   :0x00000013
+[  514.746709] Bluetooth: hci0: QCA SOC Version  :0x400c1211
+[  514.747067] Bluetooth: hci0: QCA ROM Version  :0x00000201
+[  514.747385] Bluetooth: hci0: QCA Patch Version:0x000038e6
+[  514.760474] Bluetooth: hci0: QCA controller version 0x12110201
+[  514.761619] Bluetooth: hci0: QCA Downloading qca/wcnhpbtfw21.tlv
+[  515.477022] Bluetooth: hci0: QCA Downloading qca/wcnhpnv21g.bin
+[  515.739509] Bluetooth: hci0: QCA FW build version: BTFW.HSP.2.1.0-00660-USB_UART_PATCHZ-6
+[  515.751269] Bluetooth: hci0: QCA setup on UART is completed
+[  515.758652] Bluetooth: hci0: HFP non-HCI data transport is supported
+==hci
+hci0

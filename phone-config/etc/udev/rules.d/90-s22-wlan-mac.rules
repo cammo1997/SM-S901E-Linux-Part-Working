@@ -1,0 +1,2 @@
+# Replace the address with YOUR phone's Wi-Fi MAC (EFS /wifi/.mac.info)
+ACTION=="add", SUBSYSTEM=="net", DRIVERS=="ath11k_pci", RUN+="/sbin/ip link set dev %k address xx:xx:xx:xx:xx:xx"

@@ -1,0 +1,164 @@
+Runlevel: shutdown
+ killprocs                                                         [  stopped  ]
+ savecache                                                         [  stopped  ]
+ systemd-tmpfiles-clean                                            [  stopped  ]
+ mount-ro                                                          [  stopped  ]
+Runlevel: default
+ swapfile                                                          [  started  ]
+ postmarketos-zram-swap                                            [  stopped  ]
+ udev-postmount                                                    [  started  ]
+ sshd                                                              [  started  ]
+ local                                                             [  started  ]
+Runlevel: boot
+ modules                                                           [  started  ]
+ hwclock                                                           [  started  ]
+ systemd-tmpfiles-setup                                            [  started  ]
+ unudhcpd.usb0                                         [  started 00:10:27 (0) ]
+ hostname                                                          [  started  ]
+ sysctl                                                            [  started  ]
+ tmpfs                                                             [  started  ]
+ bootmisc                                                          [  started  ]
+ logbookd                                                          [  started  ]
+Runlevel: sysinit
+ devfs                                                             [  started  ]
+ systemd-tmpfiles-setup-dev-early                                  [  started  ]
+ udev                                                              [  started  ]
+ dmesg                                                             [  started  ]
+ udev-trigger                                                      [  started  ]
+ systemd-sysusers                                                  [  started  ]
+ systemd-tmpfiles-setup-dev                                        [  started  ]
+ udev-settle                                                       [  started  ]
+Runlevel: nonetwork
+Dynamic Runlevel: hotplugged
+Dynamic Runlevel: needed/wanted
+ sysfs                                                             [  started  ]
+ fsck                                                              [  started  ]
+ root                                                              [  started  ]
+ localmount                                                        [  started  ]
+Dynamic Runlevel: manual
+
+1: lo: <LOOPBACK> mtu 65536 qdisc noop state DOWN qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+2: usb0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
+    link/ether 66:5e:a0:16:c1:d0 brd ff:ff:ff:ff:ff:ff
+    inet 172.16.42.1/16 brd 172.16.255.255 scope global usb0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::645e:a0ff:fe16:c1d0/64 scope link 
+       valid_lft forever preferred_lft forever
+
+109
+NAME            MAJ:MIN  SIZE TYPE MOUNTPOINTS
+loop0           7:0      104G loop
+loop0p1         259:56   480M part /boot
+loop0p2         259:57   103G part /
+loop1           7:1         0 loop
+loop2           7:2         0 loop
+loop3           7:3         0 loop
+loop4           7:4         0 loop
+loop5           7:5         0 loop
+loop6           7:6         0 loop
+loop7           7:7         0 loop
+sda             8:0      118G disk
+sda1            8:1     3072K part
+sda10           8:10    1024K part
+sda11           8:11     512K part
+sda12           8:12     512K part
+sda13           8:13    16.0M part
+sda14           8:14    40.3M part
+sda15           8:15     512K part
+sda16           259:0   4096K part
+sda17           259:1   64.0M part
+sda18           259:2   16.0M part
+sda19           259:3    150M part
+sda2            8:2     3072K part
+sda20           259:4   16.0M part
+sda21           259:5   16.0M part
+sda22           259:6   65536 part
+sda23           259:7   32.0M part
+sda24           259:8    164M part
+sda25           259:9   96.0M part
+sda26           259:10   100M part
+sda27           259:11  96.0M part
+sda28           259:12   335M part
+sda29           259:13  11.2G part
+sda3            8:3      4096 part
+sda30           259:14  1000M part
+sda31           259:15  20.0M part
+sda32           259:16   800M part
+sda33           259:17  45.0M part
+sda34           259:18  20.0M part
+sda35           259:19  50.0M part
+sda36           259:20  8192K part
+sda37           259:21  4096K part
+sda38           259:22  64.0M part
+sda39           259:23  2048K part
+sda4            8:4      8192 part
+sda40           259:24   104G part
+sda5            8:5     32.0M part
+sda6            8:6     20.0M part
+sda7            8:7     10.0M part
+sda8            8:8     10.0M part
+sda9            8:9     20.0M part
+sdb             8:16    8192K disk
+sdb1            8:17    4096K part
+sdb2            8:18     300K part
+sdb3            8:19     256K part
+sdb4            8:20    3480K part
+sdc             8:32    8192K disk
+sdc1            8:33    4096K part
+sdc2            8:34     300K part
+sdc3            8:35    3736K part
+sdd             8:48    4096K disk
+sdd1            8:49    1024K part
+sdd2            8:50    65536 part
+sdd3            8:51    2716K part
+sde             8:64     640M disk
+sde1            8:65    4096K part
+sde10           8:74     4096 part
+sde11           8:75    8192K part
+sde12           8:76    32.6M part
+sde13           8:77     4096 part
+sde14           8:78     4096 part
+sde15           8:79    2048K part
+sde16           259:25  64.0M part
+sde17           259:26  64.0M part
+sde18           259:27  2048K part
+sde19           259:28   512K part
+sde2            8:66    2048K part
+sde20           259:29   128K part
+sde21           259:30  81920 part
+sde22           259:31  10.0M part
+sde23           259:32  2048K part
+sde24           259:33   128K part
+sde25           259:34  16.0M part
+sde26           259:35  1024K part
+sde27           259:36  32768 part
+sde28           259:37   512K part
+sde29           259:38  2048K part
+sde3            8:67    4096K part
+sde30           259:39  2048K part
+sde31           259:40  2048K part
+sde32           259:41  10.0M part
+sde33           259:42  2048K part
+sde34           259:43  2048K part
+sde35           259:44  2048K part
+sde36           259:45  5120K part
+sde37           259:46  2048K part
+sde38           259:47  1024K part
+sde39           259:48   256K part
+sde4            8:68     4096 part
+sde40           259:49  2048K part
+sde41           259:50   128K part
+sde42           259:51   128K part
+sde43           259:52   128K part
+sde44           259:53   512K part
+sde45           259:54   128K part
+sde46           259:55   351M part
+sde5            8:69    1024K part
+sde6            8:70    4096K part
+sde7            8:71    32.0M part
+sde8            8:72     384K part
+sde9            8:73    1024K part
+sdf             8:80    16.0M disk
+sdf1            8:81    3072K part
+sdf2            8:82    8900K part

@@ -1,0 +1,174 @@
+Subject: [PATCH v2 3/6] arm64: dts: qcom: r0q: add touchscreen support
+
+Enable the ST-Microelectronics FTS2BA61Y touchscreen. This patch
+depends on "Input: add support for the STM FTS2BA61Y touchscreen".
+
+The device has an issue where SPI 8 (the bus which the touchscreen is
+connected to) is not working properly right now, so
+spi-gpio is used instead.
+
+Signed-off-by: Eric Gonçalves <ghatto404@xxxxxxxxx>
+---
+ .../boot/dts/qcom/sm8450-samsung-r0q.dts      | 134 ++++++++++++++++++
+ 1 file changed, 134 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts b/arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts
+index 5ca45b040a99..96a8a0e69681 100644
+--- a/arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts
++++ b/arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts
+@@ -56,6 +56,50 @@ splash-region@b8000000 {
+ 		};
+ 	};
+ 
++	/*
++	 * The device has an issue where SPI 8 (the bus which the touchscreen is
++	 * connected to) is not working properly right now, so spi-gpio
++	 * is used instead.
++	 */
++
++	spi8 {
++		compatible = "spi-gpio";
++		pinctrl-names = "default", "sleep";
++		pinctrl-0 = <&spi_clk_tsp_active &spi_mosi_tsp_active &spi_miso_tsp_active>;
++		pinctrl-1 = <&spi_clk_tsp_sleep &spi_mosi_tsp_sleep &spi_miso_tsp_sleep>;
++
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		sck-gpios = <&tlmm 30 GPIO_ACTIVE_HIGH>;
++		mosi-gpios = <&tlmm 29 GPIO_ACTIVE_HIGH>;
++		miso-gpios = <&tlmm 28 GPIO_ACTIVE_HIGH>;
++		cs-gpios = <&tlmm 31 GPIO_ACTIVE_LOW>;
++
++		num-chipselects = <1>;
++
++		spi-max-frequency = <5000000>;
++
++		touchscreen@0 {
++			compatible = "st,fts2ba61y";
++			reg = <0>;
++			spi-max-frequency = <5000000>;
++
++			vdd-supply = <&vreg_l8c_1p8>;
++			avdd-supply = <&vreg_l11c_3p0>;
++
++			interrupt-parent = <&tlmm>;
++			interrupts = <46 IRQ_TYPE_LEVEL_LOW>;
++
++			pinctrl-names = "default", "sleep";
++			pinctrl-0 = <&tsp_int_active>;
++			pinctrl-1 = <&tsp_int_sleep>;
++
++			status = "okay";
++		};
++	};
++
+ 	vph_pwr: regulator-vph-pwr {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "vph_pwr";
+@@ -138,6 +182,20 @@ vreg_l1c_1p8: ldo1 {
+ 			regulator-max-microvolt = <1800000>;
+ 			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+ 		};
++
++		vreg_l8c_1p8: ldo8 {
++			regulator-name = "vreg_l8c_1p8";
++			regulator-min-microvolt = <1800000>;
++			regulator-max-microvolt = <1800000>;
++			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
++		};
++
++		vreg_l11c_3p0: ldo11 {
++			regulator-name = "vreg_l11c_3p0";
++			regulator-min-microvolt = <3000000>;
++			regulator-max-microvolt = <3000000>;
++			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
++		};
+ 	};
+ };
+ 
+@@ -162,6 +220,82 @@ &pon_resin {
+ 
+ &tlmm {
+ 	gpio-reserved-ranges = <36 4>; /* SPI (Unused) */
++
++	spi_clk_tsp_active: spi-clk-tsp-active {
++		pins = "gpio30";
++		function = "gpio";
++		drive-strength = <6>;
++		bias-disable;
++	};
++
++	spi_clk_tsp_sleep: spi-clk-tsp-sleep {
++		pins = "gpio30";
++		function = "gpio";
++		drive-strength = <6>;
++		input-enable;
++		bias-pull-down;
++	};
++
++	spi_cs_tsp_active: spi-cs-tsp-active {
++		pins = "gpio31";
++		function = "gpio";
++		drive-strength = <6>;
++		bias-disable;
++	};
++
++	spi_cs_tsp_sleep: spi-cs-tsp-sleep {
++		pins = "gpio31";
++		function = "gpio";
++		drive-strength = <6>;
++		input-enable;
++		bias-pull-down;
++	};
++
++	spi_miso_tsp_active: spi-miso-tsp-active {
++		pins = "gpio28";
++		function = "gpio";
++		drive-strength = <6>;
++		bias-disable;
++	};
++
++	spi_miso_tsp_sleep: spi-miso-tsp-sleep {
++		pins = "gpio28";
++		function = "gpio";
++		drive-strength = <6>;
++		input-enable;
++		bias-pull-down;
++	};
++
++	spi_mosi_tsp_active: spi-mosi-tsp-active {
++		pins = "gpio29";
++		function = "gpio";
++		drive-strength = <6>;
++		bias-disable;
++	};
++
++	spi_mosi_tsp_sleep: spi-mosi-tsp-sleep {
++		pins = "gpio29";
++		function = "gpio";
++		drive-strength = <6>;
++		input-enable;
++		bias-pull-down;
++	};
++
++	tsp_int_active: tsp-int-active {
++		pins = "gpio46";
++		function = "gpio";
++		drive-strength = <2>;
++		input-enable;
++		bias-disable;
++	};
++
++	tsp_int_sleep: tsp-int-sleep-state {
++		pins = "gpio46";
++		function = "gpio";
++		drive-strength = <2>;
++		input-enable;
++		bias-disable;
++	};
+ };
+ 
+ &usb_1 {
+-- 
+2.51.0

@@ -1,0 +1,636 @@
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd462]
+[    0.000000] Linux version 7.2.11-dirty (cammo@pop-os) (aarch64-linux-gnu-gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, GNU ld (GNU Binutils for Ubuntu) 2.42) #11 SMP PREEMPT Sat Oct 17 19:54:58 AEDT 2026
+[    0.000000] KASLR disabled due to lack of seed
+[    0.000000] Machine model: Samsung Galaxy S22 5G
+[    0.000000] printk: debug: ignoring loglevel setting.
+[    0.000000] efi: UEFI not found.
+[    0.000000] [Firmware Bug]: Kernel image misaligned at boot, please fix your bootloader!
+[    0.000000] OF: reserved mem: Reserved memory: failed to reserve memory for node 'memory@89900000': base 0x0000000089900000, size 32 MiB
+[    0.000000] OF: reserved mem: 0x0000000080000000..0x00000000805fffff (6144 KiB) nomap non-reusable memory@80000000
+[    0.000000] OF: reserved mem: 0x0000000080600000..0x000000008063ffff (256 KiB) nomap non-reusable memory@80600000
+[    0.000000] OF: reserved mem: 0x0000000080640000..0x00000000807bffff (1536 KiB) nomap non-reusable memory@80640000
+[    0.000000] OF: reserved mem: 0x00000000807c0000..0x00000000807fffff (256 KiB) nomap non-reusable memory@807c0000
+[    0.000000] OF: reserved mem: 0x0000000080800000..0x000000008085ffff (384 KiB) nomap non-reusable memory@80800000
+[    0.000000] OF: reserved mem: 0x0000000080860000..0x000000008087ffff (128 KiB) nomap non-reusable memory@80860000
+[    0.000000] OF: reserved mem: 0x0000000080880000..0x000000008089ffff (128 KiB) nomap non-reusable memory@80880000
+[    0.000000] OF: reserved mem: 0x00000000808a0000..0x00000000808dffff (256 KiB) nomap non-reusable memory@808a0000
+[    0.000000] OF: reserved mem: 0x00000000808e0000..0x00000000808e3fff (16 KiB) nomap non-reusable memory@808e0000
+[    0.000000] OF: reserved mem: 0x00000000808e4000..0x00000000808f3fff (64 KiB) nomap non-reusable memory@808e4000
+[    0.000000] OF: reserved mem: 0x0000000080900000..0x0000000080afffff (2048 KiB) nomap non-reusable memory@80900000
+[    0.000000] OF: reserved mem: 0x0000000080b00000..0x0000000080bfffff (1024 KiB) nomap non-reusable memory@80b00000
+[    0.000000] OF: reserved mem: 0x0000000080c00000..0x00000000851fffff (71680 KiB) nomap non-reusable memory@80c00000
+[    0.000000] OF: reserved mem: 0x0000000085700000..0x0000000085dfffff (7168 KiB) nomap non-reusable memory@85700000
+[    0.000000] OF: reserved mem: 0x0000000085e00000..0x0000000087efffff (33792 KiB) nomap non-reusable memory@85e00000
+[    0.000000] OF: reserved mem: 0x0000000088000000..0x00000000898fffff (25600 KiB) nomap non-reusable memory@88000000
+[    0.000000] OF: reserved mem: 0x0000000089900000..0x000000008b8fffff (32768 KiB) nomap non-reusable memory@89900000
+[    0.000000] OF: reserved mem: 0x000000008b900000..0x000000008b90ffff (64 KiB) nomap non-reusable memory@8b900000
+[    0.000000] OF: reserved mem: 0x000000008b910000..0x000000008b919fff (40 KiB) nomap non-reusable memory@8b910000
+[    0.000000] OF: reserved mem: 0x000000008b91a000..0x000000008b91bfff (8 KiB) nomap non-reusable memory@8b91a000
+[    0.000000] OF: reserved mem: 0x000000008ba00000..0x000000008bb7ffff (1536 KiB) nomap non-reusable memory@8ba00000
+[    0.000000] OF: reserved mem: 0x000000008bb80000..0x000000008bbdffff (384 KiB) nomap non-reusable memory@8bb80000
+[    0.000000] OF: reserved mem: 0x000000008bbe0000..0x000000008bbfffff (128 KiB) nomap non-reusable memory@8bbe0000
+[    0.000000] OF: reserved mem: 0x000000008bc00000..0x000000009edfffff (313344 KiB) nomap non-reusable memory@8bc00000
+[    0.000000] OF: reserved mem: 0x000000009ee00000..0x000000009f4fffff (7168 KiB) nomap non-reusable memory@9ee00000
+[    0.000000] OF: reserved mem: 0x000000009f500000..0x000000009fcfffff (8192 KiB) nomap non-reusable memory@9f500000
+[    0.000000] OF: reserved mem: 0x000000009fd00000..0x000000009ff7ffff (2560 KiB) nomap non-reusable memory@9fd00000
+[    0.000000] OF: reserved mem: 0x00000000a6e00000..0x00000000a6e3ffff (256 KiB) nomap non-reusable memory@a6e00000
+[    0.000000] OF: reserved mem: 0x00000000a6f00000..0x00000000a6ffffff (1024 KiB) nomap non-reusable memory@a6f00000
+[    0.000000] OF: reserved mem: 0x00000000bb000000..0x00000000bfffffff (81920 KiB) nomap non-reusable memory@bb000000
+[    0.000000] OF: reserved mem: 0x00000000c0000000..0x00000000dfffffff (524288 KiB) nomap non-reusable memory@c0000000
+[    0.000000] OF: reserved mem: 0x00000000e0000000..0x00000000e05fffff (6144 KiB) nomap non-reusable memory@e0000000
+[    0.000000] OF: reserved mem: 0x00000000e0600000..0x00000000e09fffff (4096 KiB) nomap non-reusable memory@e0600000
+[    0.000000] OF: reserved mem: 0x00000000e0a00000..0x00000000e0afffff (1024 KiB) nomap non-reusable memory@e0a00000
+[    0.000000] OF: reserved mem: 0x00000000e0b00000..0x00000000e55f2fff (76748 KiB) nomap non-reusable memory@e0b00000
+[    0.000000] OF: reserved mem: 0x00000000e55f3000..0x00000000e55fbfff (36 KiB) nomap non-reusable memory@e55f3000
+[    0.000000] OF: reserved mem: 0x00000000e55fc000..0x00000000e55fffff (16 KiB) nomap non-reusable memory@e55fc000
+[    0.000000] OF: reserved mem: 0x00000000e5600000..0x00000000e56fffff (1024 KiB) nomap non-reusable memory@e5600000
+[    0.000000] OF: reserved mem: 0x00000000e8800000..0x00000000e88fffff (1024 KiB) nomap non-reusable memory@e8800000
+[    0.000000] OF: reserved mem: 0x00000000e8900000..0x00000000e9afffff (18432 KiB) nomap non-reusable memory@e8900000
+[    0.000000] OF: reserved mem: 0x00000000e9b00000..0x00000000e9ffffff (5120 KiB) nomap non-reusable memory@e9b00000
+[    0.000000] OF: reserved mem: 0x00000000ea000000..0x00000000ed8fffff (58368 KiB) nomap non-reusable memory@ea000000
+[    0.000000] OF: reserved mem: 0x00000000ed900000..0x00000000f13fffff (60416 KiB) nomap non-reusable memory@ed900000
+[    0.000000] OF: reserved mem: 0x00000000b8000000..0x00000000baafffff (44032 KiB) nomap non-reusable splash-region@b8000000
+[    0.000000] OF: reserved mem: 0x0000000084500000..0x0000000087ffffff (60416 KiB) nomap non-reusable samsung-adsp@84500000
+[    0.000000] OF: reserved mem: 0x00000000a7d00000..0x00000000a7ffffff (3072 KiB) nomap non-reusable samsung-xbl-ramdump@a7d00000
+[    0.000000] OF: reserved mem: 0x00000000b01ff000..0x00000000b01fffff (4 KiB) nomap non-reusable samsung-kaslr@b01ff000
+[    0.000000] OF: reserved mem: 0x00000000b0200000..0x00000000b023ffff (256 KiB) nomap non-reusable samsung-uh-heap@b0200000
+[    0.000000] OF: reserved mem: 0x00000000b1000000..0x00000000b23fffff (20480 KiB) nomap non-reusable samsung-uh-guest@b1000000
+[    0.000000] OF: reserved mem: 0x0000000800100000..0x0000000800afffff (10240 KiB) nomap non-reusable samsung-sec-debug@800100000
+[    0.000000] OF: reserved mem: 0x0000000800b00000..0x0000000800b01fff (8 KiB) nomap non-reusable samsung-debug-kinfo@800b00000
+[    0.000000] OF: reserved mem: 0x0000000800c00000..0x000000080b8fffff (177152 KiB) nomap non-reusable samsung-rdx-bootdev@800c00000
+[    0.000000] OF: reserved mem: 0x000000083a000000..0x000000083a3fffff (4096 KiB) nomap non-reusable ramoops@83a000000
+[    0.000000] OF: reserved mem: OVERLAP DETECTED!
+[    0.000000] memory@80c00000 (0x0000000080c00000--0x0000000085200000) overlaps with samsung-adsp@84500000 (0x0000000084500000--0x0000000088000000)
+[    0.000000] OF: reserved mem: OVERLAP DETECTED!
+[    0.000000] samsung-adsp@84500000 (0x0000000084500000--0x0000000088000000) overlaps with memory@85700000 (0x0000000085700000--0x0000000085e00000)
+[    0.000000] NUMA: Faking a node at [mem 0x0000000080000000-0x000000097fffffff]
+[    0.000000] NODE_DATA(0) allocated [mem 0x97f26a800-0x97f26cebf]
+[    0.000000] cma: Reserved 32 MiB at 0x00000000fe000000
+[    0.000000] psci: probing for conduit method from DT.
+[    0.000000] psci: PSCIv1.1 detected in firmware.
+[    0.000000] psci: Using standard PSCI v0.2 function IDs
+[    0.000000] psci: MIGRATE_INFO_TYPE not supported.
+[    0.000000] psci: SMC Calling Convention v1.0
+[    0.000000] psci: OSI mode supported.
+[    0.000000] Zone ranges:
+[    0.000000]   DMA      [mem 0x0000000080000000-0x00000000ffffffff]
+[    0.000000]   DMA32    empty
+[    0.000000]   Normal   [mem 0x0000000100000000-0x000000097fffffff]
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000080000000-0x00000000808f3fff]
+[    0.000000]   node   0: [mem 0x00000000808f4000-0x00000000808fffff]
+[    0.000000]   node   0: [mem 0x0000000080900000-0x00000000898fffff]
+[    0.000000]   node   0: [mem 0x0000000089900000-0x000000008b8fffff]
+[    0.000000]   node   0: [mem 0x000000008b900000-0x000000008b91bfff]
+[    0.000000]   node   0: [mem 0x000000008b91c000-0x000000008b9fffff]
+[    0.000000]   node   0: [mem 0x000000008ba00000-0x000000009ff7ffff]
+[    0.000000]   node   0: [mem 0x000000009ff80000-0x00000000a6dfffff]
+[    0.000000]   node   0: [mem 0x00000000a6e00000-0x00000000a6e3ffff]
+[    0.000000]   node   0: [mem 0x00000000a6e40000-0x00000000a6efffff]
+[    0.000000]   node   0: [mem 0x00000000a6f00000-0x00000000a6ffffff]
+[    0.000000]   node   0: [mem 0x00000000a7000000-0x00000000a7cfffff]
+[    0.000000]   node   0: [mem 0x00000000a7d00000-0x00000000a7ffffff]
+[    0.000000]   node   0: [mem 0x00000000a8000000-0x00000000b01fefff]
+[    0.000000]   node   0: [mem 0x00000000b01ff000-0x00000000b023ffff]
+[    0.000000]   node   0: [mem 0x00000000b0240000-0x00000000b0ffffff]
+[    0.000000]   node   0: [mem 0x00000000b1000000-0x00000000b23fffff]
+[    0.000000]   node   0: [mem 0x00000000b2400000-0x00000000b7ffffff]
+[    0.000000]   node   0: [mem 0x00000000b8000000-0x00000000baafffff]
+[    0.000000]   node   0: [mem 0x00000000bab00000-0x00000000baffffff]
+[    0.000000]   node   0: [mem 0x00000000bb000000-0x00000000e56fffff]
+[    0.000000]   node   0: [mem 0x00000000e5700000-0x00000000e87fffff]
+[    0.000000]   node   0: [mem 0x00000000e8800000-0x00000000e9ffffff]
+[    0.000000]   node   0: [mem 0x00000000f1c00000-0x00000000ffffffff]
+[    0.000000]   node   0: [mem 0x0000000800000000-0x00000008000fffff]
+[    0.000000]   node   0: [mem 0x0000000800100000-0x0000000800b01fff]
+[    0.000000]   node   0: [mem 0x0000000800b02000-0x0000000800bfffff]
+[    0.000000]   node   0: [mem 0x0000000800c00000-0x000000080b8fffff]
+[    0.000000]   node   0: [mem 0x000000080b900000-0x0000000839ffffff]
+[    0.000000]   node   0: [mem 0x000000083a000000-0x000000083a3fffff]
+[    0.000000]   node   0: [mem 0x000000083a400000-0x000000083aafffff]
+[    0.000000]   node   0: [mem 0x000000083b100000-0x000000083cefffff]
+[    0.000000]   node   0: [mem 0x0000000840000000-0x000000097fffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000080000000-0x000000097fffffff]
+[    0.000000] On node 0, zone DMA: 31744 pages in unavailable ranges
+[    0.000000] On node 0, zone Normal: 1536 pages in unavailable ranges
+[    0.000000] On node 0, zone Normal: 12544 pages in unavailable ranges
+[    0.000000] percpu: Embedded 35 pages/cpu s106200 r8192 d28968 u143360
+[    0.000000] pcpu-alloc: s106200 r8192 d28968 u143360 alloc=35*4096
+[    0.000000] pcpu-alloc: [0] 0 [0] 1 [0] 2 [0] 3 [0] 4 [0] 5 [0] 6 [0] 7 
+[    0.000000] Detected PIPT I-cache on CPU0
+[    0.000000] CPU features: detected: Address authentication (architected QARMA5 algorithm)
+[    0.000000] CPU features: detected: GICv3 CPU interface
+[    0.000000] CPU features: detected: Spectre-v4
+[    0.000000] CPU features: detected: ARM erratum 2077057
+[    0.000000] CPU features: detected: ARM erratum 2658417
+[    0.000000] CPU features: detected: ARM errata 2966298, 3117295
+[    0.000000] CPU features: detected: Broken AMU AMEVCNTR01 (const counter)
+[    0.000000] alternatives: applying boot alternatives
+[    0.000000] Kernel command line: pmos_boot_uuid=BOOT-PARTITION-UUID pmos_root_uuid=ROOT-PARTITION-UUID pmos_rootfsopts=defaults clk_ignore_unused pd_ignore_unused ignore_loglevel console=tty0 panic=0 log_buf_len=4M
+[    0.000000] Unknown kernel command line parameters "pmos_boot_uuid=BOOT-PARTITION-UUID pmos_root_uuid=ROOT-PARTITION-UUID pmos_rootfsopts=defaults", will be passed to user space.
+[    0.000000] printk: log buffer data + meta data: 4194304 + 14680064 = 18874368 bytes
+[    0.000000] printk: early log buf free: 119664(91%)
+[    0.000000] Dentry cache hash table entries: 1048576 (order: 11, 8388608 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 524288 (order: 10, 4194304 bytes, linear)
+[    0.000000] software IO TLB: area num 8.
+[    0.000000] software IO TLB: mapped [mem 0x00000000fa000000-0x00000000fe000000] (64MB)
+[    0.000000] Fallback order for Node 0: 0 
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 2051328
+[    0.000000] Policy zone: Normal
+[    0.000000] mem auto-init: stack:all(zero), heap alloc:off, heap free:off
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=8, Nodes=1
+[    0.000000] rcu: Preemptible hierarchical RCU implementation.
+[    0.000000] rcu: 	RCU event tracing is enabled.
+[    0.000000] rcu: 	RCU restricting CPUs from NR_CPUS=512 to nr_cpu_ids=8.
+[    0.000000] 	Trampoline variant of Tasks RCU enabled.
+[    0.000000] 	Tracing variant of Tasks RCU enabled.
+[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 25 jiffies.
+[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=8
+[    0.000000] RCU Tasks: Setting shift to 3 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=8.
+[    0.000000] NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
+[    0.000000] GICv3: 988 SPIs implemented
+[    0.000000] GICv3: 0 Extended SPIs implemented
+[    0.000000] Root IRQ handler: gic_handle_irq
+[    0.000000] GICv3: GICv3 features: 16 PPIs, DirectLPI
+[    0.000000] GICv3: GICD_CTLR.DS=1, SCR_EL3.FIQ=0
+[    0.000000] GICv3: Enabling SGIs without active state
+[    0.000000] GICv3: CPU0: found redistributor 0 region 0:0x0000000017180000
+[    0.000000] ITS [mem 0x17140000-0x1717ffff]
+[    0.000000] ITS@0x0000000017140000: Devices Table too large, reduce ids 32->19
+[    0.000000] ITS@0x0000000017140000: Devices too large, reduce ITS pages 1024->256
+[    0.000000] ITS@0x0000000017140000: allocated 131072 Devices @80f900000 (indirect, esz 8, psz 4K, shr 1)
+[    0.000000] ITS@0x0000000017140000: allocated 4096 Interrupt Collections @80f842000 (flat, esz 1, psz 4K, shr 1)
+[    0.000000] GICv3: using LPI property table @0x000000080f860000
+[    0.000000] GICv3: CPU0: using allocated LPI pending table @0x000000080f870000
+[    0.000000] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.000000] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
+[    0.000000] arch_timer: cp15 timer running at 19.20MHz (virt).
+[    0.000000] clocksource: arch_sys_counter: mask: 0xffffffffffffff max_cycles: 0x46d987e47, max_idle_ns: 440795202767 ns
+[    0.000000] sched_clock: 56 bits at 19MHz, resolution 52ns, wraps every 4398046511078ns
+[    0.000208] Console: colour dummy device 80x25
+[    0.000219] printk: legacy console [tty0] enabled
+[    0.001359] Calibrating delay loop (skipped), value calculated using timer frequency.. 38.40 BogoMIPS (lpj=76800)
+[    0.001380] pid_max: default: 32768 minimum: 301
+[    0.001801] LSM support for eBPF active
+[    0.001900] Mount-cache hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    0.001922] Mountpoint-cache hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    0.002166] VFS: Finished mounting rootfs on nullfs
+[    0.004063] rcu: Hierarchical SRCU implementation.
+[    0.004075] rcu: 	Max phase no-delay instances is 1000.
+[    0.004291] Timer migration: 1 hierarchy levels; 8 children per group; 1 crossnode level
+[    0.008301] EFI services will not be available.
+[    0.008654] smp: Bringing up secondary CPUs ...
+[    0.009617] Detected PIPT I-cache on CPU1
+[    0.009759] GICv3: CPU1: found redistributor 100 region 0:0x00000000171c0000
+[    0.009842] GICv3: CPU1: using allocated LPI pending table @0x000000080f880000
+[    0.009921] CPU1: Booted secondary processor 0x0000000100 [0x410fd462]
+[    0.011003] Detected PIPT I-cache on CPU2
+[    0.011141] GICv3: CPU2: found redistributor 200 region 0:0x0000000017200000
+[    0.011209] GICv3: CPU2: using allocated LPI pending table @0x000000080f890000
+[    0.011283] CPU2: Booted secondary processor 0x0000000200 [0x410fd462]
+[    0.012290] Detected PIPT I-cache on CPU3
+[    0.012426] GICv3: CPU3: found redistributor 300 region 0:0x0000000017240000
+[    0.012491] GICv3: CPU3: using allocated LPI pending table @0x000000080f8a0000
+[    0.012562] CPU3: Booted secondary processor 0x0000000300 [0x410fd462]
+[    0.015728] CPU features: detected: Spectre-BHB
+[    0.015732] CPU features: detected: ARM erratum 2067961 or 2054223
+[    0.015734] CPU features: detected: Broken broadcast TLBI completion
+[    0.015735] CPU features: detected: SSBS not fully self-synchronizing
+[    0.015741] Detected PIPT I-cache on CPU4
+[    0.015744] CPU features: SANITY CHECK: Unexpected variation in SYS_ID_AA64MMFR1_EL1. Boot CPU: 0x00000011212122, CPU4: 0x00000010212122
+[    0.015750] CPU features: Unsupported CPU feature variation detected.
+[    0.015783] GICv3: CPU4: found redistributor 400 region 0:0x0000000017280000
+[    0.015814] GICv3: CPU4: using allocated LPI pending table @0x000000080f8b0000
+[    0.015865] CPU4: Booted secondary processor 0x0000000400 [0x412fd470]
+[    0.016861] Detected PIPT I-cache on CPU5
+[    0.016867] CPU features: SANITY CHECK: Unexpected variation in SYS_ID_AA64MMFR1_EL1. Boot CPU: 0x00000011212122, CPU5: 0x00000010212122
+[    0.016910] GICv3: CPU5: found redistributor 500 region 0:0x00000000172c0000
+[    0.016944] GICv3: CPU5: using allocated LPI pending table @0x000000080f8c0000
+[    0.016997] CPU5: Booted secondary processor 0x0000000500 [0x412fd470]
+[    0.017992] Detected PIPT I-cache on CPU6
+[    0.017998] CPU features: SANITY CHECK: Unexpected variation in SYS_ID_AA64MMFR1_EL1. Boot CPU: 0x00000011212122, CPU6: 0x00000010212122
+[    0.018040] GICv3: CPU6: found redistributor 600 region 0:0x0000000017300000
+[    0.018073] GICv3: CPU6: using allocated LPI pending table @0x000000080f8d0000
+[    0.018127] CPU6: Booted secondary processor 0x0000000600 [0x412fd470]
+[    0.021305] Detected PIPT I-cache on CPU7
+[    0.021310] CPU features: SANITY CHECK: Unexpected variation in SYS_ID_AA64MMFR1_EL1. Boot CPU: 0x00000011212122, CPU7: 0x00000010212122
+[    0.021343] GICv3: CPU7: found redistributor 700 region 0:0x0000000017340000
+[    0.021379] GICv3: CPU7: using allocated LPI pending table @0x000000080f8e0000
+[    0.021430] CPU7: Booted secondary processor 0x0000000700 [0x412fd480]
+[    0.021486] smp: Brought up 1 node, 8 CPUs
+[    0.021737] SMP: Total of 8 processors activated.
+[    0.021746] CPU: All CPU(s) started at EL1
+[    0.021776] CPU features: detected: Branch Target Identification
+[    0.021787] CPU features: detected: ARMv8.4 Translation Table Level
+[    0.021797] CPU features: detected: Data cache clean to the PoU not required for I/D coherence
+[    0.021810] CPU features: detected: Common not Private translations
+[    0.021819] CPU features: detected: CRC32 instructions
+[    0.021828] CPU features: detected: Data independent timing control (DIT)
+[    0.021838] CPU features: detected: E0PD
+[    0.021846] CPU features: detected: Enhanced Virtualization Traps
+[    0.021857] CPU features: detected: Generic authentication (architected QARMA5 algorithm)
+[    0.021869] CPU features: detected: RCpc load-acquire (LDAPR)
+[    0.021879] CPU features: detected: LSE atomic instructions
+[    0.021889] CPU features: detected: Privileged Access Never
+[    0.021898] CPU features: detected: PMUv3
+[    0.021908] CPU features: detected: Speculation barrier (SB)
+[    0.021917] CPU features: detected: Stage-2 Force Write-Back
+[    0.021926] CPU features: detected: TLB range maintenance instructions
+[    0.021935] CPU features: detected: XNX
+[    0.021944] CPU features: detected: Speculative Store Bypassing Safe (SSBS)
+[    0.022019] alternatives: applying system-wide alternatives
+[    0.024860] CPU features: detected: Activity Monitors Unit (AMU) on CPU0-7
+[    0.024881] CPU features: detected: Hardware dirty bit management on CPU4-7
+[    0.025453] Memory: 6383480K/8205312K available (19840K kernel code, 6522K rwdata, 15624K rodata, 14336K init, 724K bss, 1780944K reserved, 32768K cma-reserved)
+[    0.026097] devtmpfs: initialized
+[    0.040098] posixtimers hash table entries: 4096 (order: 4, 65536 bytes, linear)
+[    0.040139] futex hash table entries: 2048 (131072 bytes on 1 NUMA nodes, total 128 KiB, linear).
+[    0.040324] 18432 pages in range for non-PLT usage
+[    0.040329] 509952 pages in range for PLT usage
+[    0.044234] DMI: not present or invalid.
+[    0.046571] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.047222] DMA: preallocated 1024 KiB GFP_KERNEL pool for atomic allocations
+[    0.047468] DMA: preallocated 1024 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.047501] audit: initializing netlink subsys (disabled)
+[    0.047604] audit: type=2000 audit(0.044:1): state=initialized audit_enabled=0 res=1
+[    0.050690] thermal_sys: Registered thermal governor 'step_wise'
+[    0.050696] thermal_sys: Registered thermal governor 'power_allocator'
+[    0.050771] cpuidle: using governor menu
+[    0.050961] hw-breakpoint: found 6 breakpoint and 4 watchpoint registers.
+[    0.051104] ASID allocator initialised with 65536 entries
+[    0.054096] Serial: AMBA PL011 UART driver
+[    0.056083] pstore: Using crash dump compression: deflate
+[    0.056098] printk: legacy console [ramoops-1] enabled
+[    0.057026] pstore: Registered ramoops as persistent store backend
+[    0.057041] ramoops: using 0x400000@0x83a000000, ecc: 0
+[    0.060345] /ete-7: Fixed dependency cycle(s) with /funnel-ete
+[    0.060413] /ete-6: Fixed dependency cycle(s) with /funnel-ete
+[    0.060465] /ete-5: Fixed dependency cycle(s) with /funnel-ete
+[    0.060511] /ete-4: Fixed dependency cycle(s) with /funnel-ete
+[    0.060557] /ete-3: Fixed dependency cycle(s) with /funnel-ete
+[    0.060603] /ete-2: Fixed dependency cycle(s) with /funnel-ete
+[    0.060653] /ete-1: Fixed dependency cycle(s) with /funnel-ete
+[    0.060700] /ete-0: Fixed dependency cycle(s) with /funnel-ete
+[    0.060749] /funnel-ete: Fixed dependency cycle(s) with /ete-7
+[    0.060794] /funnel-ete: Fixed dependency cycle(s) with /ete-6
+[    0.060835] /funnel-ete: Fixed dependency cycle(s) with /ete-5
+[    0.060879] /funnel-ete: Fixed dependency cycle(s) with /ete-4
+[    0.060924] /funnel-ete: Fixed dependency cycle(s) with /ete-3
+[    0.060971] /funnel-ete: Fixed dependency cycle(s) with /ete-2
+[    0.061015] /funnel-ete: Fixed dependency cycle(s) with /ete-1
+[    0.061057] /funnel-ete: Fixed dependency cycle(s) with /ete-0
+[    0.063291] CPUidle PSCI: Initialized CPU PM domain topology using OSI mode
+[    0.069405] /soc@0/clock-controller@100000: Fixed dependency cycle(s) with /soc@0/phy@1d87000
+[    0.069462] /soc@0/interconnect@16e0000: Fixed dependency cycle(s) with /soc@0/clock-controller@100000
+[    0.069862] /soc@0/stm@10002000: Fixed dependency cycle(s) with /soc@0/funnel@10041000
+[    0.069921] /soc@0/funnel@10041000: Fixed dependency cycle(s) with /soc@0/funnel@10045000
+[    0.069946] /soc@0/funnel@10041000: Fixed dependency cycle(s) with /soc@0/stm@10002000
+[    0.069997] /soc@0/funnel@10042000: Fixed dependency cycle(s) with /soc@0/funnel@10045000
+[    0.070048] /soc@0/funnel@10042000: Fixed dependency cycle(s) with /soc@0/funnel@10c2f000
+[    0.070075] /soc@0/funnel@10042000: Fixed dependency cycle(s) with /soc@0/funnel@13810000
+[    0.070123] /soc@0/funnel@10045000: Fixed dependency cycle(s) with /soc@0/funnel@10b04000
+[    0.070157] /soc@0/funnel@10045000: Fixed dependency cycle(s) with /soc@0/funnel@10042000
+[    0.070183] /soc@0/funnel@10045000: Fixed dependency cycle(s) with /soc@0/funnel@10041000
+[    0.070218] /soc@0/replicator@10046000: Fixed dependency cycle(s) with /soc@0/replicator@1004e000
+[    0.070267] /soc@0/replicator@10046000: Fixed dependency cycle(s) with /soc@0/replicator@10b06000
+[    0.070329] /soc@0/tmc@10048000: Fixed dependency cycle(s) with /soc@0/replicator@1004e000
+[    0.070359] /soc@0/replicator@1004e000: Fixed dependency cycle(s) with /soc@0/tmc@10048000
+[    0.070409] /soc@0/replicator@1004e000: Fixed dependency cycle(s) with /soc@0/replicator@10046000
+[    0.070448] /soc@0/funnel@10b04000: Fixed dependency cycle(s) with /soc@0/tmc@10b05000
+[    0.070486] /soc@0/funnel@10b04000: Fixed dependency cycle(s) with /soc@0/funnel@10045000
+[    0.070513] /soc@0/funnel@10b04000: Fixed dependency cycle(s) with /soc@0/tpda@10b08000
+[    0.070550] /soc@0/tmc@10b05000: Fixed dependency cycle(s) with /soc@0/replicator@10b06000
+[    0.070596] /soc@0/tmc@10b05000: Fixed dependency cycle(s) with /soc@0/funnel@10b04000
+[    0.070631] /soc@0/replicator@10b06000: Fixed dependency cycle(s) with /soc@0/replicator@10046000
+[    0.070677] /soc@0/replicator@10b06000: Fixed dependency cycle(s) with /soc@0/tmc@10b05000
+[    0.070734] /soc@0/tpda@10b08000: Fixed dependency cycle(s) with /soc@0/funnel@10b04000
+[    0.070758] /soc@0/tpda@10b08000: Fixed dependency cycle(s) with /soc@0/tpdm@10b0d000
+[    0.070780] /soc@0/tpda@10b08000: Fixed dependency cycle(s) with /soc@0/tpdm@10b09000
+[    0.070842] /soc@0/tpdm@10b09000: Fixed dependency cycle(s) with /soc@0/tpda@10b08000
+[    0.070899] /soc@0/tpdm@10b0d000: Fixed dependency cycle(s) with /soc@0/tpda@10b08000
+[    0.070956] /soc@0/tpdm@10c28000: Fixed dependency cycle(s) with /soc@0/tpda@10c2e000
+[    0.071014] /soc@0/tpdm@10c29000: Fixed dependency cycle(s) with /soc@0/tpda@10c2e000
+[    0.071074] /soc@0/tpda@10c2e000: Fixed dependency cycle(s) with /soc@0/funnel@10c2f000
+[    0.071098] /soc@0/tpda@10c2e000: Fixed dependency cycle(s) with /soc@0/tpdm@10c29000
+[    0.071120] /soc@0/tpda@10c2e000: Fixed dependency cycle(s) with /soc@0/tpdm@10c28000
+[    0.071177] /soc@0/funnel@10c2f000: Fixed dependency cycle(s) with /soc@0/funnel@10042000
+[    0.071203] /soc@0/funnel@10c2f000: Fixed dependency cycle(s) with /soc@0/tpda@10c2e000
+[    0.071261] /soc@0/funnel@13810000: Fixed dependency cycle(s) with /soc@0/funnel@10042000
+[    0.071284] /soc@0/funnel@13810000: Fixed dependency cycle(s) with /funnel-ete
+[    0.071364] /soc@0/interrupt-controller@17100000: Fixed dependency cycle(s) with /soc@0/interrupt-controller@17100000
+[    0.071541] /soc@0/ufshc@1d84000: Fixed dependency cycle(s) with /soc@0/interconnect@16e0000
+[    0.071572] /soc@0/ufshc@1d84000: Fixed dependency cycle(s) with /soc@0/clock-controller@100000
+[    0.071600] /soc@0/ufshc@1d84000: Fixed dependency cycle(s) with /soc@0/phy@1d87000
+[    0.071638] /soc@0/phy@1d87000: Fixed dependency cycle(s) with /soc@0/ufshc@1d84000
+[    0.071662] /soc@0/phy@1d87000: Fixed dependency cycle(s) with /soc@0/clock-controller@100000
+[    0.072129] /soc@0/clock-controller@100000: Fixed dependency cycle(s) with /soc@0/phy@1d87000
+[    0.073921] /soc@0/interconnect@16e0000: Fixed dependency cycle(s) with /soc@0/clock-controller@100000
+[    0.083989] /soc@0/stm@10002000: Fixed dependency cycle(s) with /soc@0/funnel@10041000
+[    0.084132] /soc@0/stm@10002000: Fixed dependency cycle(s) with /soc@0/funnel@10041000
+[    0.084203] /soc@0/funnel@10041000: Fixed dependency cycle(s) with /soc@0/funnel@10045000
+[    0.084226] /soc@0/funnel@10041000: Fixed dependency cycle(s) with /soc@0/stm@10002000
+[    0.084385] /soc@0/funnel@10042000: Fixed dependency cycle(s) with /soc@0/funnel@10045000
+[    0.084413] /soc@0/funnel@10042000: Fixed dependency cycle(s) with /soc@0/funnel@10c2f000
+[    0.084438] /soc@0/funnel@10042000: Fixed dependency cycle(s) with /soc@0/funnel@13810000
+[    0.084572] /soc@0/funnel@10042000: Fixed dependency cycle(s) with /soc@0/funnel@10045000
+[    0.084650] /soc@0/funnel@10041000: Fixed dependency cycle(s) with /soc@0/funnel@10045000
+[    0.084713] /soc@0/funnel@10045000: Fixed dependency cycle(s) with /soc@0/funnel@10b04000
+[    0.084745] /soc@0/funnel@10045000: Fixed dependency cycle(s) with /soc@0/funnel@10042000
+[    0.084797] /soc@0/funnel@10045000: Fixed dependency cycle(s) with /soc@0/funnel@10041000
+[    0.084957] /soc@0/replicator@10046000: Fixed dependency cycle(s) with /soc@0/replicator@1004e000
+[    0.085001] /soc@0/replicator@10046000: Fixed dependency cycle(s) with /soc@0/replicator@10b06000
+[    0.085134] /soc@0/tmc@10048000: Fixed dependency cycle(s) with /soc@0/replicator@1004e000
+[    0.085268] /soc@0/tmc@10048000: Fixed dependency cycle(s) with /soc@0/replicator@1004e000
+[    0.085328] /soc@0/replicator@10046000: Fixed dependency cycle(s) with /soc@0/replicator@1004e000
+[    0.085379] /soc@0/replicator@1004e000: Fixed dependency cycle(s) with /soc@0/tmc@10048000
+[    0.085447] /soc@0/replicator@1004e000: Fixed dependency cycle(s) with /soc@0/replicator@10046000
+[    0.085602] /soc@0/funnel@10045000: Fixed dependency cycle(s) with /soc@0/funnel@10b04000
+[    0.085661] /soc@0/funnel@10b04000: Fixed dependency cycle(s) with /soc@0/tmc@10b05000
+[    0.085697] /soc@0/funnel@10b04000: Fixed dependency cycle(s) with /soc@0/funnel@10045000
+[    0.085753] /soc@0/funnel@10b04000: Fixed dependency cycle(s) with /soc@0/tpda@10b08000
+[    0.085881] /soc@0/funnel@10b04000: Fixed dependency cycle(s) with /soc@0/tmc@10b05000
+[    0.085939] /soc@0/tmc@10b05000: Fixed dependency cycle(s) with /soc@0/replicator@10b06000
+[    0.085978] /soc@0/tmc@10b05000: Fixed dependency cycle(s) with /soc@0/funnel@10b04000
+[    0.086145] /soc@0/tmc@10b05000: Fixed dependency cycle(s) with /soc@0/replicator@10b06000
+[    0.086222] /soc@0/replicator@10046000: Fixed dependency cycle(s) with /soc@0/replicator@10b06000
+[    0.086278] /soc@0/replicator@10b06000: Fixed dependency cycle(s) with /soc@0/replicator@10046000
+[    0.086348] /soc@0/replicator@10b06000: Fixed dependency cycle(s) with /soc@0/tmc@10b05000
+[    0.086504] /soc@0/funnel@10b04000: Fixed dependency cycle(s) with /soc@0/tpda@10b08000
+[    0.086575] /soc@0/tpda@10b08000: Fixed dependency cycle(s) with /soc@0/funnel@10b04000
+[    0.086624] /soc@0/tpda@10b08000: Fixed dependency cycle(s) with /soc@0/tpdm@10b0d000
+[    0.086648] /soc@0/tpda@10b08000: Fixed dependency cycle(s) with /soc@0/tpdm@10b09000
+[    0.086760] /soc@0/tpda@10b08000: Fixed dependency cycle(s) with /soc@0/tpdm@10b09000
+[    0.086835] /soc@0/tpdm@10b09000: Fixed dependency cycle(s) with /soc@0/tpda@10b08000
+[    0.086972] /soc@0/tpda@10b08000: Fixed dependency cycle(s) with /soc@0/tpdm@10b0d000
+[    0.087043] /soc@0/tpdm@10b0d000: Fixed dependency cycle(s) with /soc@0/tpda@10b08000
+[    0.087208] /soc@0/tpdm@10c28000: Fixed dependency cycle(s) with /soc@0/tpda@10c2e000
+[    0.087344] /soc@0/tpdm@10c29000: Fixed dependency cycle(s) with /soc@0/tpda@10c2e000
+[    0.087646] /soc@0/tpdm@10c29000: Fixed dependency cycle(s) with /soc@0/tpda@10c2e000
+[    0.087722] /soc@0/tpdm@10c28000: Fixed dependency cycle(s) with /soc@0/tpda@10c2e000
+[    0.087787] /soc@0/tpda@10c2e000: Fixed dependency cycle(s) with /soc@0/funnel@10c2f000
+[    0.087812] /soc@0/tpda@10c2e000: Fixed dependency cycle(s) with /soc@0/tpdm@10c29000
+[    0.087865] /soc@0/tpda@10c2e000: Fixed dependency cycle(s) with /soc@0/tpdm@10c28000
+[    0.088034] /soc@0/tpda@10c2e000: Fixed dependency cycle(s) with /soc@0/funnel@10c2f000
+[    0.088091] /soc@0/funnel@10042000: Fixed dependency cycle(s) with /soc@0/funnel@10c2f000
+[    0.088162] /soc@0/funnel@10c2f000: Fixed dependency cycle(s) with /soc@0/funnel@10042000
+[    0.088215] /soc@0/funnel@10c2f000: Fixed dependency cycle(s) with /soc@0/tpda@10c2e000
+[    0.088359] /soc@0/funnel@10042000: Fixed dependency cycle(s) with /soc@0/funnel@13810000
+[    0.088433] /funnel-ete: Fixed dependency cycle(s) with /soc@0/funnel@13810000
+[    0.088498] /soc@0/funnel@13810000: Fixed dependency cycle(s) with /soc@0/funnel@10042000
+[    0.088555] /soc@0/funnel@13810000: Fixed dependency cycle(s) with /funnel-ete
+[    0.097905] /soc@0/rsc@17a00000/regulators-0: Fixed dependency cycle(s) with /soc@0/rsc@17a00000/regulators-0/smps12
+[    0.098267] /soc@0/rsc@17a00000/regulators-1: Fixed dependency cycle(s) with /soc@0/rsc@17a00000/regulators-1/bob
+[    0.099948] /soc@0/ufshc@1d84000: Fixed dependency cycle(s) with /soc@0/interconnect@16e0000
+[    0.100008] /soc@0/ufshc@1d84000: Fixed dependency cycle(s) with /soc@0/clock-controller@100000
+[    0.100063] /soc@0/ufshc@1d84000: Fixed dependency cycle(s) with /soc@0/phy@1d87000
+[    0.100515] /soc@0/ufshc@1d84000: Fixed dependency cycle(s) with /soc@0/phy@1d87000
+[    0.100588] /soc@0/clock-controller@100000: Fixed dependency cycle(s) with /soc@0/phy@1d87000
+[    0.100655] /soc@0/phy@1d87000: Fixed dependency cycle(s) with /soc@0/ufshc@1d84000
+[    0.100704] /soc@0/phy@1d87000: Fixed dependency cycle(s) with /soc@0/clock-controller@100000
+[    0.105248] HugeTLB: registered 1.00 GiB page size, pre-allocated 0 pages
+[    0.105265] HugeTLB: 0 KiB vmemmap can be freed for a 1.00 GiB page
+[    0.105280] HugeTLB: registered 32.0 MiB page size, pre-allocated 0 pages
+[    0.105293] HugeTLB: 0 KiB vmemmap can be freed for a 32.0 MiB page
+[    0.105307] HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+[    0.105319] HugeTLB: 0 KiB vmemmap can be freed for a 2.00 MiB page
+[    0.105332] HugeTLB: registered 64.0 KiB page size, pre-allocated 0 pages
+[    0.105345] HugeTLB: 0 KiB vmemmap can be freed for a 64.0 KiB page
+[    0.107157] ACPI: Interpreter disabled.
+[    0.113656] iommu: Default domain type: Translated
+[    0.113713] iommu: DMA domain TLB invalidation policy: strict mode
+[    0.117298] SCSI subsystem initialized
+[    0.117424] libata version 3.00 loaded.
+[    0.117653] usbcore: registered new interface driver usbfs
+[    0.117696] usbcore: registered new interface driver hub
+[    0.117727] usbcore: registered new device driver usb
+[    0.118932] pps_core: LinuxPPS API ver. 1 registered
+[    0.118947] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.118970] PTP clock support registered
+[    0.119148] EDAC MC: Ver: 3.0.0
+[    0.119591] scmi_core: SCMI protocol bus registered
+[    0.120849] FPGA manager framework
+[    0.121651] vgaarb: loaded
+[    0.121995] clocksource: Switched to clocksource arch_sys_counter
+[    0.122304] VFS: Disk quotas dquot_6.6.0
+[    0.122329] VFS: Dquot-cache hash table entries: 512 (4096 bytes)
+[    0.122562] pnp: PnP ACPI: disabled
+[    0.126607] NET: Registered PF_INET protocol family
+[    0.126737] IP idents hash table entries: 131072 (order: 8, 1048576 bytes, linear)
+[    0.129681] tcp_listen_portaddr_hash hash table entries: 4096 (order: 4, 65536 bytes, linear)
+[    0.129734] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.129755] TCP established hash table entries: 65536 (order: 7, 524288 bytes, linear)
+[    0.130020] TCP bind hash table entries: 65536 (order: 9, 2097152 bytes, linear)
+[    0.130713] TCP: Hash tables configured (established 65536 bind 65536)
+[    0.130787] UDP hash table entries: 4096 (order: 6, 262144 bytes, linear)
+[    0.130997] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.131289] RPC: Registered named UNIX socket transport module.
+[    0.131305] RPC: Registered udp transport module.
+[    0.131316] RPC: Registered tcp transport module.
+[    0.131326] RPC: Registered tcp-with-tls transport module.
+[    0.131337] RPC: Registered tcp NFSv4.1 backchannel transport module.
+[    0.131353] PCI: CLS 0 bytes, default 64
+[    0.131549] Unpacking initramfs...
+[    0.146024] kvm [1]: HYP mode not available
+[    0.146509] Initialise system trusted keyrings
+[    0.146625] workingset: timestamp_bits=42 (anon: 37) max_order=21 bucket_order=0 (anon: 0)
+[    0.146748] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    0.146866] NFS: Registering the id_resolver key type
+[    0.146876] Key type id_resolver registered
+[    0.146879] Key type id_legacy registered
+[    0.146887] nfs4filelayout_init: NFSv4 File Layout Driver Registering...
+[    0.146891] nfs4flexfilelayout_init: NFSv4 Flexfile Layout Driver Registering...
+[    0.147039] Key type asymmetric registered
+[    0.147043] Asymmetric key parser 'x509' registered
+[    0.147064] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 242)
+[    0.147069] io scheduler mq-deadline registered
+[    0.147073] io scheduler kyber registered
+[    0.147089] io scheduler bfq registered
+[    0.159221] ledtrig-cpu: registered to indicate activity on CPUs
+[    0.171139] Freeing initrd memory: 9340K
+[    0.174279] bob: Setting 3032000-3960000uV
+[    0.174570] ldo1: Setting 1800000-1800000uV
+[    0.176443] Serial: 8250/16550 driver, 4 ports, IRQ sharing enabled
+[    0.177631] msm_serial: driver initialized
+[    0.177828] SuperH (H)SCI(F) driver initialized
+[    0.177915] STM32 USART driver initialized
+[    0.179508] [drm] Initialized simpledrm 1.0.0 for b8000000.framebuffer on minor 0
+[    0.192411] Console: switching to colour frame buffer device 135x146
+[    0.196443] simple-framebuffer b8000000.framebuffer: [drm] fb0: simpledrmdrmfb frame buffer device
+[    0.201790] loop: module loaded
+[    0.202382] megasas: 07.734.00.00-rc1
+[    0.203950] spmi_pmic_arb c400000.spmi: PMIC arbiter version v7 (0x70000000)
+[    0.212919] tun: Universal TUN/TAP device driver, 1.6
+[    0.213242] VFIO - User Level meta-driver version: 0.3
+[    0.214818] usbcore: registered new interface driver usb-storage
+[    0.225968] i2c_dev: i2c /dev entries driver
+[    0.227581] input: pmic_pwrkey as /devices/platform/soc@0/c400000.spmi/spmi-0/0-00/c400000.spmi:pmic@0:pon@1300/c400000.spmi:pmic@0:pon@1300:pwrkey/input/input0
+[    0.228212] input: pmic_resin as /devices/platform/soc@0/c400000.spmi/spmi-0/0-00/c400000.spmi:pmic@0:pon@1300/c400000.spmi:pmic@0:pon@1300:resin/input/input1
+[    0.236968] clocksource: arch_mmio_counter: mask: 0xffffffffffffff max_cycles: 0x46d987e47, max_idle_ns: 440795202767 ns
+[    0.237041] arch-timer-mmio 17420000.timer: mmio timer running at 19.20MHz (virt)
+[    0.237231] usbcore: registered new interface driver usbhid
+[    0.237273] usbhid: USB HID core driver
+[    0.240506] hw perfevents: enabled with armv8_pmuv3 PMU driver, 7 (0,8000003f) counters available
+[    0.243326] NET: Registered PF_INET6 protocol family
+[    0.243677] Segment Routing with IPv6
+[    0.243722] In-situ OAM (IOAM) with IPv6
+[    0.243765] NET: Registered PF_PACKET protocol family
+[    0.243823] Key type dns_resolver registered
+[    0.248913] registered taskstats version 1
+[    0.249039] Loading compiled-in X.509 certificates
+[    0.251131] Demotion targets for Node 0: null
+[    0.301470] qcom_scm: convention: smc arm 64
+[    0.303664] qcom_scm firmware:scm: qseecom: found qseecom with version 0x1402000
+[    0.303712] qcom_scm firmware:scm: qseecom: untested machine, skipping
+[    0.319437] qcom-ice 1d88000.crypto: Found QC Inline Crypto Engine (ICE) v3.2.1
+[    0.319582] qcom-ice 1d88000.crypto: QC Hardware Key Manager (HWKM) version v2
+[    0.319789] qcom-ice 1d88000.crypto: A supported HWKM is not present. Supporting raw keys only.
+[    0.322657] smps12: Setting 1224000-1400000uV
+[    0.322871] ldo6: Setting 1200000-1200000uV
+[    0.323102] ldo7: Setting 2504000-2504000uV
+[    0.323263] arm-smmu 3da0000.iommu: probing hardware configuration...
+[    0.323468] arm-smmu 3da0000.iommu: SMMUv2 with:
+[    0.323603] arm-smmu 3da0000.iommu: 	stage 1 translation
+[    0.323718] arm-smmu 3da0000.iommu: 	coherent table walk
+[    0.323834] arm-smmu 3da0000.iommu: 	stream matching with 24 register groups
+[    0.323987] arm-smmu 3da0000.iommu: 	22 context banks (0 stage-2 only)
+[    0.324132] arm-smmu 3da0000.iommu: 	Supported page sizes: 0x61311000
+[    0.324260] arm-smmu 3da0000.iommu: 	Stage-1: 48-bit VA -> 36-bit IPA
+[    0.324373] ldo9: Setting 1200000-1200000uV
+[    0.324448] arm-smmu 3da0000.iommu: 	preserved 0 boot mappings
+[    0.324663] ldo2: Setting 3072000-3072000uV
+[    0.324807] ldo5: Setting 880000-888000uV
+[    0.325770] platform 3d6a000.gmu: Adding to iommu group 0
+[    0.330795] arm-smmu 15000000.iommu: probing hardware configuration...
+[    0.330937] arm-smmu 15000000.iommu: SMMUv2 with:
+[    0.331148] arm-smmu 15000000.iommu: 	stage 1 translation
+[    0.331260] arm-smmu 15000000.iommu: 	coherent table walk
+[    0.331373] arm-smmu 15000000.iommu: 	stream matching with 113 register groups
+[    0.331511] arm-smmu 15000000.iommu: 	75 context banks (0 stage-2 only)
+[    0.331971] arm-smmu 15000000.iommu: 	Supported page sizes: 0x61311000
+[    0.332004] arm-smmu 15000000.iommu: 	Stage-1: 36-bit VA -> 36-bit IPA
+[    0.332068] arm-smmu 15000000.iommu: 	preserved 0 boot mappings
+[    0.333058] platform 1d84000.ufshc: Adding to iommu group 1
+[    0.333219] platform 1dc4000.dma-controller: Adding to iommu group 2
+[    0.333356] platform 1dfa000.crypto: Adding to iommu group 2
+[    0.333466] platform a600000.usb: Adding to iommu group 3
+[    0.333975] amba 10048000.tmc: Adding to iommu group 4
+[    0.339266] ufshcd-qcom 1d84000.ufshc: ufshcd_populate_vreg: Unable to find vccq2-supply regulator, assuming enabled
+[    0.393506] ufshcd-qcom 1d84000.ufshc: ufshcd_populate_vreg: Unable to find vccq2-supply regulator, assuming enabled
+[    0.408285] scsi host0: ufshcd
+[    0.466438] scsi 0:0:0:49488: Well-known LUN    MICRON   MT128GAXAT2U31   0006 PQ: 0 ANSI: 6
+[    0.475220] scsi 0:0:0:49476: Well-known LUN    MICRON   MT128GAXAT2U31   0006 PQ: 0 ANSI: 6
+[    0.477516] scsi 0:0:0:49456: Well-known LUN    MICRON   MT128GAXAT2U31   0006 PQ: 0 ANSI: 6
+[    0.480208] scsi 0:0:0:0: Direct-Access     MICRON   MT128GAXAT2U31   0006 PQ: 0 ANSI: 6
+[    0.482546] sd 0:0:0:0: [sda] 31065088 4096-byte logical blocks: (127 GB/119 GiB)
+[    0.482607] scsi 0:0:0:1: Direct-Access     MICRON   MT128GAXAT2U31   0006 PQ: 0 ANSI: 6
+[    0.482863] sd 0:0:0:0: [sda] Write Protect is off
+[    0.482898] sd 0:0:0:0: [sda] Mode Sense: 00 32 00 10
+[    0.483211] sd 0:0:0:0: [sda] Write cache: enabled, read cache: enabled, supports DPO and FUA
+[    0.483414] sd 0:0:0:0: [sda] Preferred minimum I/O size 4096 bytes
+[    0.483448] sd 0:0:0:0: [sda] Optimal transfer size 524288 bytes
+[    0.485157] sd 0:0:0:1: [sdb] 2048 4096-byte logical blocks: (8.39 MB/8.00 MiB)
+[    0.485318] sd 0:0:0:1: [sdb] Write Protect is on
+[    0.485337] sd 0:0:0:1: [sdb] Mode Sense: 00 32 00 90
+[    0.485589] sd 0:0:0:1: [sdb] Write cache: disabled, read cache: enabled, supports DPO and FUA
+[    0.485881] sd 0:0:0:1: [sdb] Preferred minimum I/O size 4096 bytes
+[    0.485899] sd 0:0:0:1: [sdb] Optimal transfer size 524288 bytes
+[    0.485933] scsi 0:0:0:2: Direct-Access     MICRON   MT128GAXAT2U31   0006 PQ: 0 ANSI: 6
+[    0.488287] sd 0:0:0:2: [sdc] 2048 4096-byte logical blocks: (8.39 MB/8.00 MiB)
+[    0.488443] sd 0:0:0:2: [sdc] Write Protect is on
+[    0.488472] sd 0:0:0:2: [sdc] Mode Sense: 00 32 00 90
+[    0.488733] sd 0:0:0:2: [sdc] Write cache: disabled, read cache: enabled, supports DPO and FUA
+[    0.489031] sd 0:0:0:2: [sdc] Preferred minimum I/O size 4096 bytes
+[    0.489065] sd 0:0:0:2: [sdc] Optimal transfer size 524288 bytes
+[    0.489072] scsi 0:0:0:3: Direct-Access     MICRON   MT128GAXAT2U31   0006 PQ: 0 ANSI: 6
+[    0.491601] scsi 0:0:0:4: Direct-Access     MICRON   MT128GAXAT2U31   0006 PQ: 0 ANSI: 6
+[    0.493222] sd 0:0:0:3: [sdd] 1024 4096-byte logical blocks: (4.19 MB/4.00 MiB)
+[    0.494006] sd 0:0:0:3: [sdd] Write Protect is off
+[    0.494032] sd 0:0:0:3: [sdd] Mode Sense: 00 32 00 10
+[    0.494390] scsi 0:0:0:5: Direct-Access     MICRON   MT128GAXAT2U31   0006 PQ: 0 ANSI: 6
+[    0.494853] sd 0:0:0:3: [sdd] Write cache: enabled, read cache: enabled, supports DPO and FUA
+[    0.495015] sd 0:0:0:4: [sde] 163840 4096-byte logical blocks: (671 MB/640 MiB)
+[    0.495243] sd 0:0:0:4: [sde] Write Protect is on
+[    0.495272] sd 0:0:0:4: [sde] Mode Sense: 00 32 00 90
+[    0.495447] sd 0:0:0:3: [sdd] Preferred minimum I/O size 4096 bytes
+[    0.495467] sd 0:0:0:3: [sdd] Optimal transfer size 524288 bytes
+[    0.496097] sd 0:0:0:4: [sde] Write cache: disabled, read cache: enabled, supports DPO and FUA
+[    0.496249] sd 0:0:0:4: [sde] Preferred minimum I/O size 4096 bytes
+[    0.496265] sd 0:0:0:4: [sde] Optimal transfer size 524288 bytes
+[    0.496887] sd 0:0:0:5: [sdf] 4096 4096-byte logical blocks: (16.8 MB/16.0 MiB)
+[    0.497096] sd 0:0:0:5: [sdf] Write Protect is on
+[    0.497125] sd 0:0:0:5: [sdf] Mode Sense: 00 32 00 90
+[    0.497396] sd 0:0:0:5: [sdf] Write cache: disabled, read cache: enabled, supports DPO and FUA
+[    0.497585] sd 0:0:0:5: [sdf] Preferred minimum I/O size 4096 bytes
+[    0.497618] sd 0:0:0:5: [sdf] Optimal transfer size 524288 bytes
+[    0.511541]  sda: sda1 sda2 sda3 sda4 sda5 sda6 sda7 sda8 sda9 sda10 sda11 sda12 sda13 sda14 sda15 sda16 sda17 sda18 sda19 sda20 sda21 sda22 sda23 sda24 sda25 sda26 sda27 sda28 sda29 sda30 sda31 sda32 sda33 sda34 sda35 sda36 sda37 sda38 sda39 sda40
+[    0.514337] sd 0:0:0:0: [sda] Attached SCSI disk
+[    0.522883]  sdc: sdc1 sdc2 sdc3
+[    0.522926]  sdb: sdb1 sdb2 sdb3 sdb4
+[    0.522934]  sdd: sdd1 sdd2 sdd3
+[    0.524281] sd 0:0:0:1: [sdb] Attached SCSI disk
+[    0.524311] sd 0:0:0:3: [sdd] Attached SCSI disk
+[    0.524324] sd 0:0:0:2: [sdc] Attached SCSI disk
+[    0.525024]  sde: sde1 sde2 sde3 sde4 sde5 sde6 sde7 sde8 sde9 sde10 sde11 sde12 sde13 sde14 sde15 sde16 sde17 sde18 sde19 sde20 sde21 sde22 sde23 sde24 sde25 sde26 sde27 sde28 sde29 sde30 sde31 sde32 sde33 sde34 sde35 sde36 sde37 sde38 sde39 sde40 sde41 sde42 sde43 sde44 sde45 sde46
+[    0.532828]  sdf: sdf1 sdf2
+[    0.537490] sd 0:0:0:4: [sde] Attached SCSI disk
+[    0.538154] sd 0:0:0:5: [sdf] Attached SCSI disk
+[    0.583952] clk: Not disabling unused clocks
+[    0.586048] PM: genpd: Not disabling unused power domains
+[    0.591573] Freeing unused kernel memory: 14336K
+[    0.594272] Run /init as init process
+[    0.596163]   with arguments:
+[    0.598035]     /init
+[    0.599935]   with environment:
+[    0.601947]     HOME=/
+[    0.603862]     TERM=linux
+[    0.605917]     pmos_boot_uuid=BOOT-PARTITION-UUID
+[    0.608078]     pmos_root_uuid=ROOT-PARTITION-UUID
+[    0.610435]     pmos_rootfsopts=defaults
+[    0.659124] syslogd started: BusyBox v1.38.0
+[    0.666166] [pmOS-rd]:   ❬❬ PMOS STAGE 1 ❭❭
+[    0.669205] [pmOS-rd]: initramfs version: 3.12.5-r0
+[    0.671926] [pmOS-rd]:   ❬❬ PMOS STAGE 2 ❭❭
+[    0.673927] udevd[150]: starting version 3.2.14
+[    1.462029] random: crng init done
+[    1.467123] udevd[152]: starting eudev-3.2.14
+[    1.766118] [pmOS-rd]:   Setting up USB gadget through configfs
+[    1.780979] configfs-gadget.g1 gadget.0: HOST MAC c6:cb:9d:1c:7e:4e
+[    1.786511] configfs-gadget.g1 gadget.0: MAC 66:5e:a0:16:c1:d0
+[    1.857104] [pmOS-rd]: Trying to start server with parameters: Server IP addr: 172.16.42.1:67, client IP addr: 172.16.42.2, interface: usb0
+[    2.867379] [pmOS-rd]: Trying to mount subpartitions for 10 seconds...
+[    3.362771] [pmOS-rd]: Mount subpartitions of /dev/sda40
+[    3.364687] loop0: detected capacity change from 0 to 218292152
+[    3.370422] GPT:Primary header thinks Alt. header is not at the end of the disk.
+[    3.373095] GPT:258047 != 27286518
+[    3.375564] GPT:Alternate GPT header not at the end of the disk.
+[    3.377844] GPT:258047 != 27286518
+[    3.380384] GPT: Use GNU Parted to correct GPT errors.
+[    3.382640]  loop0: p1 p2
+[    5.293874] [pmOS-rd]: Warning: Not all of the space available to /dev/loop0 appears to be used, you can fix the GPT to use all of the space (an extra 27028471 blocks) or continue with the current setting? 
+[    5.303705] [pmOS-rd]: Resize root partition (/dev/loop0p2)
+[    5.320819] [pmOS-rd]: Warning: Not all of the space available to /dev/loop0 appears to be used, you can fix the GPT to use all of the space (an extra 27028471 blocks) or continue with the current setting? 
+[    5.326073] [pmOS-rd]: Fixing, due to --fix
+[    5.409404] [pmOS-rd]: Auto-repair and check 'ext' filesystem (/dev/loop0p2)
+[    5.414808] [pmOS-rd]: pmOS_root: clean, 5744/66480 files, 47747/132864 blocks
+[    5.440979] [pmOS-rd]: Resize 'ext4' root filesystem (/dev/loop0p2)
+[    5.446507] [pmOS-rd]: modprobe: FATAL: Module ext4 not found in directory /lib/modules/7.2.11-dirty
+[    5.450538] [pmOS-rd]: resize2fs 1.47.4 (6-Mar-2025)
+[    5.454416] [pmOS-rd]: Resizing the filesystem on /dev/loop0p2 to 27161586 (4k) blocks.
+[    5.670149] [pmOS-rd]: The filesystem on /dev/loop0p2 is now 27161586 (4k) blocks long.
+[    5.674078] [pmOS-rd]: Mount root partition (/dev/loop0p2) to /sysroot (read-write) with options defaults
+[    5.691314] [pmOS-rd]: modprobe: FATAL: Module ext4 not found in directory /lib/modules/7.2.11-dirty
+[    5.759948] EXT4-fs (loop0p2): mounted filesystem ROOT-PARTITION-UUID r/w with ordered data mode. Quota mode: none.
+[    5.814304] [pmOS-rd]: Switching root
+[    5.822128] syslogd exiting
+[    6.391209] udevd[720]: starting version 3.2.14
+[    6.408920] udevd[720]: starting eudev-3.2.14
+[    6.538035] EXT4-fs (loop0p2): re-mounted ROOT-PARTITION-UUID.
+[    6.563264] EXT4-fs (loop0p1): mounting ext2 file system using the ext4 subsystem
+[    6.569028] EXT4-fs (loop0p1): mounted filesystem BOOT-PARTITION-UUID r/w without journal. Quota mode: none.
+[   12.003917] gcc-sm8450 100000.clock-controller: sync_state() pending due to 3d6a000.gmu
+[   12.005860] sm8450-gpucc 3d90000.clock-controller: sync_state() pending due to 3d6a000.gmu
+[   12.007700] gcc-sm8450 100000.clock-controller: sync_state() pending due to af00000.clock-controller
+[   12.009258] qcom-rpmhpd 17a00000.rsc:power-controller: sync_state() pending due to af00000.clock-controller
+[   12.010843] qnoc-sm8450 interconnect-1: sync_state() pending due to 1dfa000.crypto
+[   12.012616] qnoc-sm8450 1700000.interconnect: sync_state() pending due to 1dfa000.crypto

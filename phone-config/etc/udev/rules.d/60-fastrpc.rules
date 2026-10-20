@@ -1,0 +1,6 @@
+# S22: overrides /usr/lib/udev/rules.d/60-fastrpc.rules (systemd/setfacl based)
+SUBSYSTEM=="dma_heap", KERNEL=="system", GROUP="fastrpc", MODE="0660"
+# Normal channels for apps (unsigned PD), as on Android
+SUBSYSTEM=="misc", KERNEL=="fastrpc-adsp|fastrpc-cdsp|fastrpc-sdsp", GROUP="fastrpc", MODE="0660"
+# Secure channels stay root-only: libcdsprpc prefers them, and unsigned sessions fail on them
+SUBSYSTEM=="misc", KERNEL=="fastrpc-*-secure", OWNER="root", GROUP="root", MODE="0600"

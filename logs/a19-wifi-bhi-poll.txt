@@ -1,0 +1,55 @@
+[  128.621524] ath11k_pci 0000:01:00.0: MSI vectors: 32
+[  128.621621] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[  128.781273] mhi mhi0: BHIe programming for RDDM
+[  128.781299] mhi mhi0: Address: 00000000045a1dfb and len: 0x90 sequence: 469431906
+[  128.781316] mhi mhi0: Requested to power ON
+[  128.781330] mhi mhi0: Attempting power on with EE: PRIMARY BOOTLOADER, state: RESET
+[  128.781351] mhi mhi0: Power on setup success
+[  128.804730] mhi mhi0: Starting image download via BHI. Session ID: 221299517
+[  128.875539] mhi mhi0: r0q BHI poll: ret 1 status 2 after 40 ms
+[  128.878245] mhi mhi0: Device in READY State
+[  128.878264] mhi mhi0: Initializing MHI registers
+[  128.878290] mhi mhi0: Wait for device to enter SBL or Mission mode
+[  130.921694] CPU: 0 UID: 0 PID: 0 Comm: swapper/0 Tainted: G S         O        7.2.11-dirty #16 PREEMPT 
+[  150.500496] mhi mhi0: Processing disable transition with PM state: Linkdown or Error Fatal Detect
+[  150.500608] mhi mhi0: Waiting for all pending event ring processing to complete
+[  150.500685] mhi mhi0: Waiting for all pending threads to complete
+[  150.500734] mhi mhi0: Reset all active channels and remove MHI devices
+[  150.500797] mhi mhi0: Resetting EV CTXT and CMD CTXT
+[  150.500847] mhi mhi0: Exiting with PM state: DISABLE, MHI state: RESET
+[  150.501021] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[  150.501098] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[  150.501146] ath11k_pci 0000:01:00.0: failed to power up :-110
+[  150.524802] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[  150.524819] ath11k_pci 0000:01:00.0: failed to init core: -110
+[  150.763024] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110
+[  128.781316] mhi mhi0: Requested to power ON
+[  128.781330] mhi mhi0: Attempting power on with EE: PRIMARY BOOTLOADER, state: RESET
+[  128.781351] mhi mhi0: Power on setup success
+[  128.804730] mhi mhi0: Starting image download via BHI. Session ID: 221299517
+[  128.875539] mhi mhi0: r0q BHI poll: ret 1 status 2 after 40 ms
+[  128.878245] mhi mhi0: Device in READY State
+[  128.878264] mhi mhi0: Initializing MHI registers
+[  128.878290] mhi mhi0: Wait for device to enter SBL or Mission mode
+[  130.921609] irq 175: nobody cared (try booting with the "irqpoll" option)
+[  130.921694] CPU: 0 UID: 0 PID: 0 Comm: swapper/0 Tainted: G S         O        7.2.11-dirty #16 PREEMPT 
+[  130.921736] Tainted: [S]=CPU_OUT_OF_SPEC, [O]=OOT_MODULE
+[  130.921748] Hardware name: Samsung Galaxy S22 5G (DT)
+[  130.921760] Call trace:
+[  130.921770]  show_stack+0x18/0x24 (C)
+[  130.921811]  dump_stack_lvl+0x74/0x8c
+[  130.921844]  dump_stack+0x18/0x24
+[  130.921871]  __report_bad_irq+0x38/0xe4
+[  130.921910]  note_interrupt+0x2fc/0x340
+[  130.921948]  handle_irq_event+0x9c/0xfc
+[  130.921981]  handle_level_irq+0xd8/0x168
+[  130.922022]  handle_irq_desc+0x40/0x58
+[  130.922053]  generic_handle_irq+0x20/0x2c
+[  130.922086]  periph_interrupt+0xe0/0x1a0
+[  130.922125]  pmic_arb_chained_irq+0x1a4/0x310
+[  130.922168]  handle_irq_desc+0x40/0x58
+[  130.922200]  generic_handle_domain_irq+0x18/0x24
+[  130.922233]  gic_handle_irq+0x4c/0x110
+[  130.922260]  call_on_irq_stack+0x30/0x48
+[  130.922292]  do_interrupt_handler+0x80/0x84
+[  130.922328]  el1_interrupt+0x3c/0x60

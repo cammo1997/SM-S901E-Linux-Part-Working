@@ -1,0 +1,8 @@
+ 10:00:56 up 0 min,  0 users,  load average: 1.16, 0.36, 0.12
+[    9.632545] msm_dsi ae94000.dsi: supply refgen not found, using dummy regulator
+[    9.954412] panel_samsung_s6e3fac: loading out-of-tree module taints kernel.
+[    9.960286] msm_dpu ae01000.display-controller: bound ae94000.dsi (ops dsi_ops [msm])
+[   10.193697] panel-samsung-s6e3fac ae94000.dsi.0: after init: power mode 0x99 (ret 0), id 81 00 65 (ret 1 1 1)
+[   10.196901] panel-samsung-s6e3fac ae94000.dsi.0: after display on: power mode 0x9d (ret 0), id 81 00 65 (ret 1 1 1)
+1023
+2

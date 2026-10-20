@@ -1,0 +1,47 @@
+diff --git a/mipi.py b/mipi.py
+index d713061..3d3c2cb 100644
+--- a/mipi.py
++++ b/mipi.py
+@@ -218,6 +218,14 @@ def _generate_ignore(t: Transaction, payload: bytes, options: Options) -> str:
+ 	return f"\t// WARNING: Ignoring weird {t.name}"
+ 
+ 
++def _generate_pps(t: Transaction, payload: bytes, options: Options) -> str:
++	# S22 port: the downstream on-sequence embeds the DSC PPS. In mainline the panel driver builds it from
++	# its struct drm_dsc_config and sends it with mipi_dsi_picture_parameter_set().
++	return ("\t// Downstream sent a %d-byte DSC PPS here; mainline sends it from drm_dsc_config:\n"
++		"\tdrm_dsc_pps_payload_pack(&pps, &ctx->dsc);\n"
++		"\tmipi_dsi_picture_parameter_set_multi(&dsi_ctx, &pps);") % len(payload)
++
++
+ def _generate_fallback(t: Transaction, payload: bytes, options: Options) -> str:
+ 	raise ValueError(t.name + ' is not supported')
+ 
+@@ -259,7 +267,7 @@ class Transaction(Enum):
+ 	GENERIC_LONG_WRITE = 0x29, -1, _generate_generic_write
+ 	DCS_LONG_WRITE = 0x39, -1, _generate_dcs_write
+ 
+-	PICTURE_PARAMETER_SET = 0x0a,
++	PICTURE_PARAMETER_SET = 0x0a, -1, _generate_pps
+ 	COMPRESSED_PIXEL_STREAM = 0x0b,
+ 
+ 	LOOSELY_PACKED_PIXEL_STREAM_YCBCR20 = 0x0c,
+diff --git a/panel.py b/panel.py
+index 7b9c43b..c1e803b 100644
+--- a/panel.py
++++ b/panel.py
+@@ -243,6 +243,14 @@ def _find_mode_node(fdt: Fdt2, node: int) -> int:
+ 		return node
+ 
+ 	mode_node = None
++	# S22 port: allow choosing a timing by name, e.g. LMDPDG_TIMING=fhd60hs
++	import os
++	want = os.environ.get("LMDPDG_TIMING")
++	if want:
++		for timing in fdt.subnodes(timings_node):
++			if fdt.get_name(timing) == want:
++				return timing
++		raise ValueError("timing %s not found" % want)
+ 	for timing in fdt.subnodes(timings_node):
+ 		if mode_node:
+ 			print("WARNING: Multiple display timings are not supported yet, using first!")

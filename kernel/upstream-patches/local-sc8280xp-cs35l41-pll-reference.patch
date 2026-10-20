@@ -1,0 +1,21 @@
+--- a/sound/soc/qcom/sc8280xp.c
++++ b/sound/soc/qcom/sc8280xp.c
+@@ -159,6 +159,18 @@
+ 			if (ret && ret != -ENOTSUPP)
+ 				return dev_err_probe(rtd->dev, ret,
+ 						     "failed to set codec sysclk\n");
++
++			/*
++			 * Some amps (CS35L41) take their PLL reference from the
++			 * component sysclk, not the DAI one: hand them the bit clock
++			 * (clock id 0 = SCLK on CS35L41) so the PLL can lock.
++			 */
++			ret = snd_soc_component_set_sysclk(codec_dai->component, 0, 0,
++							   MI2S_BCLK_RATE,
++							   SND_SOC_CLOCK_IN);
++			if (ret && ret != -ENOTSUPP)
++				return dev_err_probe(rtd->dev, ret,
++						     "failed to set codec PLL reference\n");
+ 		}
+ 	}
+ 

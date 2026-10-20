@@ -1,0 +1,12 @@
+0000:00:00.0
+[ 1678.794692] pcieport 0000:00:00.0: AER: Multiple Correctable error message received from 0000:00:00.0
+[ 1678.794732] pcieport 0000:00:00.0: PCIe Bus Error: severity=Correctable, type=Physical Layer, (Receiver ID)
+[ 1678.794750] pcieport 0000:00:00.0:   device [17cb:0110] error status/mask=00000001/0000e000
+[ 1678.794767] pcieport 0000:00:00.0:    [ 0] RxErr                  (First)
+1c00000.pcie
+module
+uevent
+tee: /sys/bus/platform/drivers/qcom-pcie/unbind: Permission denied
+tee: /sys/bus/platform/drivers/qcom-pcie/bind: Permission denied
+0000:00:00.0
+6

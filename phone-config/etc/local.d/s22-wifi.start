@@ -1,0 +1,9 @@
+#!/bin/sh
+# S22: load Wi-Fi late - ath11k cold boot calibration times out at early boot but works ~20 s later
+(
+	sleep 20
+	modprobe ath11k_pci
+	sleep 25
+	[ -e /sys/class/net/wlan0 ] && iw reg set AU
+	echo "$(date) wlan0: $([ -e /sys/class/net/wlan0 ] && echo up || echo missing)" >> /var/log/s22-wifi.log
+) &

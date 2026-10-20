@@ -1,0 +1,27 @@
+l0s_aspm
+l1_1_aspm
+l1_1_pcipm
+l1_2_aspm
+l1_2_pcipm
+l1_aspm
+l1_2_aspm=0
+l1_1_aspm=0
+l1_2_pcipm=0
+l1_1_pcipm=0
+l0s_aspm=0
+l1_aspm=0
+		LnkCtl:	ASPM Disabled; RCB 128 bytes, LnkDisable- CommClk+
+		L1SubCtl1: PCI-PM_L1.2- PCI-PM_L1.1- ASPM_L1.2- ASPM_L1.1-
+[  688.878493] ath11k_pci 0000:01:00.0: BAR 0 [mem 0x60400000-0x605fffff 64bit]: assigned
+[  688.878566] ath11k_pci 0000:01:00.0: enabling device (0000 -> 0002)
+[  688.879327] ath11k_pci 0000:01:00.0: MSI vectors: 32
+[  688.879350] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[  689.037670] mhi mhi0: Requested to power ON
+[  689.037684] mhi mhi0: Power on setup success
+[  709.628653] mhi mhi0: MHI did not load image over BHI, ret: -5
+[  709.630536] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[  709.630554] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[  709.630562] ath11k_pci 0000:01:00.0: failed to power up :-110
+[  709.639111] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[  709.639127] ath11k_pci 0000:01:00.0: failed to init core: -110
+[  709.819609] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110

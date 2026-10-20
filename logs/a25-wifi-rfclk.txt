@@ -1,0 +1,14 @@
+[  714.567569] rfclk: rf_clk1 enable 0
+[  714.567830] rfclk: rf_clk2 enable 0
+[  714.567877] rfclk: rf_clk3 enable 0
+[  714.568133] rfclk: rf_clk4 enable 0
+MHISTATUS 0xff05 state 255 syserr 1 BHIOFF 0x100
+EXECENV 0x1
+[  714.798196] mhi mhi0: Power on setup success
+[  714.898123] mhi mhi0: Wait for device to enter SBL or Mission mode
+[  736.251520] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[  736.251542] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[  736.251552] ath11k_pci 0000:01:00.0: failed to power up :-110
+[  736.258906] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[  736.258923] ath11k_pci 0000:01:00.0: failed to init core: -110
+[  736.361210] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110

@@ -1,0 +1,14 @@
+loaded: 1
+cat: can't open '/sys/module/msm/parameters/separate_gpu_kms': Permission denied
+[   50.843374] adreno 3d00000.gpu: supply vdd not found, using dummy regulator
+[   50.843427] adreno 3d00000.gpu: supply vddcx not found, using dummy regulator
+[   50.853863] [drm] Initialized msm 1.13.0 for 3d00000.gpu on minor 1
+[   50.862361] adreno 3d00000.gpu: [drm:adreno_request_fw [msm]] loaded qcom/a730_sqe.fw from new location
+[   50.863299] adreno 3d00000.gpu: [drm:adreno_request_fw [msm]] loaded qcom/gmu_gen70000.bin from new location
+[   50.863947] [drm] Loaded GMU firmware v4.0.7
+== dri:
+total 0
+drwxr-xr-x    2 root     root           100 Oct 17 22:38 by-path
+crw-rw----    1 root     video     226,   0 Jan  1  1970 card0
+crw-rw----    1 root     video     226,   1 Oct 17 22:38 card1
+crw-rw-rw-    1 root     video     226, 128 Oct 17 22:38 renderD128

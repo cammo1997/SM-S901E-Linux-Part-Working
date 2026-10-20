@@ -1,0 +1,11 @@
+EGL API version: 1.5
+EGL vendor string: Mesa Project
+EGL version string: 1.5
+OpenGL core profile vendor: freedreno
+OpenGL core profile renderer: FD730
+OpenGL core profile version: 4.6 (Core Profile) Mesa 26.2.4
+OpenGL core profile shading language version: 4.60
+OpenGL compatibility profile vendor: freedreno
+OpenGL compatibility profile renderer: FD730
+OpenGL compatibility profile version: 4.6 (Compatibility Profile) Mesa 26.2.4
+== kernel:

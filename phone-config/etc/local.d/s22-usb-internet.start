@@ -1,0 +1,6 @@
+#!/bin/sh
+# Galaxy S22 bring-up: use the PC (172.16.42.2, NetworkManager "shared" mode) as gateway + DNS over USB,
+# then set the clock from NTP (no RTC driver yet). Runs from OpenRC's "local" service at boot.
+ip route replace default via 172.16.42.2 dev usb0 2>/dev/null
+echo "nameserver 172.16.42.2" > /etc/resolv.conf
+( for i in 1 2 3 4 5 6 7 8 9 10 11 12; do ntpd -n -q -p pool.ntp.org >/dev/null 2>&1 && break; sleep 10; done ) &

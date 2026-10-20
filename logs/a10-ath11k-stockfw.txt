@@ -1,0 +1,18 @@
+total 5480
+-rw-r--r--    1 root     root       5341184 Oct 17 21:34 amss.bin
+-rw-r--r--    1 root     root        266668 Oct 17 21:34 m3.bin
+[  454.764446] ath11k_pci 0000:01:00.0: BAR 0 [mem 0x60400000-0x605fffff 64bit]: assigned
+[  454.769467] ath11k_pci 0000:01:00.0: MSI vectors: 32
+[  454.772476] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[  454.932646] mhi mhi0: Requested to power ON
+[  454.936840] mhi mhi0: Power on setup success
+[  476.129465] mhi mhi0: MHI did not load image over BHI, ret: -5
+[  476.131204] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[  476.131607] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[  476.131945] ath11k_pci 0000:01:00.0: failed to power up :-110
+[  476.141005] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[  476.141354] ath11k_pci 0000:01:00.0: failed to init core: -110
+[  476.242856] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110
+==ieee80211
+lo
+usb0

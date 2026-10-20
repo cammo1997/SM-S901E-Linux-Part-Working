@@ -1,0 +1,18 @@
+slot21 0x1000100
+181: 3 bwctrl;
+[  237.914617] ath11k_pci 0000:01:00.0: wcn6855 hw2.1
+[  238.140525] mhi mhi0: r0q BHI poll: ret 1 status 2 after 40 ms
+[  238.147167] mhi mhi0: Device in READY State
+[  238.147227] mhi mhi0: Wait for device to enter SBL or Mission mode
+[  259.049973] mhi mhi0: Waiting for all pending event ring processing to complete
+[  259.049993] mhi mhi0: Waiting for all pending threads to complete
+[  259.050460] ath11k_pci 0000:01:00.0: failed to power up mhi: -110
+[  259.050482] ath11k_pci 0000:01:00.0: failed to start mhi: -110
+[  259.050490] ath11k_pci 0000:01:00.0: failed to power up :-110
+[  259.076525] ath11k_pci 0000:01:00.0: failed to create soc core: -110
+[  259.076543] ath11k_pci 0000:01:00.0: failed to init core: -110
+[  259.330486] ath11k_pci 0000:01:00.0: probe with driver ath11k_pci failed with error -110
+181: 3 bwctrl;182: 4 bhi;183: 0 mhi;184: 0 mhi;
+[  292.066550] mhi mhi0: Attempting power on with EE: PRIMARY BOOTLOADER, state: RESET
+[  292.133663] mhi mhi0: r0q BHI poll: ret 1 status 2 after 40 ms
+[  292.138854] mhi mhi0: Wait for device to enter SBL or Mission mode

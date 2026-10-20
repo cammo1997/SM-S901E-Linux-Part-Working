@@ -1,0 +1,2 @@
+#!/bin/sh
+/usr/local/sbin/s22-mtp-gadget > /var/log/s22-mtp.log 2>&1

@@ -1,0 +1,3 @@
+#!/bin/sh
+# Save the time every 2 minutes (only if it looks sane: after 2026-10-01) so s22-clock can restore it at boot.
+( while sleep 120; do n=$(date +%s); [ "$n" -gt 1790000000 ] && echo "$n" > /var/lib/s22-time; done ) >/dev/null 2>&1 &

@@ -1,0 +1,2 @@
+# Galaxy S22 (r0q): CS40L26 ROM-effect haptics driver
+SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT}=="1", SUBSYSTEMS=="input", ATTRS{name}=="cs40l26-rom-vibra", TAG+="uaccess", ENV{FEEDBACKD_TYPE}="vibra"

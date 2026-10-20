@@ -1,0 +1,15 @@
+1
+[  355.772903] qcom-pcie 1c00000.pcie: supply vdda not found, using dummy regulator
+[  355.776104] qcom-pcie 1c00000.pcie: supply vddpe-3v3 not found, using dummy regulator
+[  355.779652] qcom-pcie 1c00000.pcie: host bridge /soc@0/pcie@1c00000 ranges:
+[  355.780278] qcom-pcie 1c00000.pcie:       IO 0x0060200000..0x00602fffff -> 0x0000000000
+[  355.780846] qcom-pcie 1c00000.pcie:      MEM 0x0060300000..0x0063ffffff -> 0x0060300000
+[  372.411959] qcom-pcie 1c00000.pcie: supply vdda not found, using dummy regulator
+[  372.415441] qcom-pcie 1c00000.pcie: supply vddpe-3v3 not found, using dummy regulator
+[  372.416278] qcom-pcie 1c00000.pcie: host bridge /soc@0/pcie@1c00000 ranges:
+[  372.416866] qcom-pcie 1c00000.pcie:       IO 0x0060200000..0x00602fffff -> 0x0000000000
+[  372.417492] qcom-pcie 1c00000.pcie:      MEM 0x0060300000..0x0063ffffff -> 0x0060300000
+==deferred
+0-0036	i2c: supplier 0-0069 not ready
+1c00000.pcie	qcom-pcie: cannot initialize host
+==lspci

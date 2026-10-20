@@ -1,0 +1,9 @@
+1
+[    6.000454] EXT4-fs (loop0p1): warning: mounting unchecked fs, running e2fsck is recommended
+[    6.017518] EXT4-fs (loop0p1): mounted filesystem BOOT-PARTITION-UUID r/w without journal. Quota mode: none.
+[   16.097849] gcc-sm8450 100000.clock-controller: sync_state() pending due to 3d6a000.gmu
+[   16.109144] sm8450-gpucc 3d90000.clock-controller: sync_state() pending due to 3d6a000.gmu
+[   16.119054] gcc-sm8450 100000.clock-controller: sync_state() pending due to af00000.clock-controller
+[   16.129192] qcom-rpmhpd 17a00000.rsc:power-controller: sync_state() pending due to af00000.clock-controller
+[   16.139239] qnoc-sm8450 interconnect-1: sync_state() pending due to 1dfa000.crypto
+[   16.149400] qnoc-sm8450 1700000.interconnect: sync_state() pending due to 1dfa000.crypto

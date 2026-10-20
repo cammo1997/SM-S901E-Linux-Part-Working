@@ -1,0 +1,10 @@
+modprobe: FATAL: Module simple_pm_bus not found in directory /lib/modules/7.2.11-dirty
+0
+[   16.097849] gcc-sm8450 100000.clock-controller: sync_state() pending due to 3d6a000.gmu
+[   16.109144] sm8450-gpucc 3d90000.clock-controller: sync_state() pending due to 3d6a000.gmu
+[   16.119054] gcc-sm8450 100000.clock-controller: sync_state() pending due to af00000.clock-controller
+[   16.129192] qcom-rpmhpd 17a00000.rsc:power-controller: sync_state() pending due to af00000.clock-controller
+[   16.139239] qnoc-sm8450 interconnect-1: sync_state() pending due to 1dfa000.crypto
+[   16.149400] qnoc-sm8450 1700000.interconnect: sync_state() pending due to 1dfa000.crypto
+[   49.072732] qcom-spmi-adc5 c400000.spmi:pmic@0:adc@3100: error -EINVAL: no channels defined
+[   49.078599] qcom-spmi-adc5 c400000.spmi:pmic@0:adc@3100: probe with driver qcom-spmi-adc5 failed with error -22
