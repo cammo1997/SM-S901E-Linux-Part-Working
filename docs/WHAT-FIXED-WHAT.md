@@ -1,6 +1,6 @@
 # S22 (SM-S901E, r0q) mainline Linux: what fixed what
 
-From flashing uniLoader up to attempt 28 (2026-10-18). Kernel 7.2.11, postmarketOS Plasma Mobile.
+From flashing uniLoader up to attempt 39 (2026-10-20). Kernel 7.2.11, postmarketOS Plasma Mobile.
 
 **Source key**
 - **Samsung kernel**: taken from Samsung's S901E kernel source or stock device tree (`recon/live.dts`)
@@ -45,10 +45,23 @@ From flashing uniLoader up to attempt 28 (2026-10-18). Kernel 7.2.11, postmarket
 | 33 | No file transfer | MTP via umtprd + FunctionFS next to NCM (`s22-mtp-gadget`) | Ours |
 | 34 | PC sharing its internet to the phone | PC NM profile "S22 USB (pmOS)" set to manual, not shared | Ours |
 
+| 35 | No NPU: CDSP memory clobbered by the DTB left at the end of the uniLoader image | uniLoader DTB relocation to 0xb6000000 (attempt 29), full 32 MiB cdsp_mem, &remoteproc_cdsp | Tab S8+ (patch) + Samsung file (cdsp.mdt) |
+| 36 | NPU can't run code | quic/fastrpc built, Samsung DSP libs from the dsp partition, system_heap, cdsprpcd service, udev; unsigned PD on the normal (not secure) channel | Ours + Samsung file |
+| 37 | Memory bus pinned at max forever (qcrypto blocked, interconnect sync_state never ran) | CPU + DDR bwmon nodes and GPU gfx-mem votes from stock tables, then &crypto disabled (attempts 31-32) | Samsung kernel (stock tables) + Ours |
+| 38 | Vulkan missing | mesa-vulkan-freedreno (Turnip) | Upstream (Mesa) |
+| 39 | Brightness slider went fully black at the bottom | Panel driver maps the slider onto DBV 6-2047 | Ours |
+| 40 | No vibration | CS40L26 on i2c9 (QUP1 enabled, reset held), out-of-tree ROM-effect FF driver, feedbackd udev rule (attempts 33-34) | Samsung kernel (wiring) + Ours |
+| 41 | No camera subsystem | SM8450 CAMSS + camcc fixes, &camss/&cci0/&cci1 (attempt 35) | Tab S8+ |
+| 42 | Camera rails unreachable | S2MPB02 camera PMIC regulator driver on i2c-gpio 175/176 (attempt 36) | Samsung kernel (GPL driver, wiring) + Ours |
+| 43 | No sensor settings | Vendor partition read via F2FS (with compression) module; CamX Chromatix decoder (tools/camx-chromatix-dump.py) | Ours |
+
 ## Not fixed yet
 - 2.4 GHz Wi-Fi association times out (5 GHz works)
 - Speaker protection firmware (volume kept moderate)
 - Suspend/resume (blocked), keyboard auto-hide
+- Front camera (IMX374): driver written, CCI bus held low (timeouts); rear camera drivers not written
+- Unused clocks/power domains kept on (clk_ignore_unused); removing them broke the display probe (attempt 40, reverted)
+- NPU compute runtime (needs Qualcomm SDK); NPU first-call race
 - Modem: no SIM tested, ModemManager doesn't list it; no mobile data (no sm8450 IPA)
 - Sensors, cameras, fingerprint, NFC, vibration, writable RTC
 
