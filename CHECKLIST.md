@@ -26,6 +26,7 @@ Updated 2026-10-20 · attempt 39 · kernel 7.2.11 (#21)
 - [x] **Vibration**: CS40L26 driver (ROM effects, medium strength), works with Plasma/feedbackd (attempt 34)
 - [x] Brightness slider, with a minimum (DBV 6) so it never goes fully black
 - [x] **Memory bandwidth voting**: CPU + DDR bwmon and GPU votes from stock tables; memory bus idles at its lowest step instead of max (attempts 31-32)
+- [x] **Idle battery**: ~3.2 %/h (~31 h projected), was ~8 h before the memory bus fix (overnight test, 2026-10-21)
 
 ## 🟡 Partly working
 - [ ] Wi-Fi 2.4 GHz (sees networks, association times out)
@@ -37,7 +38,6 @@ Updated 2026-10-20 · attempt 39 · kernel 7.2.11 (#21)
 - [ ] NPU userspace (FastRPC library) - CDSP is up
 - [ ] NPU first-call race (skel load fails ~1 in 3; apps should retry)
 - [ ] Unused clocks/power domains stay on (clk_ignore_unused pd_ignore_unused). Attempt 40 removed them: works but the display probe timed out (reverted). Next: longer deferred_probe_timeout
-- [ ] Idle battery test after the memory bus fix (was ~8 h): overnight run 2026-10-20 in progress
 
 ## ❌ Not done
 - [ ] Calls / SMS (needs SIM)
