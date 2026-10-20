@@ -9,8 +9,10 @@ Updated 2026-10-20 · attempt 39 · kernel 7.2.11 (#21)
 - [x] MTP file transfer to PC
 - [x] Wi-Fi 5 GHz, autoconnects at boot ([[Wi-Fi]])
 - [x] Bluetooth
+- [x] Bluetooth audio in (A2DP sink): phone plays music streamed from another device (2026-10-21)
+- [ ] Bluetooth audio out (S22 to earbuds/speaker): untested
 - [x] Display 120 Hz, touch, GPU ([[Display]]); CPU frequency scaling + PSCI idle states verified
-- [x] Stereo speakers + 2 mics ([[Audio]])
+- [x] Stereo speakers + 2 mics ([[Audio]]); amp digital volume +3 dB (841), no speaker protection yet
 - [x] Power, volume down, volume up buttons
 - [x] On-screen keyboard
 - [x] Charging + battery %
@@ -32,7 +34,7 @@ Updated 2026-10-20 · attempt 39 · kernel 7.2.11 (#21)
 - [ ] Wi-Fi 2.4 GHz (sees networks, association times out)
 - [ ] Modem (boots; no SIM tested, ModemManager doesn't list it) ([[Modem]])
 - [ ] Keyboard auto-hide
-- [ ] Suspend/resume (blocked on purpose: USB dies on resume)
+- [x] Suspend/resume: deep sleep entered automatically and resumed cleanly (Wi-Fi, touch OK); USB after resume untested
 - [ ] Android phones can't browse MTP (PC works)
 - [ ] OTG: bootable/ISO sticks won't open (no ISO9660/UDF in kernel); exFAT via fuse-exfat
 - [ ] NPU userspace (FastRPC library) - CDSP is up
