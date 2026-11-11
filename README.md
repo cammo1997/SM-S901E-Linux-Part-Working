@@ -2,7 +2,7 @@
 
 **Keywords:** r0q · samsung-r0q · SM-S901E · SM-S901B · Galaxy S22 · SM8450 · Snapdragon 8 Gen 1 · waipio · mainline Linux · postmarketOS · Plasma Mobile · uniLoader
 
-Status: boots, USB, Wi-Fi 5 GHz, Bluetooth, 120 Hz display, stereo speakers, mics, buttons work. See [CHECKLIST](CHECKLIST.md) and [what fixed what](docs/WHAT-FIXED-WHAT.md).
+Status: boots, USB, Wi-Fi 2.4 + 5 GHz, Bluetooth, 120 Hz display, stereo speakers, mics, buttons work. See [CHECKLIST](CHECKLIST.md) and [what fixed what](docs/WHAT-FIXED-WHAT.md).
 Credits: [CREDITS.md](CREDITS.md) · License: [LICENSE.md](LICENSE.md) (GPL-2.0 kernel parts, MIT the rest)
 
 ## r0q kernels compared
@@ -12,7 +12,7 @@ Credits: [CREDITS.md](CREDITS.md) · License: [LICENSE.md](LICENSE.md) (GPL-2.0 
 | 5.10 (Android GKI) | Samsung stock kernel ([opensource.samsung.com](https://opensource.samsung.com)) | Android only, not mainline |
 | 6.16-rc1 | Ghatto404 / Arthurus36 ([Nura wiki](https://wiki.nura.eco/wiki/Samsung_Galaxy_S22_5G_(samsung-r0q))) | Wiki lists Wi-Fi as working; source tree not public (Arthurus36's public repo has a decompiled stock DT only) |
 | 7.2.11 (upstream) | Mainline `arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts` | Minimal: framebuffer, regulators, USB 2.0. No panel, touch, Wi-Fi, GPU or battery |
-| **7.2.11 (this repo)** | This port | Wi-Fi 5 GHz, Bluetooth, 120 Hz panel, touch, GPU, stereo speakers, mics, USB-C hotplug, MTP, buttons, charging, modem boot |
+| **7.2.11 (this repo)** | This port | Wi-Fi 2.4 + 5 GHz, Bluetooth, 120 Hz panel, touch, GPU, stereo speakers, mics, USB-C hotplug, MTP, buttons, charging, modem boot |
 
 To my knowledge this is the newest working mainline kernel on the r0q, and the most complete public one,
 as of 2026-10-18. Know of a newer or more complete one? Please open an issue.
@@ -28,10 +28,10 @@ Australian XSA, One UI 7, bootloader unlocked) from the phone's own storage. And
 
 | Works | Partly | Not yet |
 |---|---|---|
-| Boot via uniLoader, UFS, USB networking + SSH | 2.4 GHz Wi-Fi association (5 GHz works) | Calls/SMS, mobile data (no sm8450 IPA in mainline) |
-| **Wi-Fi** 5 GHz, Wi-Fi 6 2x2, 960 Mbit/s, autoconnects at boot | **Modem**: boots, QMI online; no SIM test yet | Sleep/suspend, sensors, cameras, fingerprint, NFC |
-| **Audio: stereo speakers (2x CS35L41) + 2 mics**, Speaker/Mic in Plasma | **USB OTG: USB stick detected in Dolphin; ISO/exFAT sticks need kernel support** | **NPU userspace (CDSP firmware runs, attempt 29)**, speaker protection |
-| **USB-C hotplug** (MAX77705, attempt 28) + **MTP file transfer to PC** | On-screen keyboard (no auto-hide) | Writable RTC |
+| Boot via uniLoader, UFS, USB networking + SSH | **Modem**: boots, QMI online; no SIM test yet | Calls/SMS, mobile data (no sm8450 IPA in mainline) |
+| **Wi-Fi** 2.4 + 5 GHz, Wi-Fi 6 2x2, 960 Mbit/s, autoconnects at boot | **USB OTG: USB stick detected in Dolphin; ISO/exFAT sticks need kernel support** | Sleep/suspend, sensors, cameras, fingerprint, NFC |
+| **Audio: stereo speakers (2x CS35L41) + 2 mics**, Speaker/Mic in Plasma | On-screen keyboard (no auto-hide) | **NPU userspace (CDSP firmware runs, attempt 29)**, speaker protection |
+| **USB-C hotplug** (MAX77705, attempt 28) + **MTP file transfer to PC** | | Writable RTC |
 | **Display 120 Hz** (new mainline S6E3FAC panel driver) | **Vulkan (Turnip) on Adreno 730** | |
 | Touch (STM FTS2BA61Y, multitouch), GPU (Adreno 730) | | |
 | Bluetooth (address from EFS), battery %, charging | | |
@@ -66,9 +66,9 @@ Full checklist: [docs/CHECKLIST-not-sorted.md](docs/CHECKLIST-not-sorted.md). Co
 9. **Bluetooth** needs the antenna-switch rail (PMR735A L7, 2.8 V always-on) or discovery finds nothing.
 10. Safe flash loop without Download-mode buttons: TWRP in the recovery slot, `adb push boot.img`, sha256 check, `dd` to `boot`, read back, `adb reboot`.
 
-## Wi-Fi: works (5 GHz)
+## Wi-Fi: works (2.4 + 5 GHz)
 
-Chip: PCI `17cb:1103`, QCNFA765, ath11k "wcn6855 hw2.1" (Samsung: QCA6490). Four things were needed:
+Chip: PCI `17cb:1103`, QCNFA765, ath11k "wcn6855 hw2.1" (Samsung: QCA6490). Five things were needed:
 1. **pcie-qcom BDF->SID fix** (mainline bug, 5-cell `iommu-map`): the chip's MSIs were lost. Patch in `kernel/upstream-patches/`.
 2. **Galaxy Tab S8+ DT values** (S2E/S1C, no IOVA pool, mainline PHY): fixed the firmware bootloader crash.
 3. **Samsung's own firmware + board file + regdb** (`tools/s22-wifi-firmware-setup.sh`). The generic board file leaves the RF front
@@ -76,8 +76,12 @@ Chip: PCI `17cb:1103`, QCNFA765, ath11k "wcn6855 hw2.1" (Samsung: QCA6490). Four
    so the generic one silently wins - use a small invalid file so ath11k falls back to `board.bin`.
 4. **Cold boot calibration** (stock DT `qcom,wlan-cbc-enabled`): ath11k patch enabling `coldboot_cal_mm` + `cbcal_restart_fw` for
    WCN6855 hw2.1. Without it every transmitted frame came back "no ACK".
+5. **2.4 GHz internal PA 2.2 V rail (`s3e`) via AOSS QMP** (`kernel/s22-wlan-pdc`): on the S22 (`dtbo` `qcom,use-xPA = <0>`),
+   QCA6490 uses its internal 2.4 GHz PA powered by PMR735A S3 (`s3e`), gated by AOSS `wlan_pdc`. Sending stock Android's
+   `{class: wlan_pdc, res: s3e.e, upval: 1}` and `{class: wlan_pdc, ss: rf, res: s3e.e, upval: 1}` messages before cold boot
+   calibration powers the 2.4 GHz PA so both 2.4 GHz and 5 GHz associate cleanly.
 
-Result: "HOME-5G" 5240 MHz, -59 dBm, TX 960 Mbit/s HE-MCS 9 2x2. 2.4 GHz association still times out - next.
+Result: 5 GHz ("HOME-5G" 5240 MHz, TX 960 Mbit/s HE-MCS 9 2x2) and 2.4 GHz (2462 MHz HE40, fast auth/assoc) both work.
 
 ## Layout
 
@@ -90,5 +94,5 @@ Result: "HOME-5G" 5240 MHz, -59 dBm, TX 960 Mbit/s HE-MCS 9 2x2. 2.4 GHz associa
 - `wifi-debug/` - BHI register watcher, regulator test module
 
 Note: uniLoader's own AGENTS.md forbids LLM-generated changes inside its tree; `build-uniloader.sh` builds an unmodified copy.
-Developed with the help of an AI assistant (Claude Code). Use at your own risk: flashing can brick your phone; never flash Android 16 /
+Developed with the help of AI assistants (Claude Code; 2.4 GHz Wi-Fi fix authored with Gemini 4 Carbon). Use at your own risk: flashing can brick your phone; never flash Android 16 /
 One UI 8 firmware (relocks the bootloader) and never touch efs/sec_efs/persist/modem partitions.

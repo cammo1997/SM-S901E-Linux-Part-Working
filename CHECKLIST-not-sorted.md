@@ -11,7 +11,7 @@
 - [x] Plasma Mobile only (tinydm autologin); power, volume down and (since attempt 27) VOLUME UP work; clock saved/restored across boots
 
 ## Not sorted - needs work
-- [x] **Wi-Fi CONNECTS** (5 GHz, Wi-Fi 6 2x2, 960 Mbit/s link), autoconnects at boot (ath11k loaded late by /etc/local.d/s22-wifi.start). 2.4 GHz connect still to fix
+- [x] **Wi-Fi CONNECTS** (2.4 GHz + 5 GHz, Wi-Fi 6 2x2, 960 Mbit/s link), autoconnects at boot (ath11k loaded late by /etc/local.d/s22-wifi.start; 2.4 GHz internal PA rail `s3e` enabled via AOSS QMP by `s22-wlan-pdc`)
 - [x] **Wi-Fi signal** fixed by Samsung board file (-35 dBm 2.4 GHz, -51 dBm 5 GHz at 6 m)
 - [x] **RAM**: +512 MiB (dropped mainline mte_mem), 6.6 GiB usable (attempt 21)
 - [x] **On-screen keyboard** (plasma-keyboard as KWin input method; hide key works, no auto-hide yet)

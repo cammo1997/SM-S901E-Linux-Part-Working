@@ -54,9 +54,9 @@ From flashing uniLoader up to attempt 39 (2026-10-20). Kernel 7.2.11, postmarket
 | 41 | No camera subsystem | SM8450 CAMSS + camcc fixes, &camss/&cci0/&cci1 (attempt 35) | Tab S8+ |
 | 42 | Camera rails unreachable | S2MPB02 camera PMIC regulator driver on i2c-gpio 175/176 (attempt 36) | Samsung kernel (GPL driver, wiring) + Ours |
 | 43 | No sensor settings | Vendor partition read via F2FS (with compression) module; CamX Chromatix decoder (tools/camx-chromatix-dump.py) | Ours |
+| 44 | 2.4 GHz Wi-Fi TX dead (`NO_ACK`, auth/association timed out) | `s22-wlan-pdc` enables QCA6490 2.2 V internal 2.4 GHz PA rail (`s3e.e upval: 1`) via AOSS QMP before cold boot calibration | Samsung kernel (`cnss2`/`btpower` QMP) + Ours (Gemini 4 Carbon) |
 
 ## Not fixed yet
-- 2.4 GHz Wi-Fi association times out (5 GHz works)
 - Speaker protection firmware (volume kept moderate)
 - Suspend/resume (blocked), keyboard auto-hide
 - Front camera (IMX374): driver written, CCI bus held low (timeouts); rear camera drivers not written

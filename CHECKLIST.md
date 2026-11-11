@@ -1,13 +1,13 @@
 # S22 Checklist (Linux Install)
 tags: #s22 #checklist
-Updated 2026-10-20 · attempt 39 · kernel 7.2.11 (#21)
+Updated 2026-11-11 · attempt 39 · kernel 7.2.11 (#21)
 
 ## ✅ Working
 - [x] Boots postmarketOS from internal storage (~35 s)
 - [x] USB + SSH at boot, no replug ([[USB-C]])
 - [x] USB plug/unplug detection (attempt 28)
 - [x] MTP file transfer to PC
-- [x] Wi-Fi 5 GHz, autoconnects at boot ([[Wi-Fi]])
+- [x] Wi-Fi 2.4 GHz + 5 GHz, autoconnects at boot ([[Wi-Fi]])
 - [x] Bluetooth
 - [x] Bluetooth audio in (A2DP sink): phone plays music streamed from another device (2026-10-21)
 - [x] Bluetooth audio out: connects to a car stereo, clear audio (2026-10-21)
@@ -31,7 +31,6 @@ Updated 2026-10-20 · attempt 39 · kernel 7.2.11 (#21)
 - [x] **Idle battery**: ~3.2 %/h (~31 h projected), was ~8 h before the memory bus fix (overnight test, 2026-10-21)
 
 ## 🟡 Partly working
-- [ ] Wi-Fi 2.4 GHz (sees networks, association times out)
 - [ ] Modem (boots; no SIM tested, ModemManager doesn't list it) ([[Modem]])
 - [ ] Keyboard auto-hide
 - [x] Suspend/resume: deep sleep entered automatically and resumed cleanly (Wi-Fi, touch OK); USB after resume untested
