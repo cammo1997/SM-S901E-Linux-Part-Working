@@ -1,0 +1,128 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+"""Mobile settings UI for Samsung S22 Display, Refresh Rate, and Always-On Display."""
+
+import json
+import subprocess
+from pathlib import Path
+
+import gi
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
+from gi.repository import Adw, Gtk
+
+
+def run_ctl(*args: str) -> None:
+    subprocess.Popen(["/usr/local/bin/s22-display-ctl", *args])
+
+
+def load_state() -> dict:
+    p = Path("/run/s22-display-state.json")
+    if p.exists():
+        try:
+            return json.loads(p.read_text())
+        except Exception:
+            pass
+    return {"aod": 0, "aod_nits": 10, "game": 0, "vrr": "[dynamic]", "colour": "[vivid]", "hbm_auto": 1, "wake_sec": 3}
+
+
+class S22DisplayApp(Adw.Application):
+    def __init__(self):
+        super().__init__(application_id="org.postmarketos.s22.display")
+        self.connect("activate", self.on_activate)
+
+    def on_activate(self, _app):
+        st = load_state()
+        win = Adw.PreferencesWindow(title="Tela S22 & Always-On Display")
+        win.set_default_size(390, 720)
+        page = Adw.PreferencesPage()
+        win.add(page)
+
+        # Group 1: Taxa de Atualizacao
+        g_vrr = Adw.PreferencesGroup(
+            title="Taxa de Atualiza??o",
+            description="Alterna entre 120Hz e 60Hz dinamicamente ou em v?deo (24Hz s? com tela parada h? 45s).",
+        )
+        page.add(g_vrr)
+
+        vrr_opts = [("dynamic", "Din?mico (120?60 Hz + 24 Hz parado)"), ("120", "120 Hz (60 Hz em v?deo)"), ("60", "60 Hz Economia")]
+        vrr_row = Adw.ComboRow(title="Modo de Taxa")
+        vrr_row.set_model(Gtk.StringList.new([label for _, label in vrr_opts]))
+        cur_vrr = str(st.get("vrr", ""))
+        vrr_row.set_selected(2 if "drm=60Hz" in cur_vrr and "[fixed]" in cur_vrr else (1 if "[fixed]" in cur_vrr else 0))
+        vrr_row.connect("notify::selected", lambda r, _: run_ctl("vrr", vrr_opts[r.get_selected()][0]))
+        g_vrr.add(vrr_row)
+
+        game_row = Adw.SwitchRow(
+            title="Modo Jogo (90 / 96 Hz)",
+            subtitle="Ative apenas ao jogar para destravar o modo dedicado de jogos",
+        )
+        game_row.set_active(bool(st.get("game", 0)))
+        game_row.connect("notify::active", lambda r, _: run_ctl("game", "on" if r.get_active() else "off"))
+        g_vrr.add(game_row)
+
+        # Group 2: Tela Bloqueada & Always-On Display
+        g_aod = Adw.PreferencesGroup(
+            title="Tela Bloqueada & Always-On Display",
+            description="Com AOD desligado (padr?o), o painel apaga 100% e acende brevemente ao receber mensagens.",
+        )
+        page.add(g_aod)
+
+        aod_row = Adw.SwitchRow(
+            title="Always-On Display (HLPM)",
+            subtitle="Desativado por padr?o para apagar a tela totalmente",
+        )
+        aod_row.set_active(bool(st.get("aod", 0)))
+        g_aod.add(aod_row)
+
+        nits_vals = [2, 10, 30, 60]
+        nits_row = Adw.ComboRow(title="Brilho do Always-On Display")
+        nits_row.set_model(Gtk.StringList.new([f"{n} nits" for n in nits_vals]))
+        cur_nits = int(st.get("aod_nits", 10))
+        nits_row.set_selected(nits_vals.index(cur_nits) if cur_nits in nits_vals else 1)
+
+        aod_row.connect(
+            "notify::active",
+            lambda r, _: run_ctl("aod", "on" if r.get_active() else "off", str(nits_vals[nits_row.get_selected()])),
+        )
+        nits_row.connect(
+            "notify::selected",
+            lambda r, _: run_ctl("aod", "on" if aod_row.get_active() else "off", str(nits_vals[r.get_selected()])),
+        )
+        g_aod.add(nits_row)
+
+        wake_vals = [0, 3, 5, 10]
+        wake_labels = ["Desativado", "3 segundos (Padr?o)", "5 segundos", "10 segundos"]
+        wake_row = Adw.ComboRow(title="Acender ao receber mensagem")
+        wake_row.set_model(Gtk.StringList.new(wake_labels))
+        cur_w = int(st.get("wake_sec", 3))
+        wake_row.set_selected(wake_vals.index(cur_w) if cur_w in wake_vals else 1)
+        wake_row.connect("notify::selected", lambda r, _: run_ctl("wake-sec", str(wake_vals[r.get_selected()])))
+        g_aod.add(wake_row)
+
+        # Group 3: Cor & Brilho Solar HBM
+        g_col = Adw.PreferencesGroup(title="Calibra??o de Cor (mDNIe) & Brilho Solar")
+        page.add(g_col)
+
+        col_opts = [("vivid", "V?vido (AMOLED)"), ("natural", "Natural (sRGB)"), ("standard", "Padr?o"), ("night", "Filtro Noturno"), ("outdoor", "Externo")]
+        col_row = Adw.ComboRow(title="Perfil de Cor")
+        col_row.set_model(Gtk.StringList.new([lbl for _, lbl in col_opts]))
+        cur_c = str(st.get("colour", "[vivid]"))
+        sel_c = next((i for i, (k, _) in enumerate(col_opts) if f"[{k}]" in cur_c), 0)
+        col_row.set_selected(sel_c)
+        col_row.connect("notify::selected", lambda r, _: run_ctl("colour", col_opts[r.get_selected()][0]))
+        g_col.add(col_row)
+
+        hbm_row = Adw.SwitchRow(
+            title="Brilho Solar Autom?tico (HBM 1300 nits)",
+            subtitle="Ativa boost sob luz solar direta pelo sensor STK33915",
+        )
+        hbm_row.set_active(bool(st.get("hbm_auto", 1)))
+        hbm_row.connect("notify::active", lambda r, _: run_ctl("hbm", "auto" if r.get_active() else "off"))
+        g_col.add(hbm_row)
+
+        win.present()
+
+
+if __name__ == "__main__":
+    S22DisplayApp().run()

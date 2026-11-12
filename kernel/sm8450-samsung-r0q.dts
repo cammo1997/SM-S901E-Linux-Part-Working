@@ -12,10 +12,19 @@
 #include "pmk8350.dtsi"
 
 /*
- * Samsung's firmware does not reserve the reference-board MTE tag storage
- * (stock Android uses 0xc0000000 + 512 MiB as normal RAM).
+ * Reclaim reference-board / Android-only carve-outs verified as normal HLOS RAM
+ * (keeping mpss_mem, rmtfs_mem, camera_mem, cvp_mem, video_mem and DSP regions intact):
+ * - mte_mem (512 MiB): absent on stock S22
+ * - oem_vm_mem (80 MiB) & global_sync_mem (1 MiB): disabled in stock S22 DTBO (fragments 121-122)
+ * - trust_ui_vm_* (76 MiB): Android-only Gunyah Trusted UI VM (HLOS-mapped via gh_vm_loader_sec)
  */
 /delete-node/ &mte_mem;
+/delete-node/ &oem_vm_mem;
+/delete-node/ &global_sync_mem;
+/delete-node/ &trust_ui_vm_mem;
+/delete-node/ &trust_ui_vm_qrtr;
+/delete-node/ &trust_ui_vm_vblk0_ring;
+/delete-node/ &trust_ui_vm_swiotlb;
 
 / {
 	model = "Samsung Galaxy S22 5G";
@@ -163,8 +172,9 @@
 	};
 
 	/*
-	 * Panel rails: GPIO-switched supplies (stock fixed_regulator@0-2). Always on for now so the
-	 * bootloader-lit panel keeps power if the DSI path does not probe (simple-framebuffer fallback).
+	 * Panel rails: GPIO-switched supplies (stock fixed_regulator@0-2). Keep regulator-boot-on for
+	 * glitch-free handoff from bootloader, without regulator-always-on so s6e3fac_unprepare() cuts
+	 * VDD3 (1.8 V), VDDR (1.3 V), and VCI (3.0 V) completely to 0 V when the screen blanks.
 	 */
 	vreg_panel_vdd3: regulator-panel-vdd3 {
 		compatible = "regulator-fixed";
@@ -176,7 +186,6 @@
 		pinctrl-0 = <&panel_vdd3_en>;
 		pinctrl-names = "default";
 		regulator-boot-on;
-		regulator-always-on;
 	};
 
 	vreg_panel_vddr: regulator-panel-vddr {
@@ -189,7 +198,6 @@
 		pinctrl-0 = <&panel_vddr_en>;
 		pinctrl-names = "default";
 		regulator-boot-on;
-		regulator-always-on;
 	};
 
 	vreg_panel_vci: regulator-panel-vci {
@@ -202,7 +210,6 @@
 		pinctrl-0 = <&panel_vci_en>;
 		pinctrl-names = "default";
 		regulator-boot-on;
-		regulator-always-on;
 	};
 
 	vph_pwr: regulator-vph-pwr {
@@ -212,6 +219,31 @@
 		regulator-max-microvolt = <3700000>;
 		regulator-always-on;
 		regulator-boot-on;
+	};
+
+	/*
+	 * DisplayPort AUX / Type-C SBU mux (stock DTBO fragments 26, 82, 83):
+	 * - gpio125 (dp_aux_en / aux_sw_oe): active-low enable (0 = AUX enabled, 1 = disabled)
+	 * - gpio108 (dp_aux_sel): orientation select (0 = CC1 / normal, 1 = CC2 / reverse)
+	 * - gpio91 (usbplug_cc): CC direction input from MAX77705
+	 */
+	sbu-mux {
+		compatible = "gpio-sbu-mux";
+
+		enable-gpios = <&tlmm 125 GPIO_ACTIVE_LOW>;
+		select-gpios = <&tlmm 108 GPIO_ACTIVE_HIGH>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&sbu_mux_default>;
+
+		mode-switch;
+		orientation-switch;
+
+		port {
+			sbu_mux_in: endpoint {
+				remote-endpoint = <&max77705_typec_sbu>;
+			};
+		};
 	};
 
 	reserved-memory {
@@ -245,18 +277,12 @@
 			no-map;
 		};
 
-		samsung-sec-debug@800100000 {
-			reg = <0x8 0x00100000 0x0 0xa00000>;
-			no-map;
-		};
-
+		/*
+		 * Keep 8 KiB kinfo + Knox HDM region (0x800b00000..0x800b02000);
+		 * sec_debug (10 MiB) and rdx_bootdev (173 MiB) are HLOS RAM freed by stock Android.
+		 */
 		samsung-debug-kinfo@800b00000 {
 			reg = <0x8 0x00b00000 0x0 0x2000>;
-			no-map;
-		};
-
-		samsung-rdx-bootdev@800c00000 {
-			reg = <0x8 0x00c00000 0x0 0xad00000>;
 			no-map;
 		};
 
@@ -309,6 +335,7 @@
 		vdd-s11-supply = <&vph_pwr>;
 		vdd-s12-supply = <&vph_pwr>;
 
+		vdd-l1-l4-supply = <&vreg_s11b_0p95>;
 		vdd-l2-l7-supply = <&vreg_bob>;
 		vdd-l3-l5-supply = <&vreg_bob>;
 		vdd-l6-l9-l10-supply = <&vreg_s12b_1p25>;
@@ -328,6 +355,14 @@
 		vreg_s12b_1p25: smps12 {
 			regulator-min-microvolt = <1350000>;
 			regulator-max-microvolt = <1400000>;
+		};
+
+		/* USB3 + DisplayPort QMP combo PHY 0.912 V rail (stock L1B 0xdea80 uV) */
+		vreg_l1b_0p91: ldo1 {
+			regulator-name = "vreg_l1b_0p91";
+			regulator-min-microvolt = <912000>;
+			regulator-max-microvolt = <920000>;
+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
 		};
 
 		vreg_l6b_1p2: ldo6 {
@@ -395,10 +430,25 @@
 			regulator-initial-mode = <RPMH_REGULATOR_MODE_AUTO>;
 		};
 
+		/* Stock sensor rails: L2C 1.8 V (SLPI sensor_vdd) and L9C 3.0 V (always-on) */
+		vreg_l2c_1p8: ldo2 {
+			regulator-min-microvolt = <1800000>;
+			regulator-max-microvolt = <1800000>;
+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+			regulator-always-on;
+		};
+
 		vreg_l8c_1p8: ldo8 {
 			regulator-min-microvolt = <1800000>;
 			regulator-max-microvolt = <1800000>;
 			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+		};
+
+		vreg_l9c_3p0: ldo9 {
+			regulator-min-microvolt = <3000000>;
+			regulator-max-microvolt = <3000000>;
+			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+			regulator-always-on;
 		};
 
 		vreg_l11c_3p0: ldo11 {
@@ -501,6 +551,15 @@
 	status = "okay";
 };
 
+&mdss_dp0 {
+	status = "okay";
+};
+
+&mdss_dp0_out {
+	data-lanes = <0 1>;
+	link-frequencies = /bits/ 64 <1620000000 2700000000 5400000000 8100000000>;
+};
+
 /*
  * Adreno 730 GPU. msm is loaded with separate_gpu_kms=1, so the GPU (renderD128) and the display
  * (MDSS, above) are separate DRM devices. Zap shader is the phone's own Samsung-signed
@@ -578,6 +637,22 @@
 						remote-endpoint = <&usb_1_dwc3_hs>;
 					};
 				};
+
+				port@1 {
+					reg = <1>;
+
+					max77705_typec_ss: endpoint {
+						remote-endpoint = <&usb_1_qmpphy_out>;
+					};
+				};
+
+				port@2 {
+					reg = <2>;
+
+					max77705_typec_sbu: endpoint {
+						remote-endpoint = <&sbu_mux_in>;
+					};
+				};
 			};
 		};
 	};
@@ -638,7 +713,15 @@
 	};
 };
 
+&pmk8350_sdam_21 {
+	rtc_offset: rtc-offset@78 {
+		reg = <0x78 0x4>;
+	};
+};
+
 &pmk8350_rtc {
+	nvmem-cells = <&rtc_offset>;
+	nvmem-cell-names = "offset";
 	status = "okay";
 };
 
@@ -653,6 +736,19 @@
 /* Samsung-signed modem firmware from the phone's own modem partition (image/modem.mdt) */
 &remoteproc_mpss {
 	firmware-name = "qcom/sm8450/samsung/r0q/modem.mdt";
+
+	status = "okay";
+};
+
+/*
+ * IP Accelerator (IPA v5.1) for cellular mobile data (rmnet) and ModemManager
+ * qcom-soc enumeration. Stock S22 vendor_boot DTB binds PAS ID 15 (ipa_fws) to
+ * ipa_gsi_mem (0x8b910000, 0xa000), authenticated from apnhlos ipa_fws.mdt.
+ */
+&ipa {
+	qcom,gsi-loader = "self";
+	memory-region = <&ipa_gsi_mem>;
+	firmware-name = "qcom/sm8450/samsung/r0q/ipa_fws.mdt";
 
 	status = "okay";
 };
@@ -681,6 +777,18 @@
 	firmware-name = "qcom/sm8450/samsung/r0q/cdsp.mdt";
 
 	status = "okay";
+};
+
+/* Samsung-signed SLPI sensor hub firmware from apnhlos (exposes QRTR SNS_CLIENT_SVC 0x190) */
+&remoteproc_slpi {
+	firmware-name = "qcom/sm8450/samsung/r0q/slpi.mdt";
+
+	status = "okay";
+};
+
+/* Stock S22 DTBO fragment@123: slpi_region is 23 MiB (0x1700000), freeing 2 MiB */
+&slpi_mem {
+	reg = <0x0 0x88000000 0x0 0x1700000>;
 };
 
 &i2c4 {
@@ -1005,6 +1113,32 @@
 		drive-strength = <2>;
 		bias-disable;
 	};
+
+	sbu_mux_default: sbu-mux-default-state {
+		aux-sel-pins {
+			pins = "gpio108";
+			function = "gpio";
+			drive-strength = <2>;
+			bias-disable;
+			output-low;
+		};
+
+		aux-en-pins {
+			pins = "gpio125";
+			function = "gpio";
+			drive-strength = <2>;
+			bias-disable;
+			output-high;
+		};
+
+		cc-dir-pins {
+			pins = "gpio91";
+			function = "gpio";
+			drive-strength = <2>;
+			bias-disable;
+			input-enable;
+		};
+	};
 };
 
 &uart20 {
@@ -1047,17 +1181,10 @@
 };
 
 &usb_1 {
-	/* Keep USB 2.0 only for now */
-	qcom,select-utmi-as-pipe-clk;
-
-	/* Roles come from the MAX77705 CCIC role switch (was fixed "peripheral") */
+	/* Dual-role USB 3.0 SuperSpeed (5 Gbps, stock DTBO fragment@150) + USB 2.0 fallback */
 	dr_mode = "otg";
-	/* Start as a gadget like before, so the initramfs USB network still comes up before the CCIC driver loads */
 	role-switch-default-mode = "peripheral";
-	maximum-speed = "high-speed";
-	/* Remove USB3 phy */
-	phys = <&usb_1_hsphy>;
-	phy-names = "usb2-phy";
+	maximum-speed = "super-speed";
 
 	status = "okay";
 };
@@ -1072,6 +1199,19 @@
 	vdda33-supply = <&vreg_l2b_3p07>;
 
 	status = "okay";
+};
+
+&usb_1_qmpphy {
+	vdda-phy-supply = <&vreg_l1b_0p91>;
+	vdda-pll-supply = <&vreg_l6b_1p2>;
+	mode-switch;
+	orientation-switch;
+
+	status = "okay";
+};
+
+&usb_1_qmpphy_out {
+	remote-endpoint = <&max77705_typec_ss>;
 };
 
 /* Volume up: plain gpio-keys line on pm8350 gpio6, active low with pull-up (stock vol_up; same as the Galaxy Tab S8+) */
@@ -1282,4 +1422,177 @@
 		drive-strength = <2>;
 		bias-disable;
 	};
+};
+
+/*
+ * CPU passive DVFS thermal management: mainline sm8450.dtsi defines CPU thermal zones without
+ * cooling-maps, leaving Silver (CPU0-3), Gold A710 (CPU4-6), and Prime Cortex-X2 (CPU7) unthrottled
+ * until 110 C critical reset. Wire cpufreq cooling-maps with handset-safe 72-82 C passive trips.
+ */
+&{/thermal-zones/cpu0-thermal} {
+	polling-delay-passive = <100>;
+
+	cooling-maps {
+		map0 {
+			trip = <&cpu0_alert0>;
+			cooling-device = <&cpu0 0 3>;
+		};
+
+		map1 {
+			trip = <&cpu0_alert1>;
+			cooling-device = <&cpu0 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+		};
+	};
+};
+
+&cpu0_alert0 {
+	temperature = <75000>;
+};
+
+&cpu0_alert1 {
+	temperature = <82000>;
+};
+
+&{/thermal-zones/cpu4-top-thermal} {
+	polling-delay-passive = <100>;
+
+	cooling-maps {
+		map0 {
+			trip = <&cpu4_top_alert0>;
+			cooling-device = <&cpu4 0 5>;
+		};
+
+		map1 {
+			trip = <&cpu4_top_alert1>;
+			cooling-device = <&cpu4 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+		};
+	};
+};
+
+&cpu4_top_alert0 {
+	temperature = <74000>;
+};
+
+&cpu4_top_alert1 {
+	temperature = <80000>;
+};
+
+&{/thermal-zones/cpu5-top-thermal} {
+	polling-delay-passive = <100>;
+
+	cooling-maps {
+		map0 {
+			trip = <&cpu5_top_alert0>;
+			cooling-device = <&cpu4 0 5>;
+		};
+
+		map1 {
+			trip = <&cpu5_top_alert1>;
+			cooling-device = <&cpu4 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+		};
+	};
+};
+
+&cpu5_top_alert0 {
+	temperature = <74000>;
+};
+
+&cpu5_top_alert1 {
+	temperature = <80000>;
+};
+
+&{/thermal-zones/cpu6-top-thermal} {
+	polling-delay-passive = <100>;
+
+	cooling-maps {
+		map0 {
+			trip = <&cpu6_top_alert0>;
+			cooling-device = <&cpu4 0 5>;
+		};
+
+		map1 {
+			trip = <&cpu6_top_alert1>;
+			cooling-device = <&cpu4 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+		};
+	};
+};
+
+&cpu6_top_alert0 {
+	temperature = <74000>;
+};
+
+&cpu6_top_alert1 {
+	temperature = <80000>;
+};
+
+&{/thermal-zones/cpu7-top-thermal} {
+	polling-delay-passive = <50>;
+
+	cooling-maps {
+		map0 {
+			trip = <&cpu7_top_alert0>;
+			cooling-device = <&cpu7 0 6>;
+		};
+
+		map1 {
+			trip = <&cpu7_top_alert1>;
+			cooling-device = <&cpu7 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+		};
+	};
+};
+
+&cpu7_top_alert0 {
+	temperature = <72000>;
+};
+
+&cpu7_top_alert1 {
+	temperature = <78000>;
+};
+
+&{/thermal-zones/cpu7-middle-thermal} {
+	polling-delay-passive = <50>;
+
+	cooling-maps {
+		map0 {
+			trip = <&cpu7_middle_alert0>;
+			cooling-device = <&cpu7 0 6>;
+		};
+
+		map1 {
+			trip = <&cpu7_middle_alert1>;
+			cooling-device = <&cpu7 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+		};
+	};
+};
+
+&cpu7_middle_alert0 {
+	temperature = <72000>;
+};
+
+&cpu7_middle_alert1 {
+	temperature = <78000>;
+};
+
+&{/thermal-zones/cpu7-bottom-thermal} {
+	polling-delay-passive = <50>;
+
+	cooling-maps {
+		map0 {
+			trip = <&cpu7_bottom_alert0>;
+			cooling-device = <&cpu7 0 6>;
+		};
+
+		map1 {
+			trip = <&cpu7_bottom_alert1>;
+			cooling-device = <&cpu7 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+		};
+	};
+};
+
+&cpu7_bottom_alert0 {
+	temperature = <72000>;
+};
+
+&cpu7_bottom_alert1 {
+	temperature = <78000>;
 };

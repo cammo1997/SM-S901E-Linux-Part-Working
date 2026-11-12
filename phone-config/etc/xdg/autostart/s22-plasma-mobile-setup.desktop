@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=S22 Plasma Mobile Setup
+Exec=/usr/local/lib/s22/s22-plasma-session-init.sh
+OnlyShowIn=KDE;
+X-KDE-AutostartPhase=2
+NoDisplay=true

@@ -1,0 +1,13 @@
+#!/sbin/openrc-run
+description="Samsung Galaxy S22 (SM8450) MPSS Cellular Modem & IPA Setup"
+
+depend() {
+	need rmtfs tqftpserv
+	before modemmanager 81voltd
+}
+
+start() {
+	ebegin "Starting S22 MPSS cellular modem and IPA"
+	/usr/local/lib/s22/s22-modem-start.sh
+	eend $?
+}

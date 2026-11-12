@@ -1,0 +1,17 @@
+{
+    "KPackageStructure": "KPackage/GenericQML",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "s22@postmarketos.org",
+                "Name": "S22 Linux"
+            }
+        ],
+        "Description": "Always-On Display (HLPM) para o Samsung Galaxy S22",
+        "Icon": "preferences-desktop-display",
+        "Id": "org.kde.plasma.quicksetting.s22aod",
+        "License": "GPL-2.0+",
+        "Name": "Always-On Display",
+        "Name[pt_BR]": "Always-On Display"
+    }
+}

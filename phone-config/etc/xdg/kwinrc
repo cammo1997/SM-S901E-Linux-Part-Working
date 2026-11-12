@@ -1,2 +1,8 @@
+[Compositing]
+Backend=OpenGL
+GLCore=true
+LatencyPolicy=Medium
+
 [Wayland]
 InputMethod=/usr/share/applications/org.kde.plasma.keyboard.desktop
+VirtualKeyboardEnabled=true

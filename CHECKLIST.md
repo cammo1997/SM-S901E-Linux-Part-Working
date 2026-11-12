@@ -11,8 +11,10 @@ Updated 2026-10-20 · attempt 39 · kernel 7.2.11 (#21)
 - [x] Bluetooth
 - [x] Bluetooth audio in (A2DP sink): phone plays music streamed from another device (2026-10-21)
 - [x] Bluetooth audio out: connects to a car stereo, clear audio (2026-10-21)
-- [x] Display 120 Hz, touch, GPU ([[Display]]); CPU frequency scaling + PSCI idle states verified
-- [x] Stereo speakers + 2 mics ([[Audio]]); amp digital volume +3 dB (841), no speaker protection yet
+- [x] Display 120/96/60/48/30/24 Hz + **Dynamic VRR (10-120 Hz PHS/LFD & seamless switch), HBM (~1300 nits + auto-lux), hardware mDNIe/IRC/OTP colour calibration & Always-On Display (HLPM 2/10/30/60 nit)**, touch, GPU ([[Display]]); CPU frequency scaling + PSCI idle states verified
+- [x] **KWin on Adreno 730**: session waits for `/dev/dri/card0` + `renderD128` before starting; `freedreno/FD730`, no `llvmpipe` (2026-11-12)
+- [x] **Wayland socket discovery** (`wayland-[0-9]`) in `s22-display-ctl` / `s22-display-extrasd`; 120↔60 switching works through the helper (2026-11-12)
+- [x] Stereo speakers + handset **Earpiece** + 2 mics + **VoiceCall UCM2** ([[Audio]]); amp digital volume +3 dB (841), no speaker protection yet
 - [x] Power, volume down, volume up buttons
 - [x] On-screen keyboard
 - [x] Charging + battery %
@@ -32,7 +34,7 @@ Updated 2026-10-20 · attempt 39 · kernel 7.2.11 (#21)
 
 ## 🟡 Partly working
 - [ ] Wi-Fi 2.4 GHz (sees networks, association times out)
-- [ ] Modem (boots; no SIM tested, ModemManager doesn't list it) ([[Modem]])
+- [x] **Cellular modem + SM8450 IPA v5.1 (`qcom,sm8450-ipa`)**: auto-starts at boot (`s22-modem.service` + read-only `rmtfs`), exposes `rmnet_ipa0` + `qrtr0` + `wwan0at0` to **ModemManager (`qcom-soc`)**, auto-provisions Dual-SIM USIM, VoLTE (`81voltd`), VoiceCall UCM2 & GNSS ([[Modem]])
 - [ ] Keyboard auto-hide
 - [x] Suspend/resume: deep sleep entered automatically and resumed cleanly (Wi-Fi, touch OK); USB after resume untested
 - [ ] Android phones can't browse MTP (PC works)
@@ -42,8 +44,7 @@ Updated 2026-10-20 · attempt 39 · kernel 7.2.11 (#21)
 - [ ] Unused clocks/power domains stay on (clk_ignore_unused pd_ignore_unused). Attempt 40 removed them: works but the display probe timed out (reverted). Next: longer deferred_probe_timeout
 
 ## ❌ Not done
-- [ ] Calls / SMS (needs SIM)
-- [ ] Mobile data (no sm8450 IPA in mainline)
+- [x] **Mobile data (`sm8450-ipa` v5.1 + `rmnet`)** & **Calls / SMS stack** (`ModemManager` + `rpmsg_wwan_ctrl` + `81voltd` + `VoiceCall` UCM2)
 - [ ] Speaker protection firmware (louder volume)
 - [ ] Sensors (rotate, proximity, light)
 - [ ] Vibration: full CS40L26 driver with Samsung firmware + calibration (stronger, custom waveforms)
@@ -57,5 +58,5 @@ Updated 2026-10-20 · attempt 39 · kernel 7.2.11 (#21)
 ## 📋 Housekeeping
 - [ ] Clean debug leftovers (ath11k debug build, `~/s22-tests`)
 - [ ] Battery charge limit control
-- [ ] "Landscape" label in Display settings (cosmetic)
+- [x] Portrait panel orientation (`DRM_MODE_PANEL_ORIENTATION_NORMAL`) reported by S6E3FAC driver
 - [ ] Upstream pcie-qcom patch (skipped for now)

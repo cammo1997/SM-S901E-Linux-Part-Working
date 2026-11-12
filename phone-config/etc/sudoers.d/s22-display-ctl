@@ -1,0 +1,2 @@
+%wheel ALL=(root) NOPASSWD: /usr/local/bin/s22-display-ctl
+netobr ALL=(root) NOPASSWD: /usr/local/bin/s22-display-ctl
