@@ -54,6 +54,9 @@ From flashing uniLoader up to attempt 39 (2026-10-20). Kernel 7.2.11, postmarket
 | 41 | No camera subsystem | SM8450 CAMSS + camcc fixes, &camss/&cci0/&cci1 (attempt 35) | Tab S8+ |
 | 42 | Camera rails unreachable | S2MPB02 camera PMIC regulator driver on i2c-gpio 175/176 (attempt 36) | Samsung kernel (GPL driver, wiring) + Ours |
 | 43 | No sensor settings | Vendor partition read via F2FS (with compression) module; CamX Chromatix decoder (tools/camx-chromatix-dump.py) | Ours |
+| 44 | USB 2.0 peripheral only (no USB 3.0 SuperSpeed) | Enable `&usb_1_qmpphy` (`vreg_l1b_0p91` + `vreg_l6b_1p2`), add 4nm SM8450/r0q QMP RX & PCS lock-detect tuning (`0xc4`/`0x89`, stock `fragment@152`), fix `dwc3-qcom` role VBUS/`LANE0_PWR_PRESENT` override, set `maximum-speed = "super-speed"` (`fragment@150`), build USB3/Type-C stack in | Samsung kernel (DTBO values) + Ours (Gemini 4 Carbon) |
+| 45 | No DisplayPort over USB-C | Enable `&mdss_dp0` (`card1-DP-1`, 2 lanes up to HBR3), add `gpio-sbu-mux` (`gpio125` `/OE` active-low, `gpio108` `aux_sel`), wire OF-graph ports, and implement SVDM `0xff01` (Discover Identity/SVIDs/Modes, Enter Mode, DP Status, DP Configure Pin C/D/E, Attention/HPD + `drm_dp_hpd_bridge`) in `max77705-usbc` | Samsung kernel (`max77705_alternate.c`, `secdp`) + Ours (Gemini 4 Carbon) |
+| 46 | 342 MiB of HLOS RAM still locked in Android-only `no-map` regions | Drop DTBO-disabled `oem_vm_mem` (80M) & `global_sync_mem` (1M), Android-only `trust_ui_vm_*` (76M), boot-freed `samsung-rdx-bootdev` (173M) & `samsung-sec-debug` (10M), and shrink `slpi_mem` to stock 23M (`fragment@123`), keeping modem/camera/CVP intact -> **7,161 MiB (7.0 GiB) usable** | Samsung kernel (`sec_qc_rdx_bootdev.c`, stock DTBO) + Ours (Gemini 4 Carbon) |
 
 ## Not fixed yet
 - 2.4 GHz Wi-Fi association times out (5 GHz works)

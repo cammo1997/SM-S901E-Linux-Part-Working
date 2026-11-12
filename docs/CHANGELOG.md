@@ -38,6 +38,7 @@ Wi-Fi is the one big item still open. Even the failed Wi-Fi attempts are useful:
 | 10-18 | 26 | VA macro + DMICs (LPI 6/7, 8/9, 12/13), L12C | **microphones work** |
 | 10-18 | 27 | gpio-keys: volume up on pm8350 gpio6 | **volume up works** |
 | 10-18 | - | Samsung Wi-Fi fw + board file (really loaded) + regdb + ath11k cold boot calibration | **Wi-Fi CONNECTS (5 GHz, 960 Mbit/s link)** |
+| 11-12 | - | QMP USB3+DP combo PHY (4nm S22 tuning), built-in Type-C/SBU AUX mux, SVDM `0xff01` + DRM HPD bridge in `max77705-usbc`, `&mdss_dp0`, +342 MiB Android-only RAM reclaim | **USB 3.0 SuperSpeed (5 Gbps), DisplayPort Alt-Mode (`card1-DP-1`) & 7.0 GiB usable RAM** |
 
 ## Added to the repo
 
