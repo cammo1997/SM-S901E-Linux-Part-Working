@@ -29,14 +29,16 @@ Australian XSA, One UI 7, bootloader unlocked) from the phone's own storage. And
 | Works | Partly | Not yet |
 |---|---|---|
 | Boot via uniLoader, UFS, USB networking + SSH | 2.4 GHz Wi-Fi association (5 GHz works) | Calls/SMS, mobile data (no sm8450 IPA in mainline) |
-| **Wi-Fi** 5 GHz, Wi-Fi 6 2x2, 960 Mbit/s, autoconnects at boot | **Modem**: boots, QMI online; no SIM test yet | Sleep/suspend, sensors, cameras, fingerprint, NFC |
+| **Wi-Fi** 5 GHz, Wi-Fi 6 2x2, 960 Mbit/s, autoconnects at boot | **Modem**: boots, QMI online; no SIM test yet | Cameras, fingerprint (QBT2000 TZ), NFC, DP Alt-Mode |
 | **Audio: stereo speakers (2x CS35L41) + 2 mics**, Speaker/Mic in Plasma | **USB OTG: USB stick detected in Dolphin; ISO/exFAT sticks need kernel support** | **NPU userspace (CDSP firmware runs, attempt 29)**, speaker protection |
-| **USB-C hotplug** (MAX77705, attempt 28) + **MTP file transfer to PC** | On-screen keyboard (no auto-hide) | Writable RTC |
+| **USB-C hotplug + OTG** (MAX77705, ISO/exFAT) + **MTP file transfer** | On-screen keyboard (no auto-hide) | |
+| **Sensors** (SLPI: accel/auto-rotate, ALS/auto-brightness, proximity, compass) | | |
+| **Writable hardware RTC** (PMK8350 SDAM offset) + **Deep suspend/resume** | | |
 | **Display 120 Hz** (new mainline S6E3FAC panel driver) | **Vulkan (Turnip) on Adreno 730** | |
 | Touch (STM FTS2BA61Y, multitouch), GPU (Adreno 730) | | |
 | Bluetooth (address from EFS), battery %, charging | | |
 | **6.8 GiB RAM**, firewall (nftables) | | |
-| Plasma Mobile autologin (tinydm), **power/volume up/volume down keys**, clock restore | | |
+| Plasma Mobile autologin (tinydm), **power/volume up/volume down keys**, hardware RTC | | |
 
 **Complete start-to-finish guide (unlock, root, EFS backup, TWRP, everything we found): [docs/S22-Mainline-Linux-Guide.pdf](docs/S22-Mainline-Linux-Guide.pdf).**
 
@@ -90,5 +92,5 @@ Result: "HOME-5G" 5240 MHz, -59 dBm, TX 960 Mbit/s HE-MCS 9 2x2. 2.4 GHz associa
 - `wifi-debug/` - BHI register watcher, regulator test module
 
 Note: uniLoader's own AGENTS.md forbids LLM-generated changes inside its tree; `build-uniloader.sh` builds an unmodified copy.
-Developed with the help of an AI assistant (Claude Code). Use at your own risk: flashing can brick your phone; never flash Android 16 /
+Developed with the help of AI assistants (Claude Code; SLPI sensors, writable SDAM RTC & deep-sleep resume authored with Gemini 4 Carbon). Use at your own risk: flashing can brick your phone; never flash Android 16 /
 One UI 8 firmware (relocks the bootloader) and never touch efs/sec_efs/persist/modem partitions.

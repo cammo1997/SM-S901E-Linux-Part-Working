@@ -24,15 +24,15 @@
 - [x] **Audio**: stereo loudspeakers (top = left, bottom = right) + 2 microphones, PulseAudio Speaker sink + Mic source (attempts 24-26). Still: speaker protection fw, call audio
 - [~] **Cellular modem**: boots (attempt 20), QMI online, 52 services; rmtfs from EFS copies read-only. Started by hand (not at boot).
       No SIM inserted yet; ModemManager does not list it yet. SMS/calls untested; mobile data needs sm8450 IPA (not in mainline)
-- [ ] **Sleep / suspend / resume**, screen off + wake, power button behaviour (untested)
-- [ ] **Brightness control in the UI** (backlight exists; slider untested), auto-brightness
-- [ ] **Sensors**: auto-rotate (accelerometer/gyro), proximity, ambient light
-- [ ] **Vibration / haptics** (max77705 haptic not bound)
+- [x] **Sleep / suspend / resume**: `deep` sleep + RTC/power-button wake verified; Wi-Fi, touch, sensors and USB NCM survive resume without replug
+- [x] **Brightness control in the UI** (slider mapped to DBV 6-2047) + **auto-brightness** via `STK33915` ambient light sensor (`iio-sensor-proxy`)
+- [x] **Sensors**: SLPI sensor hub (`remoteproc_slpi` + `L2C`/`L9C` rails + `s22-hex-cb3` + `hexagonrpcd`) -> auto-rotate (`LSM6DSO`), proximity & ambient light (`STK33915`), compass (`AK09918`)
+- [x] **Vibration / haptics**: Cirrus CS40L26 (`cs40l26-rom-vibra` on `i2c9 @ 0x40` + `feedbackd`)
 - [ ] **Cameras**, flash
 - [ ] **Fingerprint** reader
 - [ ] **NFC**
 - [ ] **USB-C**: host/OTG (driver + OTG VBUS in place since attempt 23, untested), PD, DisplayPort out, USB3 (currently USB2 peripheral only)
-- [ ] **RTC** is read-only (clock relies on NTP; no time at boot until network)
+- [x] **Writable hardware RTC**: `pmk8350_rtc` wired to `pmk8350_sdam_21` (`rtc-offset@78`); `/dev/rtc0` persists wall-clock time across reboots before network
 - [x] **120 Hz** (panel driver refresh=120 default, stock fhd120hs timing + commands)
 - [ ] **Display extras**: VRR (no dynamic switching), HBM, colour calibration, always-on display
 

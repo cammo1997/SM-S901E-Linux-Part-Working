@@ -1,6 +1,6 @@
 # S22 Checklist (Linux Install)
 tags: #s22 #checklist
-Updated 2026-10-20 · attempt 39 · kernel 7.2.11 (#21)
+Updated 2026-11-11 · kernel 7.2.11
 
 ## ✅ Working
 - [x] Boots postmarketOS from internal storage (~35 s)
@@ -29,14 +29,16 @@ Updated 2026-10-20 · attempt 39 · kernel 7.2.11 (#21)
 - [x] Brightness slider, with a minimum (DBV 6) so it never goes fully black
 - [x] **Memory bandwidth voting**: CPU + DDR bwmon and GPU votes from stock tables; memory bus idles at its lowest step instead of max (attempts 31-32)
 - [x] **Idle battery**: ~3.2 %/h (~31 h projected), was ~8 h before the memory bus fix (overnight test, 2026-10-21)
+- [x] **Sensors**: SLPI sensor hub (`remoteproc_slpi` + stock `L2C` 1.8 V / `L9C` 3.0 V rails) + `hexagonrpcd-sdsp` (`s22-hex-cb3` on CB3 `0x0543`) + `iio-sensor-proxy`: accelerometer/auto-rotate (`LSM6DSO`), ambient light/auto-brightness (`STK33915`), proximity (`STK33915`), compass (`AK09918`)
+- [x] **Writable hardware RTC**: `pmk8350_rtc` wired to battery-backed `pmk8350_sdam_21` (`rtc-offset@78`), `/dev/rtc0` writable (`hwclock --systohc`, `chrony rtcsync`)
+- [x] **Suspend/resume**: `deep` sleep + RTC/power-button wake verified; Wi-Fi, touch, sensors and **USB NCM survive resume without replug**
 
 ## 🟡 Partly working
 - [ ] Wi-Fi 2.4 GHz (sees networks, association times out)
 - [ ] Modem (boots; no SIM tested, ModemManager doesn't list it) ([[Modem]])
 - [ ] Keyboard auto-hide
-- [x] Suspend/resume: deep sleep entered automatically and resumed cleanly (Wi-Fi, touch OK); USB after resume untested
 - [ ] Android phones can't browse MTP (PC works)
-- [ ] OTG: bootable/ISO sticks won't open (no ISO9660/UDF in kernel); exFAT via fuse-exfat
+- [x] OTG: ISO9660, UDF and exFAT enabled as kernel modules
 - [ ] NPU userspace (FastRPC library) - CDSP is up
 - [ ] NPU first-call race (skel load fails ~1 in 3; apps should retry)
 - [ ] Unused clocks/power domains stay on (clk_ignore_unused pd_ignore_unused). Attempt 40 removed them: works but the display probe timed out (reverted). Next: longer deferred_probe_timeout
@@ -45,14 +47,12 @@ Updated 2026-10-20 · attempt 39 · kernel 7.2.11 (#21)
 - [ ] Calls / SMS (needs SIM)
 - [ ] Mobile data (no sm8450 IPA in mainline)
 - [ ] Speaker protection firmware (louder volume)
-- [ ] Sensors (rotate, proximity, light)
 - [ ] Vibration: full CS40L26 driver with Samsung firmware + calibration (stronger, custom waveforms)
 - [ ] Front camera IMX374: driver written (1616x912 RAW10 @ 30 fps), rails/MCLK/reset/power domain all verified, but CCI bus SDA/SCL held low (timeouts). Next: read the bus on stock Android
 - [ ] Rear cameras: S5KGN3 main (QUP i2c@884000), IMX563 ultrawide (CCI0 m0), S5K3K1 tele (CCI0 m1): no mainline drivers
 - [ ] Fingerprint (Qualcomm 3D Sonic QBT2000, TrustZone-only: unlikely)
 - [ ] NFC
 - [ ] DisplayPort out
-- [ ] Writable RTC
 
 ## 📋 Housekeeping
 - [ ] Clean debug leftovers (ath11k debug build, `~/s22-tests`)

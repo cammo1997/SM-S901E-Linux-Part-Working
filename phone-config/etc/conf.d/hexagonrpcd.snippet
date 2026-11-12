@@ -1,0 +1,4 @@
+# OpenRC equivalent for /etc/init.d/hexagonrpcd-sdsp:
+# wrap hexagonrpcd with s22-hex-cb3 so SENSORS_PD lands on context bank 3 (0x0543)
+command="/usr/local/lib/s22/s22-hex-cb3"
+command_args="/usr/bin/hexagonrpcd -f /dev/fastrpc-sdsp -d sdsp -s -R /usr/share/qcom/sm8450/Samsung/r0q/"

@@ -54,16 +54,19 @@ From flashing uniLoader up to attempt 39 (2026-10-20). Kernel 7.2.11, postmarket
 | 41 | No camera subsystem | SM8450 CAMSS + camcc fixes, &camss/&cci0/&cci1 (attempt 35) | Tab S8+ |
 | 42 | Camera rails unreachable | S2MPB02 camera PMIC regulator driver on i2c-gpio 175/176 (attempt 36) | Samsung kernel (GPL driver, wiring) + Ours |
 | 43 | No sensor settings | Vendor partition read via F2FS (with compression) module; CamX Chromatix decoder (tools/camx-chromatix-dump.py) | Ours |
+| 44 | Read-only RTC (`1970` at boot before NTP) | `&pmk8350_rtc` wired to `&pmk8350_sdam_21` `rtc-offset@78` (128-byte HLOS-writable SPMI SDAM); `rtc_pm8xxx` unblocked | Mainline `rtc-pm8xxx` + Ours (Gemini 4 Carbon) |
+| 45 | No sensors (auto-rotate, ambient light, proximity, compass) | `&remoteproc_slpi` (`slpi.mdt`) + stock `L2C` (1.8 V) / `L9C` (3.0 V) rails + `s22-hex-cb3` (`0x0543` `SENSORS_PD` CB) + `hexagonrpcd` + `iio-sensor-proxy` | Stock DTBO (`fragment@47`/`143`) + Ours (Gemini 4 Carbon) |
+| 46 | Deep suspend/resume USB check | Verified `deep` sleep + RTC alarm / `pmic_pwrkey` wakeup with `max77705_typec` + `dwc3-host-power-lost`: USB NCM & Wi-Fi survive resume without replug | Tab S8+ + Ours (Gemini 4 Carbon) |
 
 ## Not fixed yet
 - 2.4 GHz Wi-Fi association times out (5 GHz works)
 - Speaker protection firmware (volume kept moderate)
-- Suspend/resume (blocked), keyboard auto-hide
+- Keyboard auto-hide
 - Front camera (IMX374): driver written, CCI bus held low (timeouts); rear camera drivers not written
 - Unused clocks/power domains kept on (clk_ignore_unused); removing them broke the display probe (attempt 40, reverted)
 - NPU compute runtime (needs Qualcomm SDK); NPU first-call race
 - Modem: no SIM tested, ModemManager doesn't list it; no mobile data (no sm8450 IPA)
-- Sensors, cameras, fingerprint, NFC, vibration, writable RTC
+- Cameras, fingerprint (QBT2000/QBT2608 TrustZone-only), NFC, DisplayPort Alt-Mode
 
 ## Rules kept throughout
 - Never write the EFS partitions (efs, sec_efs, persist, modemst1/2, fsg, fsc)
