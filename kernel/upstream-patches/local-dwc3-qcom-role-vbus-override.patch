@@ -1,0 +1,49 @@
+Subject: [PATCH] usb: dwc3: qcom: drive VBUS/LANE0_PWR_PRESENT override from target role
+
+SPDX-License-Identifier: GPL-2.0-only
+
+dwc3_qcom_set_role_notifier() checked qcom->current_role instead of
+next_role when toggling QSCRATCH LANE0_PWR_PRESENT and UTMI_OTG_VBUS_VALID,
+leaving VBUS override asserted on a HOST -> NONE detach and skipping the
+initial role transition when usb-role-switch initialized current_role to
+USB_ROLE_DEVICE before the Type-C controller probed.
+
+Drive dwc3_qcom_vbus_override_enable() from (next_role == USB_ROLE_DEVICE)
+and start current_role at USB_ROLE_NONE when usb-role-switch is used, while
+preserving the initial override for default peripheral mode.
+
+Authored with Gemini 4 Carbon.
+---
+diff --git a/drivers/usb/dwc3/dwc3-qcom.c b/drivers/usb/dwc3/dwc3-qcom.c
+--- a/drivers/usb/dwc3/dwc3-qcom.c
++++ b/drivers/usb/dwc3/dwc3-qcom.c
+@@ -570,10 +570,7 @@
+ 		return;
+ 	}
+ 
+-	if (qcom->current_role == USB_ROLE_DEVICE)
+-		dwc3_qcom_vbus_override_enable(qcom, false);
+-	else if (qcom->current_role != USB_ROLE_DEVICE)
+-		dwc3_qcom_vbus_override_enable(qcom, true);
++	dwc3_qcom_vbus_override_enable(qcom, next_role == USB_ROLE_DEVICE);
+ 
+ 	pm_runtime_mark_last_busy(qcom->dev);
+ 	pm_runtime_put_sync(qcom->dev);
+@@ -690,12 +687,12 @@
+ 	} else if (qcom->mode == USB_DR_MODE_PERIPHERAL) {
+ 		qcom->current_role = USB_ROLE_DEVICE;
+ 		dwc3_qcom_vbus_override_enable(qcom, true);
++	} else if (device_property_read_bool(dev, "usb-role-switch")) {
++		qcom->current_role = USB_ROLE_NONE;
++		if (usb_get_role_switch_default_mode(dev) == USB_DR_MODE_PERIPHERAL)
++			dwc3_qcom_vbus_override_enable(qcom, true);
+ 	} else {
+-		if ((device_property_read_bool(dev, "usb-role-switch")) &&
+-		    (usb_get_role_switch_default_mode(dev) == USB_DR_MODE_HOST))
+-			qcom->current_role = USB_ROLE_HOST;
+-		else
+-			qcom->current_role = USB_ROLE_DEVICE;
++		qcom->current_role = USB_ROLE_DEVICE;
+ 	}
+ 
+ 	qcom->dwc.glue_ops = &dwc3_qcom_glue_ops;

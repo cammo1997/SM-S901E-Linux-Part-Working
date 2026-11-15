@@ -13,7 +13,7 @@
 ## Not sorted - needs work
 - [x] **Wi-Fi CONNECTS** (5 GHz, Wi-Fi 6 2x2, 960 Mbit/s link), autoconnects at boot (ath11k loaded late by /etc/local.d/s22-wifi.start). 2.4 GHz connect still to fix
 - [x] **Wi-Fi signal** fixed by Samsung board file (-35 dBm 2.4 GHz, -51 dBm 5 GHz at 6 m)
-- [x] **RAM**: +512 MiB (dropped mainline mte_mem), 6.6 GiB usable (attempt 21)
+- [x] **RAM**: +854 MiB total reclaimed (dropped mainline `mte_mem`, disabled `oem_vm_mem`/`global_sync_mem`, Android-only `trust_ui_vm_*`/`rdx_bootdev`/`sec_debug`, stock 23 MiB `slpi_mem`; modem/camera/CVP kept), **7.0 GiB (7,161 MiB) usable**
 - [x] **On-screen keyboard** (plasma-keyboard as KWin input method; hide key works, no auto-hide yet)
 - [x] **Charging**: works (charger driver unblocked, battery seen going 99% -> 100%); battery status icon may say Unknown until DT links gauge to charger
 - [x] **Battery %**: works (max170xx_battery, DT dependency on charger removed)
@@ -31,7 +31,7 @@
 - [ ] **Cameras**, flash
 - [ ] **Fingerprint** reader
 - [ ] **NFC**
-- [ ] **USB-C**: host/OTG (driver + OTG VBUS in place since attempt 23, untested), PD, DisplayPort out, USB3 (currently USB2 peripheral only)
+- [x] **USB-C**: host/OTG (with VBUS), USB-PD (5V/3A & 9V/2A), **USB 3.0 SuperSpeed (5 Gbps, CC1/CC2 orientation)**, and **DisplayPort Alt-Mode (`card1-DP-1`, SVDM `0xff01` Pin C/D/E)**
 - [ ] **RTC** is read-only (clock relies on NTP; no time at boot until network)
 - [x] **120 Hz** (panel driver refresh=120 default, stock fhd120hs timing + commands)
 - [ ] **Display extras**: VRR (no dynamic switching), HBM, colour calibration, always-on display
