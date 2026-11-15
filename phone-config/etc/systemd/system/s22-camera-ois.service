@@ -1,0 +1,11 @@
+[Unit]
+Description=Samsung Galaxy S22 Camera OIS Init and Centering
+After=systemd-modules-load.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/lib/s22/s22-camera-ois.sh
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

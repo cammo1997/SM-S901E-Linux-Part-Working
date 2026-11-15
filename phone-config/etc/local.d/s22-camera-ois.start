@@ -1,0 +1,5 @@
+#!/bin/sh
+# Initialize and center Samsung Galaxy S22 (r0q) OIS MCU (0x62 on i2c-1).
+if [ -x /usr/local/lib/s22/s22-camera-ois.sh ]; then
+	/usr/local/lib/s22/s22-camera-ois.sh >/var/log/s22-camera-ois.log 2>&1 || true
+fi

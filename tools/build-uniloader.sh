@@ -26,6 +26,10 @@ cp "$PMOS/sm8450-samsung-r0q.dtb"  "$SRC/blob/dtb"
 cp "$PMOS/initramfs"               "$SRC/blob/ramdisk"
 
 cd "$SRC"
+if [ -f "$W/../kernel/uniloader-patches/0001-dtb-relocate.patch" ]; then
+    patch -p1 --forward < "$W/../kernel/uniloader-patches/0001-dtb-relocate.patch"
+    cat "$W/../kernel/uniloader-patches/r0q_defconfig.append" >> configs/r0q_defconfig
+fi
 touch "$OUT/.stamp"
 
 echo "[2/4] make r0q_defconfig"

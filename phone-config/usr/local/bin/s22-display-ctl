@@ -1,0 +1,300 @@
+#!/bin/sh
+# SPDX-License-Identifier: MIT
+# Control Samsung Galaxy S22 (S6E3FAC) Display Extras:
+# Dynamic 120/60Hz VRR (+45s static 24Hz, opt-in Game 90/96Hz), HBM, mDNIe/OTP colour, and AOD.
+
+set -eu
+
+cmd="${1:-status}"
+if [ "$cmd" != "status" ] && [ "$cmd" != "json" ] && [ "$cmd" != "help" ] && [ "$cmd" != "--help" ] && [ "$(id -u)" -ne 0 ]; then
+	exec sudo -n \
+		WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-}" \
+		XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}" \
+		"$0" "$@" 2>/dev/null || exec sudo \
+		WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-}" \
+		XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}" \
+		"$0" "$@"
+fi
+
+CONF="/etc/s22-display.conf"
+PANEL=""
+for d in /sys/bus/mipi-dsi/devices/*; do
+	if [ -f "$d/vrr_mode" ]; then
+		PANEL="$d"
+		break
+	fi
+done
+
+if [ -z "$PANEL" ]; then
+	echo "s22-display-ctl: S6E3FAC panel sysfs not found under /sys/bus/mipi-dsi/devices" >&2
+	exit 1
+fi
+
+DSI_CONN=""
+for c in /sys/class/drm/card*-DSI-1; do
+	if [ -d "$c" ]; then
+		DSI_CONN="$c"
+		break
+	fi
+done
+
+save_conf() {
+	key="$1"
+	val="$2"
+	[ -w "$CONF" ] || return 0
+	if grep -q "^${key}=" "$CONF" 2>/dev/null; then
+		sed -i "s|^${key}=.*|${key}=\"${val}\"|" "$CONF"
+	else
+		printf '%s="%s"\n' "$key" "$val" >> "$CONF"
+	fi
+}
+
+get_conf() {
+	key="$1"
+	def="$2"
+	val="$(sed -n "s/^${key}=\"\?\([^\"]*\)\"\?.*/\1/p" "$CONF" 2>/dev/null | head -n1)"
+	printf '%s\n' "${val:-$def}"
+}
+
+run_kscreen() {
+	arg="$1"
+	command -v kscreen-doctor >/dev/null 2>&1 || return 0
+	for rt in /run/user/*; do
+		wsock="$(ls "$rt"/wayland-[0-9] 2>/dev/null | head -n1 || true)"
+		[ -n "$wsock" ] && [ -S "$wsock" ] || continue
+		uid="$(basename "$rt")"
+		usr="$(awk -F: -v u="$uid" '$3 == u { print $1; exit }' /etc/passwd 2>/dev/null)"
+		[ -n "$usr" ] || continue
+		sudo -u "$usr" XDG_RUNTIME_DIR="$rt" WAYLAND_DISPLAY="$(basename "$wsock")" \
+			kscreen-doctor "$arg" >/dev/null 2>&1 || true
+		break
+	done
+}
+
+write_state_json() {
+	aod_en="$(get_conf AOD_ENABLED 0)"
+	aod_nits="$(cat "$PANEL/aod_brightness" 2>/dev/null || echo 10)"
+	game_en="$(cat "$PANEL/game_mode" 2>/dev/null || get_conf GAME_MODE 0)"
+	vrr_raw="$(cat "$PANEL/vrr_mode" 2>/dev/null || echo dynamic)"
+	col_raw="$(cat "$PANEL/colour_mode" 2>/dev/null || echo vivid)"
+	hbm_m="$(cat "$PANEL/hbm_mode" 2>/dev/null || echo 0)"
+	hbm_auto="$(get_conf HBM_AUTO 1)"
+	wake_s="$(get_conf NOTIFICATION_WAKE_SEC 3)"
+	kelvin="$(cat "$PANEL/night_kelvin" 2>/dev/null || echo 4300)"
+	tmp="/run/s22-display-state.json.tmp"
+	if printf '{"aod":%s,"aod_nits":%s,"game":%s,"vrr":"%s","colour":"%s","hbm":%s,"hbm_auto":%s,"wake_sec":%s,"kelvin":%s}\n' \
+		"$aod_en" "$aod_nits" "$game_en" "$vrr_raw" "$col_raw" "$hbm_m" "$hbm_auto" "$wake_s" "$kelvin" > "$tmp" 2>/dev/null; then
+		chmod 0644 "$tmp" 2>/dev/null || true
+		mv -f "$tmp" /run/s22-display-state.json 2>/dev/null || true
+	fi
+}
+
+usage() {
+	cat <<'USAGE'
+Usage: s22-display-ctl <command> [args]
+
+Commands:
+  status                                  Show all S6E3FAC display states & OTP calibration
+  vrr <dynamic|fixed|game|120|90|60>      Set refresh policy (only 120/60Hz normal; 90/96Hz in game)
+  game <on|off|toggle>                    Toggle Game Mode (90/96Hz gaming refresh)
+  hbm <off|boost|sunlight|auto|0|1|2>     Control High Brightness Mode (up to ~1300 nits)
+  colour <vivid|natural|standard|auto|bypass|grayscale|night|outdoor>
+                                          Set hardware mDNIe + IRC colour calibration profile
+  wb <R> <G> <B>                          Set RGB white balance gains (128..255 each)
+  kelvin <2300..6500>                     Set hardware Night Mode colour temperature in K
+  acl <0|1|2|3>                           Set AMOLED Automatic Current Limit (0=off, 1=8%, 2=15%, 3=30%)
+  aod <on|off|toggle> [2|10|30|60]        Enable/disable hardware Always-On Display (off by default)
+  wake-sec <0..15>                        Seconds to light screen on incoming message when off (default 3)
+USAGE
+}
+
+case "$cmd" in
+	status)
+		echo "=== Samsung S6E3FAC Display Extras ($PANEL) ==="
+		echo "DRM connector : ${DSI_CONN:-n/a} ($(cat "${DSI_CONN}/enabled" 2>/dev/null || echo n/a))"
+		echo "DRM modes     : $(tr '\n' ' ' < "${DSI_CONN}/modes" 2>/dev/null || echo n/a)"
+		echo "VRR mode      : $(cat "$PANEL/vrr_mode")"
+		echo "Game mode     : $(cat "$PANEL/game_mode" 2>/dev/null || echo 0)"
+		echo "Video mode    : $(cat "$PANEL/video_mode" 2>/dev/null || echo 0)"
+		echo "HBM mode      : $(cat "$PANEL/hbm_mode") (hbm_dbv=$(cat "$PANEL/hbm_dbv"), auto=$(get_conf HBM_AUTO 1))"
+		echo "Backlight     : $(cat /sys/class/backlight/*/brightness 2>/dev/null | head -n1) / $(cat /sys/class/backlight/*/max_brightness 2>/dev/null | head -n1)"
+		echo "Colour mode   : $(cat "$PANEL/colour_mode")"
+		echo "White balance : $(cat "$PANEL/white_balance_rgb")"
+		echo "Factory OTP   : $(cat "$PANEL/factory_calibration")"
+		echo "Night Kelvin  : $(cat "$PANEL/night_kelvin") K"
+		echo "ACL mode      : $(cat "$PANEL/acl_mode")"
+		echo "AOD (HLPM)    : $(cat "$PANEL/aod_mode") @ $(cat "$PANEL/aod_brightness") nits"
+		echo "Msg wake time : $(get_conf NOTIFICATION_WAKE_SEC 3) s"
+		;;
+	json)
+		if [ -f /run/s22-display-state.json ]; then
+			cat /run/s22-display-state.json
+		else
+			write_state_json
+			cat /run/s22-display-state.json 2>/dev/null || echo '{}'
+		fi
+		;;
+	vrr)
+		mode="${2:?missing VRR mode}"
+		case "$mode" in
+			dynamic|adaptive)
+				echo 0 > "$PANEL/game_mode" 2>/dev/null || true
+				echo dynamic > "$PANEL/vrr_mode"
+				save_conf GAME_MODE 0
+				save_conf VRR_MODE dynamic
+				run_kscreen "output.DSI-1.mode.1080x2340@120"
+				;;
+			fixed)
+				echo 0 > "$PANEL/game_mode" 2>/dev/null || true
+				echo fixed > "$PANEL/vrr_mode"
+				save_conf GAME_MODE 0
+				save_conf VRR_MODE fixed
+				;;
+			120)
+				echo 0 > "$PANEL/game_mode" 2>/dev/null || true
+				echo fixed > "$PANEL/vrr_mode"
+				save_conf GAME_MODE 0
+				save_conf VRR_MODE fixed
+				run_kscreen "output.DSI-1.mode.1080x2340@120"
+				;;
+			60)
+				echo 0 > "$PANEL/game_mode" 2>/dev/null || true
+				echo fixed > "$PANEL/vrr_mode"
+				save_conf GAME_MODE 0
+				save_conf VRR_MODE fixed
+				run_kscreen "output.DSI-1.mode.1080x2340@60"
+				;;
+			game|90|96)
+				echo 1 > "$PANEL/game_mode" 2>/dev/null || echo game > "$PANEL/vrr_mode"
+				save_conf GAME_MODE 1
+				save_conf VRR_MODE game
+				sleep 0.2
+				run_kscreen "output.DSI-1.mode.1080x2340@96"
+				;;
+			24)
+				echo 24 > "$PANEL/vrr_mode"
+				;;
+			*)
+				echo "Invalid VRR mode: $mode (allowed: dynamic, fixed, game, 120, 90, 60)" >&2
+				exit 1
+				;;
+		esac
+		write_state_json
+		echo "VRR mode -> $(cat "$PANEL/vrr_mode")"
+		;;
+	game)
+		gstate="${2:-toggle}"
+		cur_g="$(cat "$PANEL/game_mode" 2>/dev/null || get_conf GAME_MODE 0)"
+		if [ "$gstate" = "toggle" ]; then
+			if [ "$cur_g" = "1" ]; then gstate="off"; else gstate="on"; fi
+		fi
+		case "$gstate" in
+			on|1)
+				"$0" vrr game
+				;;
+			off|0)
+				"$0" vrr dynamic
+				;;
+			*)
+				echo "Invalid game state: $gstate" >&2
+				exit 1
+				;;
+		esac
+		;;
+	hbm)
+		arg="${2:?missing HBM mode}"
+		case "$arg" in
+			off|0)
+				save_conf HBM_AUTO 0
+				echo 0 > "$PANEL/hbm_mode"
+				;;
+			boost|1)
+				save_conf HBM_AUTO 0
+				echo 1 > "$PANEL/hbm_mode"
+				;;
+			sunlight|peak|2)
+				save_conf HBM_AUTO 0
+				echo 4095 > "$PANEL/hbm_dbv"
+				echo 2 > "$PANEL/hbm_mode"
+				;;
+			auto)
+				save_conf HBM_AUTO 1
+				echo 0 > "$PANEL/hbm_mode"
+				;;
+			*)
+				echo "Invalid HBM mode: $arg" >&2
+				exit 1
+				;;
+		esac
+		write_state_json
+		echo "HBM mode -> $(cat "$PANEL/hbm_mode") (auto=$(get_conf HBM_AUTO 1))"
+		;;
+	colour|color)
+		cm="${2:?missing colour mode}"
+		echo "$cm" > "$PANEL/colour_mode"
+		save_conf COLOUR_MODE "$cm"
+		write_state_json
+		echo "Colour mode -> $(cat "$PANEL/colour_mode")"
+		;;
+	wb)
+		r="${2:?missing R}"
+		g="${3:?missing G}"
+		b="${4:?missing B}"
+		echo "$r $g $b" > "$PANEL/white_balance_rgb"
+		save_conf WHITE_BALANCE_RGB "$r $g $b"
+		echo "White balance -> $(cat "$PANEL/white_balance_rgb")"
+		;;
+	kelvin)
+		k="${2:?missing kelvin}"
+		echo "$k" > "$PANEL/night_kelvin"
+		save_conf NIGHT_KELVIN "$k"
+		write_state_json
+		echo "Night Kelvin -> $(cat "$PANEL/night_kelvin") K"
+		;;
+	acl)
+		a="${2:?missing acl 0..3}"
+		echo "$a" > "$PANEL/acl_mode"
+		save_conf ACL_MODE "$a"
+		echo "ACL mode -> $(cat "$PANEL/acl_mode")"
+		;;
+	aod)
+		state="${2:-toggle}"
+		cur_aod="$(get_conf AOD_ENABLED 0)"
+		if [ "$state" = "toggle" ]; then
+			if [ "$cur_aod" = "1" ]; then state="off"; else state="on"; fi
+		fi
+		case "$state" in
+			on|1)
+				if [ "${3:-}" != "" ]; then
+					echo "$3" > "$PANEL/aod_brightness"
+					save_conf AOD_NITS "$3"
+				fi
+				echo 1 > "$PANEL/aod_mode"
+				save_conf AOD_ENABLED 1
+				;;
+			off|0)
+				echo 0 > "$PANEL/aod_mode"
+				save_conf AOD_ENABLED 0
+				if [ "${3:-}" != "" ]; then
+					echo "$3" > "$PANEL/aod_brightness"
+					save_conf AOD_NITS "$3"
+				fi
+				;;
+			*)
+				echo "Invalid AOD state: $state" >&2
+				exit 1
+				;;
+		esac
+		write_state_json
+		echo "AOD -> $(cat "$PANEL/aod_mode") @ $(cat "$PANEL/aod_brightness") nits"
+		;;
+	wake-sec)
+		sec="${2:?missing seconds 0..15}"
+		save_conf NOTIFICATION_WAKE_SEC "$sec"
+		write_state_json
+		echo "Notification wake -> ${sec} s"
+		;;
+	help|--help|-h|*)
+		usage
+		;;
+esac

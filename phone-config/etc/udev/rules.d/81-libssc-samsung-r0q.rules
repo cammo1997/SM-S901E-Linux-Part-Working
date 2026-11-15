@@ -1,0 +1,4 @@
+# iio-sensor-proxy with libssc (SLPI): convert Qualcomm SEE proper-acceleration
+# (+X right, +Y top, +Z front = -g) to Linux IIO gravity convention so portrait,
+# inverted-portrait, landscape-left, and landscape-right rotate to the right side.
+SUBSYSTEM=="misc", KERNEL=="fastrpc-*", ENV{ACCEL_MOUNT_MATRIX}+="-1, 0, 0; 0, -1, 0; 0, 0, -1"

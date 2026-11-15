@@ -54,16 +54,28 @@ From flashing uniLoader up to attempt 39 (2026-10-20). Kernel 7.2.11, postmarket
 | 41 | No camera subsystem | SM8450 CAMSS + camcc fixes, &camss/&cci0/&cci1 (attempt 35) | Tab S8+ |
 | 42 | Camera rails unreachable | S2MPB02 camera PMIC regulator driver on i2c-gpio 175/176 (attempt 36) | Samsung kernel (GPL driver, wiring) + Ours |
 | 43 | No sensor settings | Vendor partition read via F2FS (with compression) module; CamX Chromatix decoder (tools/camx-chromatix-dump.py) | Ours |
+| 44 | 2.4 GHz Wi-Fi TX dead (`NO_ACK`, auth/association timed out) | `s22-wlan-pdc` enables QCA6490 2.2 V internal 2.4 GHz PA rail (`s3e.e upval: 1`) via AOSS QMP before cold boot calibration | Samsung kernel (`cnss2`/`btpower` QMP) + Ours (Gemini 4 Carbon) |
+| 45 | Read-only RTC (`1970` at boot before NTP) | `&pmk8350_rtc` wired to `&pmk8350_sdam_21` `rtc-offset@78` (128-byte HLOS-writable SPMI SDAM); `rtc_pm8xxx` unblocked | Mainline `rtc-pm8xxx` + Ours (Gemini 4 Carbon) |
+| 46 | No sensors (auto-rotate, ambient light, proximity, compass) | `&remoteproc_slpi` (`slpi.mdt`) + stock `L2C` (1.8 V) / `L9C` (3.0 V) rails + `s22-hex-cb3` (`0x0543` `SENSORS_PD` CB) + `hexagonrpcd` + `iio-sensor-proxy` | Stock DTBO (`fragment@47`/`143`) + Ours (Gemini 4 Carbon) |
+| 47 | Deep suspend/resume USB check | Verified `deep` sleep + RTC alarm / `pmic_pwrkey` wakeup with `max77705_typec` + `dwc3-host-power-lost`: USB NCM & Wi-Fi survive resume without replug | Tab S8+ + Ours (Gemini 4 Carbon) |
+| 48 | USB 2.0 peripheral only (no USB 3.0 SuperSpeed) | Enable `&usb_1_qmpphy` (`vreg_l1b_0p91` + `vreg_l6b_1p2`), add 4nm SM8450/r0q QMP RX & PCS lock-detect tuning (`0xc4`/`0x89`, stock `fragment@152`), fix `dwc3-qcom` role VBUS/`LANE0_PWR_PRESENT` override, set `maximum-speed = "super-speed"` (`fragment@150`), build USB3/Type-C stack in | Samsung kernel (DTBO values) + Ours (Gemini 4 Carbon) |
+| 49 | No DisplayPort over USB-C | Enable `&mdss_dp0` (`card1-DP-1`, 2 lanes up to HBR3), add `gpio-sbu-mux` (`gpio125` `/OE` active-low, `gpio108` `aux_sel`), wire OF-graph ports, and implement SVDM `0xff01` (Discover Identity/SVIDs/Modes, Enter Mode, DP Status, DP Configure Pin C/D/E, Attention/HPD + `drm_dp_hpd_bridge`) in `max77705-usbc` | Samsung kernel (`max77705_alternate.c`, `secdp`) + Ours (Gemini 4 Carbon) |
+| 50 | 342 MiB of HLOS RAM still locked in Android-only `no-map` regions | Drop DTBO-disabled `oem_vm_mem` (80M) & `global_sync_mem` (1M), Android-only `trust_ui_vm_*` (76M), boot-freed `samsung-rdx-bootdev` (173M) & `samsung-sec-debug` (10M), and shrink `slpi_mem` to stock 23M (`fragment@123`), keeping modem/camera/CVP intact -> **7,161 MiB (7.0 GiB) usable** | Samsung kernel (`sec_qc_rdx_bootdev.c`, stock DTBO) + Ours (Gemini 4 Carbon) |
+
+| 51 | Modem not listed by ModemManager, no mobile data (no SM8450 IPA), manual start only | Backport SM8450 IPA v5.1 (`qcom,sm8450-ipa`, `ipa_data-v5.1.c`), wire `&ipa` to stock `ipa_gsi_mem` (`0x8b910000` PAS 15 `apnhlos` `ipa_fws.mdt`), enable `RMNET` + `RPMSG_WWAN_CTRL`, add `s22-modem.service` (auto-boot + Dual-SIM QMI UIM provisioning + GNSS), read-only `rmtfs` drop-in, `81voltd`, and `VoiceCall`/`Earpiece` UCM2 | Upstream LKML (E. Urrutia / N. Kompanets) + Samsung kernel (`ipa.c`) + Ours (Gemini 4 Carbon) |
+| 52 | Fixed 120 Hz only (no dynamic VRR), no HBM, no colour calibration, no Always-On Display | Upgrade `panel-samsung-s6e3fac` with 6 stock FHD modes (120/96/60/48/30/24 Hz) + glitch-free seamless switching + hardware PHS/LFD adaptive VRR (10-120 Hz), 12-bit HBM (`0x0800..0x0fff`, ~1300 nits + `STK33915` auto-lux), hardware mDNIe/IRC colour modes + factory `0xA1` OTP white-point calibration + RGB/Kelvin LUT, hardware HLPM Always-On Display (2/10/30/60 nit + pocket guard), and `s22-display-ctl` | Samsung kernel (`S6E3FAC_AMB606AW01`) + Ours (Gemini 4 Carbon) |
+
+| 53 | Display helpers silently skipped `kscreen-doctor` when the compositor socket was `wayland-1` instead of `wayland-0` | Discover `wayland-[0-9]` in `s22-display-ctl` / `s22-display-extrasd`, and resolve the session user from `/etc/passwd` (busybox `id -nu` fails under sudo) before calling `kscreen-doctor` | Ours |
+| 54 | KWin composited on `llvmpipe` because the Plasma session started before the Adreno DRM nodes existed | `startplasmamobile` now drops `EGL_PLATFORM=wayland` and waits for `/dev/dri/card0` + `/dev/dri/renderD128` before launching KWin; KWin selects `renderD128` / `freedreno FD730` | Ours |
+| 55 | Front camera (`IMX374`) CCI1 bus SDA/SCL held low (I2C timeouts) & missing rear camera rails/drivers | Expand `s2mpb02-regulator` to all 21 regulators (`LDO1-18`, `BUCK1`, `BUCK2` 1.3 V, `BUCK_BOOST` 3.3 V) and keep shared I/O & sub-PMIC rails (`buck2`, `bb`, `ldo6`, `ldo7`, `ldo9`) always-on per stock DTBO (`s2mpb02_pmic@59`), releasing the CCI pull-ups; enable `&gpi_dma2` + `&i2c16` (1 MHz) + `gpio83` (`CAM_WIDE_LONG_EXPOSURE` low) and add V4L2 drivers for `imx374`, `s5k3k1`, `imx563`, and `s5kgn3` | Stock DTBO (`fragment@68`/`104`) + CamX sensormodules + Ours |
+| 56 | Ultrawide (`IMX563`) & Main Wide (`S5KGN3`) use 3-trio MIPI C-PHY (rejected by mainline SM8450 CAMSS) | Add 3-phase C-PHY support (`MEDIA_BUS_TYPE_CSI2_CPHY`, `CSI2_RX_CFG0_PHY_TYPE_SEL = 1`, SM8450 5nm 3PH Trio0/1/2 lane config, 1.50-3.30 GSpS rate delta table, and 400 MHz `csiphy_timer` frequency clamp) in `local-sm8450-camss-cphy.patch` | Downstream `csiphy_v2_0_1_3ph` + Ours |
 
 ## Not fixed yet
-- 2.4 GHz Wi-Fi association times out (5 GHz works)
 - Speaker protection firmware (volume kept moderate)
-- Suspend/resume (blocked), keyboard auto-hide
-- Front camera (IMX374): driver written, CCI bus held low (timeouts); rear camera drivers not written
+- Keyboard auto-hide
 - Unused clocks/power domains kept on (clk_ignore_unused); removing them broke the display probe (attempt 40, reverted)
 - NPU compute runtime (needs Qualcomm SDK); NPU first-call race
-- Modem: no SIM tested, ModemManager doesn't list it; no mobile data (no sm8450 IPA)
-- Sensors, cameras, fingerprint, NFC, vibration, writable RTC
+- Fingerprint (QBT2000/QBT2608 TrustZone-only), NFC
 
 ## Rules kept throughout
 - Never write the EFS partitions (efs, sec_efs, persist, modemst1/2, fsg, fsc)

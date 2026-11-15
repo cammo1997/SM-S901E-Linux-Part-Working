@@ -1,0 +1,176 @@
+--- a/drivers/media/i2c/ak7375.c
++++ b/drivers/media/i2c/ak7375.c
+@@ -18,6 +18,7 @@
+ 	u8 mode_standby;
+ 	bool has_standby;	/* Some chips may not have standby mode */
+ 	u16 focus_pos_max;
++	u16 focus_pos_def;
+ 	/*
+ 	 * This sets the minimum granularity for the focus positions.
+ 	 * A value of 1 gives maximum accuracy for a desired focus position
+@@ -36,6 +37,8 @@
+ 	 * I2C messages.
+ 	 */
+ 	u16 power_delay_us;
++	bool no_open_rpm;
++	bool standby_before_active;
+ };
+ 
+ static const struct ak73xx_chipdef ak7345_cdef = {
+@@ -65,6 +68,24 @@
+ 	.power_delay_us	= 10000,
+ };
+ 
++/* AKM AK7377 & Dongwoon DW9825A (Samsung Galaxy S22 r0q VCMs) */
++static const struct ak73xx_chipdef ak7377_cdef = {
++	.reg_position		= 0x0,
++	.reg_cont		= 0x2,
++	.shift_pos		= 4,	/* 12 bits position values, need to << 4 */
++	.mode_active		= 0x0,
++	.mode_standby		= 0x40,
++	.has_standby		= true,
++	.focus_pos_max		= 4095,
++	.focus_steps		= 1,
++	.focus_pos_def		= 2000,
++	.ctrl_steps		= 64,
++	.ctrl_delay_us		= 1000,
++	.power_delay_us		= 5000,
++	.no_open_rpm		= true,
++	.standby_before_active	= true,
++};
++
+ static const char * const ak7375_supply_names[] = {
+ 	"vdd",
+ 	"vio",
+@@ -119,9 +140,12 @@
+ 	struct ak7375_device *dev_vcm = to_ak7375_vcm(ctrl);
+ 	const struct ak73xx_chipdef *cdef = dev_vcm->cdef;
+ 
+-	if (ctrl->id == V4L2_CID_FOCUS_ABSOLUTE)
++	if (ctrl->id == V4L2_CID_FOCUS_ABSOLUTE) {
++		if (!dev_vcm->active)
++			return 0;
+ 		return ak7375_i2c_write(dev_vcm, cdef->reg_position,
+ 					ctrl->val << cdef->shift_pos, 2);
++	}
+ 
+ 	return -EINVAL;
+ }
+@@ -132,11 +156,21 @@
+ 
+ static int ak7375_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh)
+ {
++	struct ak7375_device *ak7375_dev = sd_to_ak7375_vcm(sd);
++
++	if (ak7375_dev->cdef->no_open_rpm)
++		return 0;
++
+ 	return pm_runtime_resume_and_get(sd->dev);
+ }
+ 
+ static int ak7375_close(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh)
+ {
++	struct ak7375_device *ak7375_dev = sd_to_ak7375_vcm(sd);
++
++	if (ak7375_dev->cdef->no_open_rpm)
++		return 0;
++
+ 	pm_runtime_put(sd->dev);
+ 
+ 	return 0;
+@@ -165,7 +199,7 @@
+ 	v4l2_ctrl_handler_init(hdl, 1);
+ 
+ 	dev_vcm->focus = v4l2_ctrl_new_std(hdl, ops, V4L2_CID_FOCUS_ABSOLUTE,
+-		0, cdef->focus_pos_max, cdef->focus_steps, 0);
++		0, cdef->focus_pos_max, cdef->focus_steps, cdef->focus_pos_def);
+ 
+ 	if (hdl->error)
+ 		dev_err(dev_vcm->sd.dev, "%s fail error: 0x%x\n",
+@@ -305,38 +339,71 @@
+ 	/* Wait for vcm to become ready */
+ 	usleep_range(cdef->power_delay_us, cdef->power_delay_us + 500);
+ 
+-	ret = ak7375_i2c_write(ak7375_dev, cdef->reg_cont,
+-			       cdef->mode_active, 1);
+-	if (ret) {
+-		dev_err(dev, "%s I2C failure: %d\n", __func__, ret);
+-		return ret;
+-	}
++	if (cdef->standby_before_active) {
++		ret = ak7375_i2c_write(ak7375_dev, cdef->reg_cont,
++				       cdef->mode_standby, 1);
++		if (ret) {
++			dev_err(dev, "%s I2C failure: %d\n", __func__, ret);
++			goto err_disable_reg;
++		}
++		usleep_range(cdef->power_delay_us, cdef->power_delay_us + 500);
+ 
+-	for (val = ak7375_dev->focus->val % cdef->ctrl_steps;
+-	     val <= ak7375_dev->focus->val;
+-	     val += cdef->ctrl_steps) {
+ 		ret = ak7375_i2c_write(ak7375_dev, cdef->reg_position,
+-				       val << cdef->shift_pos, 2);
+-		if (ret)
+-			dev_err_ratelimited(dev, "%s I2C failure: %d\n",
+-						__func__, ret);
+-		usleep_range(cdef->ctrl_delay_us, cdef->ctrl_delay_us + 10);
++				       ak7375_dev->focus->val << cdef->shift_pos, 2);
++		if (ret) {
++			dev_err(dev, "%s I2C failure: %d\n", __func__, ret);
++			goto err_disable_reg;
++		}
++		usleep_range(cdef->ctrl_delay_us, cdef->ctrl_delay_us + 100);
++
++		ret = ak7375_i2c_write(ak7375_dev, cdef->reg_cont,
++				       cdef->mode_active, 1);
++		if (ret) {
++			dev_err(dev, "%s I2C failure: %d\n", __func__, ret);
++			goto err_disable_reg;
++		}
++	} else {
++		ret = ak7375_i2c_write(ak7375_dev, cdef->reg_cont,
++				       cdef->mode_active, 1);
++		if (ret) {
++			dev_err(dev, "%s I2C failure: %d\n", __func__, ret);
++			goto err_disable_reg;
++		}
++
++		for (val = ak7375_dev->focus->val % cdef->ctrl_steps;
++		     val <= ak7375_dev->focus->val;
++		     val += cdef->ctrl_steps) {
++			ret = ak7375_i2c_write(ak7375_dev, cdef->reg_position,
++					       val << cdef->shift_pos, 2);
++			if (ret)
++				dev_err_ratelimited(dev, "%s I2C failure: %d\n",
++							__func__, ret);
++			usleep_range(cdef->ctrl_delay_us, cdef->ctrl_delay_us + 10);
++		}
+ 	}
+ 
+ 	ak7375_dev->active = true;
+ 
+ 	return 0;
++
++err_disable_reg:
++	regulator_bulk_disable(ARRAY_SIZE(ak7375_supply_names),
++			       ak7375_dev->supplies);
++	return ret;
+ }
+ 
+ static const struct of_device_id ak7375_of_table[] = {
+ 	{ .compatible = "asahi-kasei,ak7345", .data = &ak7345_cdef, },
+ 	{ .compatible = "asahi-kasei,ak7375", .data = &ak7375_cdef, },
++	{ .compatible = "asahi-kasei,ak7377", .data = &ak7377_cdef, },
++	{ .compatible = "dongwoon,dw9825a", .data = &ak7377_cdef, },
+ 	{ /* sentinel */ }
+ };
+ MODULE_DEVICE_TABLE(of, ak7375_of_table);
+ 
+ static const struct dev_pm_ops ak7375_pm_ops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(ak7375_vcm_suspend, ak7375_vcm_resume)
++	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
++				pm_runtime_force_resume)
+ 	SET_RUNTIME_PM_OPS(ak7375_vcm_suspend, ak7375_vcm_resume, NULL)
+ };
+ 

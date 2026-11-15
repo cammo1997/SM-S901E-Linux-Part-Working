@@ -15,6 +15,8 @@ This port stands on other people's work. Thank you to:
 | Nura wiki – Samsung Galaxy S22 5G (samsung-r0q) | https://wiki.nura.eco/wiki/Samsung_Galaxy_S22_5G_(samsung-r0q) | – | Reference notes for r0q |
 | TWRP | https://twrp.me | GPL-3.0 | Recovery used for flashing and EFS backup |
 | Linaro / Qualcomm upstream contributors | https://git.codelinaro.org/linaro/qcomlt | GPL-2.0 | SM8450 mainline support, AudioReach, remoteproc, QRTR/rmtfs |
+| Esteban Urrutia & Nazar Kompanets | https://lore.kernel.org/all/20260909-sm8450-ipa-v2-0-2deb8b4e91a5@proton.me/ | GPL-2.0 | Qualcomm SM8450 IPA v5.1 configuration data (`ipa_data-v5.1.c`) and DT node |
+| Richard Acayan – 81voltd | https://gitlab.postmarketos.org/modem/81voltd | GPL-2.0+ | Server-side QMI IMS Data service daemon for VoLTE over ModemManager |
 | Flathub | https://flathub.org | – | App store (Google Chrome ARM64) |
 
 Samsung firmware is proprietary and belongs to Samsung / Qualcomm; it is not redistributed here.

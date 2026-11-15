@@ -1,0 +1,13 @@
+[Unit]
+Description=Samsung Galaxy S22 (SM8450) MPSS Cellular Modem & IPA Setup
+After=systemd-udevd.service rmtfs.service tqftpserv.service pd-mapper.service qrtr-ns.service
+Wants=rmtfs.service tqftpserv.service
+Before=ModemManager.service 81voltd.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/lib/s22/s22-modem-start.sh
+
+[Install]
+WantedBy=multi-user.target

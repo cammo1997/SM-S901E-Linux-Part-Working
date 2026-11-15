@@ -38,6 +38,9 @@ Wi-Fi is the one big item still open. Even the failed Wi-Fi attempts are useful:
 | 10-18 | 26 | VA macro + DMICs (LPI 6/7, 8/9, 12/13), L12C | **microphones work** |
 | 10-18 | 27 | gpio-keys: volume up on pm8350 gpio6 | **volume up works** |
 | 10-18 | - | Samsung Wi-Fi fw + board file (really loaded) + regdb + ath11k cold boot calibration | **Wi-Fi CONNECTS (5 GHz, 960 Mbit/s link)** |
+| 11-12 | - | QMP USB3+DP combo PHY (4nm S22 tuning), built-in Type-C/SBU AUX mux, SVDM `0xff01` + DRM HPD bridge in `max77705-usbc`, `&mdss_dp0`, +342 MiB Android-only RAM reclaim | **USB 3.0 SuperSpeed (5 Gbps), DisplayPort Alt-Mode (`card1-DP-1`) & 7.0 GiB usable RAM** |
+| 11-12 | - | SM8450 IPA v5.1 (`qcom,sm8450-ipa`, `ipa_gsi_mem` PAS 15) + `rpmsg_wwan_ctrl` + `s22-modem.service` (Dual-SIM UIM + `81voltd` + `VoiceCall`/`Earpiece` UCM2); S6E3FAC dynamic VRR/LFD (10-120 Hz + seamless 120/96/60/48/30/24 Hz), HBM (~1300 nits + auto-lux), mDNIe/OTP colour calibration & HLPM Always-On Display | **Full cellular modem stack (ModemManager + mobile data/SMS/calls ready) & S6E3FAC Display Extras** |
+| 11-14 | - | Expand `s2mpb02-regulator` (21 rails + always-on shared I/O supplies), add SM8450 CAMSS 3-phase C-PHY support (`local-sm8450-camss-cphy.patch`), wire `&gpi_dma2` + `&i2c16` + `gpio83`, add V4L2 drivers (`imx374`, `s5k3k1`, `imx563`, `s5kgn3`) and CamX register extractor | **All 4 cameras streaming RAW10 (D-PHY + C-PHY)** |
 
 ## Added to the repo
 
@@ -63,5 +66,5 @@ Wi-Fi is the one big item still open. Even the failed Wi-Fi attempts are useful:
 
 ## Still open
 
-Wi-Fi (details in README), audio, cellular modem, sleep/suspend, sensors, cameras, NFC, cable detection. See
+Wi-Fi (details in README), audio, cellular modem, sleep/suspend, sensors, NFC, cable detection. See
 [CHECKLIST-not-sorted.md](CHECKLIST-not-sorted.md).

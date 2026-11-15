@@ -1,0 +1,17 @@
+{
+    "KPackageStructure": "KPackage/GenericQML",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "s22@postmarketos.org",
+                "Name": "S22 Linux"
+            }
+        ],
+        "Description": "Modo Jogo 90Hz para o Samsung Galaxy S22",
+        "Icon": "input-gaming",
+        "Id": "org.kde.plasma.quicksetting.s22gamemode",
+        "License": "GPL-2.0+",
+        "Name": "Modo Jogo (90Hz)",
+        "Name[pt_BR]": "Modo Jogo (90Hz)"
+    }
+}

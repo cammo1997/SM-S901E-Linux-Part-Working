@@ -32,10 +32,9 @@ For the Odin tool we used Odin4-GUI (github.com/Ragekill3377/Odin4-GUI) in its o
 
 ```
 mkdir -p ~/s22-kernel && cd ~/s22-kernel
-# Linux 7.2.11 from kernel.org, then apply kernel/upstream-patches/* and kernel/0001-r0q-debug-ramoops-and-console.patch
-# copy kernel/panel-samsung-s6e3fac.c to drivers/gpu/drm/panel/ and add its Kconfig/Makefile lines (see docs/boot-log.md "Attempt 13")
-# copy kernel/sm8450-samsung-r0q.dts to arch/arm64/boot/dts/qcom/
-# use kernel/config-r0q.aarch64 (or r0q.fragment on top of defconfig); always: scripts/config ... && make olddefconfig </dev/null
+# Extract Linux 7.2.11 from kernel.org, then apply all patches, S6E3FAC panel + mDNIe, DTS, and config:
+bash /path/to/SM-S901E-Linux-Part-Working/tools/apply-kernel-patches.sh ~/s22-kernel/linux-7.2.11
+cd ~/s22-kernel/linux-7.2.11
 make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j$(nproc) Image.gz modules qcom/sm8450-samsung-r0q.dtb
 ```
 uniLoader (secondary loader): clone it OUTSIDE this repo and let `tools/build-uniloader.sh` build in a copy

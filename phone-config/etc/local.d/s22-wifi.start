@@ -1,6 +1,8 @@
 #!/bin/sh
-# S22: load Wi-Fi late - ath11k cold boot calibration times out at early boot but works ~20 s later
+# S22: load Wi-Fi late - ath11k cold boot calibration times out at early boot but works ~20 s later.
+# Enable the QCA6490 2.4 GHz internal PA rail (s3e via AOSS QMP) before calibration runs.
 (
+	modprobe s22-wlan-pdc 2>/dev/null || true
 	sleep 20
 	modprobe ath11k_pci
 	sleep 25

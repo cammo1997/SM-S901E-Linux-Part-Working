@@ -1,0 +1,12 @@
+[Unit]
+Description=Samsung Galaxy S22 Display Extras (VRR, Auto-HBM, mDNIe Calibration & AOD)
+After=systemd-udevd.service iio-sensor-proxy.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/lib/s22/s22-display-extrasd.sh
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
