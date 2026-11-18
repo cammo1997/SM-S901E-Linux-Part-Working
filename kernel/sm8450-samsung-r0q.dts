@@ -502,9 +502,9 @@
 };
 
 /*
- * Adreno 730 GPU. msm is loaded with separate_gpu_kms=1, so the GPU (renderD128) and the display
- * (MDSS, above) are separate DRM devices. Zap shader is the phone's own Samsung-signed
- * a730_zap (from /vendor/firmware_mnt/image).
+ * Adreno 730 GPU. Loaded with separate_gpu_kms=0 (s22-gpu.conf) so MDSS DPU1 KMS and Adreno 730
+ * share a unified DRM device (/dev/dri/card0 + renderD128). Zap shader is the phone's own
+ * Samsung-signed a730_zap (from /vendor/firmware_mnt/image).
  */
 &gpu {
 	status = "okay";
@@ -1157,18 +1157,40 @@
 };
 
 &gpu_opp_table {
-	opp-818000000 { opp-peak-kBps = <13085937>; };
-	opp-791000000 { opp-peak-kBps = <13085937>; };
-	opp-734000000 { opp-peak-kBps = <12484375>; };
-	opp-640000000 { opp-peak-kBps = <12484375>; };
-	opp-599000000 { opp-peak-kBps = <8171875>; };
-	opp-545000000 { opp-peak-kBps = <8171875>; };
-	opp-492000000 { opp-peak-kBps = <6074218>; };
-	opp-421000000 { opp-peak-kBps = <6074218>; };
-	opp-350000000 { opp-peak-kBps = <2136718>; };
+	opp-818000000 { opp-peak-kBps = <13085937>; qcom,opp-acd-level = <0x882c5ffd>; };
+	opp-791000000 { opp-peak-kBps = <13085937>; qcom,opp-acd-level = <0x882c5ffd>; };
+	opp-734000000 { opp-peak-kBps = <12484375>; qcom,opp-acd-level = <0x882d5ffd>; };
+	opp-640000000 { opp-peak-kBps = <12484375>; qcom,opp-acd-level = <0xa82d5ffd>; };
+	opp-599000000 { opp-peak-kBps = <8171875>; qcom,opp-acd-level = <0x882e5ffd>; };
+	opp-545000000 { opp-peak-kBps = <8171875>; qcom,opp-acd-level = <0x882e5ffd>; };
+	opp-492000000 { opp-peak-kBps = <6074218>; qcom,opp-acd-level = <0x882e5ffd>; };
+	opp-421000000 { opp-peak-kBps = <6074218>; qcom,opp-acd-level = <0xa82e5ffd>; };
+	opp-350000000 { opp-peak-kBps = <2136718>; qcom,opp-acd-level = <0x882f5ffd>; };
 	opp-317000000 { opp-peak-kBps = <1761718>; };
-	opp-285000000 { opp-peak-kBps = <1761718>; };
+	opp-285000000 { opp-peak-kBps = <1761718>; qcom,opp-acd-level = <0x882f5ffd>; };
 	opp-220000000 { opp-peak-kBps = <1761718>; };
+};
+
+/*
+ * Stock vendor_boot.img sets gpuss-0/gpuss-1 passive tj_cfg to 95000 mC (hyst 5000).
+ * Raise mainline's early 85000 mC alert to 90000 mC (hot 95000 mC), still 5 C cooler than stock.
+ */
+&gpu_top_alert0 {
+	temperature = <90000>;
+	hysteresis = <2000>;
+};
+
+&gpu_bottom_alert0 {
+	temperature = <90000>;
+	hysteresis = <2000>;
+};
+
+&{/thermal-zones/gpu-top-thermal/trips/trip-point1} {
+	temperature = <95000>;
+};
+
+&{/thermal-zones/gpu-bottom-thermal/trips/trip-point1} {
+	temperature = <95000>;
 };
 
 /*

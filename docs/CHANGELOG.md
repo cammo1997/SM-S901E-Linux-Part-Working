@@ -60,6 +60,7 @@ Wi-Fi is the one big item still open. Even the failed Wi-Fi attempts are useful:
 - Fuel gauge never registered while it depended on an unloaded charger driver
 - Display black despite a correct init sequence: missing DCS 0x53 (found in Samsung's own S901E source)
 - Hot-unbinding `msm-mdss` oopsed the phone: install modules and reboot instead
+- Adreno 730 (`msm` + Turnip): `separate_gpu_kms=1` split KMS/GPU devices (forcing KWin onto `llvmpipe`), missing GMU `SH0`/`MC0`/`ACV` BCM + ICC DDR sync capped memory BW at ~17.8 GB/s, LITTLE-core `gpu-irq` affinity + `queuelock`/`idr_lock` contention throttled submit rate, and 85 C early DT thermal alert throttled sustained 3D loads -> fixed via `msm-w10` (`local-msm-adreno730-w10-gpu-opt.patch`), OEM GPU ACD + 90 C/95 C thermal trips, `s22-gpu.conf`, and Mesa 26.3.0 Turnip/`ir3` Wave 5 (`+197.8%` Wayland `vkmark`, `45.0 GB/s` Triad BW, `27,893+ submits/s`)
 
 ## Still open
 

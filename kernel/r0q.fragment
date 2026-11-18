@@ -72,3 +72,7 @@ CONFIG_ZRAM_BACKEND_LZ4=y
 # Attempt 11: touchscreen (upstream fts2ba61y patch) on spi-gpio
 CONFIG_SPI_GPIO=m
 CONFIG_TOUCHSCREEN_FTS2BA61Y=m
+
+# Adreno 730 GPU extra devfreq governors
+CONFIG_DEVFREQ_GOV_PERFORMANCE=y
+CONFIG_DEVFREQ_GOV_POWERSAVE=y

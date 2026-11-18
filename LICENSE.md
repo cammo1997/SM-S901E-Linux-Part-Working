@@ -6,7 +6,7 @@ This repository carries two licenses, following the upstream projects each part 
 |---|---|---|
 | `kernel/` (DTS, kernel patches, kernel config, audio topology) | **GPL-2.0-only** | Linux kernel sources; parts derived from Samsung's GPL SM-S901E kernel and the GPL-2.0 Galaxy Tab S8+ port |
 | `phone-config/` (UCM2, modprobe, OpenRC/local.d, udev, NetworkManager snippets) | **MIT** | postmarketOS device configuration is conventionally MIT |
-| `tools/`, `docs/`, `logs/`, `wifi-debug/`, top-level notes | **MIT** | Maximum reuse for other porters |
+| `tools/` (including `tools/mesa-26.3.0-turnip-ir3-adreno730-w5.patch` and `tools/s22-gpu-opt-setup.sh`), `docs/`, `logs/`, `wifi-debug/`, top-level notes | **MIT** | Matches upstream Mesa 3D (`MIT`) and allows maximum reuse for other porters |
 
 Full texts: [GPL-2.0](https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt) · [MIT](https://opensource.org/license/mit)
 

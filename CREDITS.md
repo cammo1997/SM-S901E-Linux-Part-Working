@@ -14,6 +14,8 @@ This port stands on other people's work. Thank you to:
 | Viveris – uMTP-Responder | https://github.com/viveris/uMTP-Responder | GPL-3.0 | MTP file transfer (`umtprd`) |
 | Nura wiki – Samsung Galaxy S22 5G (samsung-r0q) | https://wiki.nura.eco/wiki/Samsung_Galaxy_S22_5G_(samsung-r0q) | – | Reference notes for r0q |
 | TWRP | https://twrp.me | GPL-3.0 | Recovery used for flashing and EFS backup |
+| Rob Clark & Freedreno / Linux `drm/msm` contributors | `drivers/gpu/drm/msm/` in mainline · https://gitlab.freedesktop.org/drm/msm | GPL-2.0-only | Qualcomm Adreno 6xx/7xx KMS/GPU driver, GMU/HFI power management, syncobj, `VM_BIND`, and devfreq infrastructure optimized in `local-msm-adreno730-w10-gpu-opt.patch` |
+| Mesa 3D, Turnip Vulkan & `ir3` compiler contributors | https://mesa3d.org · https://gitlab.freedesktop.org/mesa/mesa | MIT | Turnip `FD730` Vulkan 1.4 ICD, GMEM/SYSMEM renderpass autotuner, `ir3` shader compiler, NIR algebraic passes, and Gallium Freedreno/Zink drivers (`tools/mesa-26.3.0-turnip-ir3-adreno730-w5.patch`) |
 | Linaro / Qualcomm upstream contributors | https://git.codelinaro.org/linaro/qcomlt | GPL-2.0 | SM8450 mainline support, AudioReach, remoteproc, QRTR/rmtfs |
 | Flathub | https://flathub.org | – | App store (Google Chrome ARM64) |
 

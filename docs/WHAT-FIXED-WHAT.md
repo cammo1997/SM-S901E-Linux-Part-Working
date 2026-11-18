@@ -55,6 +55,8 @@ From flashing uniLoader up to attempt 39 (2026-10-20). Kernel 7.2.11, postmarket
 | 42 | Camera rails unreachable | S2MPB02 camera PMIC regulator driver on i2c-gpio 175/176 (attempt 36) | Samsung kernel (GPL driver, wiring) + Ours |
 | 43 | No sensor settings | Vendor partition read via F2FS (with compression) module; CamX Chromatix decoder (tools/camx-chromatix-dump.py) | Ours |
 
+| 61 | KWin fell back to CPU `llvmpipe` (`separate_gpu_kms=1` split `card0`/`card1`) & Adreno 730 memory bandwidth stuck at ~17.8 GB/s with high submit latency | Set `options msm separate_gpu_kms=0 fence_spin_us=120` (`s22-gpu.conf`), wire Adreno 730 GMU `SH0`/`MC0`/`ACV` BCMs + `gfx-mem` ICC OPP sync (`45.0 GB/s` Triad BW), program `UCHE_CACHE_WAYS`, pin `gpu-irq` + `WQ_PERCPU|WQ_HIGHPRI` submit worker to Cortex-X2, add lockless RCU `wait_fence`/`msm_submitqueue_get` + zero-BO `VM_BIND` fast paths + 16 ms devfreq boost lease (`local-msm-adreno730-w10-gpu-opt.patch`), add OEM `qcom,opp-acd-level` + 90 C/95 C GPU thermal trips in `sm8450-samsung-r0q.dts`, and add Mesa 26.3.0 Turnip/`ir3` Wave 5 patch (`tools/mesa-26.3.0-turnip-ir3-adreno730-w5.patch`) | Linux `drm/msm` + Samsung DTBO + Mesa/Turnip + Ours |
+
 ## Not fixed yet
 - 2.4 GHz Wi-Fi association times out (5 GHz works)
 - Speaker protection firmware (volume kept moderate)

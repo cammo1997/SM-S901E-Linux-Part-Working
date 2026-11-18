@@ -1,0 +1,2422 @@
+SPDX-License-Identifier: MIT
+Subject: [PATCH] freedreno/turnip,ir3,nir: Adreno 730 (SM8450) syncobj/fence fast paths, prime-core steering, autotuner lock & ir3 occupancy pass (Wave 5)
+
+Userspace Mesa 26.3.0 optimization patch for Qualcomm Adreno 730 (`FD730`) on
+Samsung Galaxy S22 (`sm8450-samsung-r0q`):
+
+- `tu_knl_drm_msm.cc` / `tu_knl_drm.cc` / `tu_device.*`:
+  * 64-slot seqlock completed-fence watermark table (`tu_q_done`), timeline &
+    binary syncobj hint tables, zero-syscall `VK_SYNC_WAIT_PENDING` / completed
+    timeline-semaphore wait pruning, inline stack `in_syncobjs`/`out_syncobjs`,
+    and automatic Cortex-X2 prime-core thread steering (`TU_PERF_MASK`,
+    respecting explicit `taskset`).
+- `tu_autotune.cc`:
+  * Default to `PROFILED` GMEM/SYSMEM renderpass autotuning and skip per-RP
+    CS timestamp instrumentation once a renderpass history locks.
+- `ir3_cse.c` / `ir3_compiler*.c` / `nir_opt_algebraic.py`:
+  * Pre-RA `ir3_opt_occupancy` pass (post-`OPC_KILL` ALU sinking + register
+    pressure cliff lookahead with `rpt` and subgroup guards) and balanced
+    integer-exponent `fmul` trees in NIR.
+
+Credits:
+- Freedreno, Turnip, ir3 & Mesa 3D contributors (MIT License).
+
+diff --git a/src/compiler/nir/nir_opt_algebraic.py b/src/compiler/nir/nir_opt_algebraic.py
+index a466f6e..fddc565 100644
+--- a/src/compiler/nir/nir_opt_algebraic.py
++++ b/src/compiler/nir/nir_opt_algebraic.py
+@@ -39,6 +39,13 @@ d = 'd'
+ e = 'e'
+ NAN = math.nan
+ 
++def _build_fpow_mul_tree(expr, exp):
++    if exp == 1:
++        return expr
++    left = exp // 2
++    right = exp - left
++    return ('fmul', _build_fpow_mul_tree(expr, left), _build_fpow_mul_tree(expr, right))
++
+ has_fmulz = '(options->has_fmulz || \
+               (options->has_fmulz_no_denorms && \
+                !nir_is_denorm_preserve(info->float_controls_execution_mode, 32)))'
+@@ -1877,6 +1884,14 @@ optimizations.extend([
+    # Exponential/logarithmic identities
+    (('fexp2(contract)', ('flog2', a)), ('fcanonicalize', a)), # 2^lg2(a) = a
+    (('flog2(contract)', ('fexp2', a)), ('fcanonicalize', a)), # lg2(2^a) = a
++   *[
++       (('~fpow', ('fsqrt', 'a(is_not_negative)'), float(2 * _k)), _build_fpow_mul_tree(a, _k))
++       for _k in [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16]
++   ],
++   *[
++       (('~fpow', a, float(_n)), _build_fpow_mul_tree(a, _n))
++       for _n in [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 20, 24, 32]
++   ],
+    # 32-bit fpow should use fmulz to fix https://gitlab.freedesktop.org/mesa/mesa/-/issues/11464 (includes apitrace)
+    (('fpow@32', a, b), ('fexp2', ('fmulz(preserve_nan_inf)', ('flog2', a), b)), 'options->lower_fpow && ' + has_fmulz), # a^b = 2^(lg2(a)*b)
+    (('fpow', a, b), ('fexp2', ('fmul', ('flog2', a), b)), 'options->lower_fpow'), # a^b = 2^(lg2(a)*b)
+@@ -2062,6 +2077,19 @@ optimizations.extend([
+    (('ult', a, 0), False),
+ ])
+ 
++# Expand integer constant powers after lower_fpow / flog2(fsqrt(x)) folding
++# (e.g. exp2(12*log2(x))) into balanced ALU fmul trees.
++optimizations.append((('fexp2(contract)', ('fmulz', ('flog2', a), 0.5)), ('fsqrt', a)))
++for _n in [2, 3, 4, 5, 6, 7, 8]:
++    optimizations.append((('fexp2(contract)', ('fmulz', ('flog2', a), float(_n))), _build_fpow_mul_tree(a, _n)))
++
++for _n in [9, 10, 11, 12, 13, 14, 15, 16, 20, 24, 32]:
++    _tree = _build_fpow_mul_tree(a, _n)
++    optimizations.extend([
++        (('fexp2(contract)', ('fmul', ('flog2', a), float(_n))), _tree),
++        (('fexp2(contract)', ('fmulz', ('flog2', a), float(_n))), _tree),
++    ])
++
+ # Doing a 32-bit fadd/fmul on 16-bit operands is equivalent to a 16-bit
+ # fadd/fmul, contract is required for the double rounding.
+ for op in ['fadd', 'fmul']:
+diff --git a/src/freedreno/ir3/ir3.h b/src/freedreno/ir3/ir3.h
+index be5915e..ed52048 100644
+--- a/src/freedreno/ir3/ir3.h
++++ b/src/freedreno/ir3/ir3.h
+@@ -2297,6 +2297,9 @@ bool ir3_cp(struct ir3 *ir, struct ir3_shader_variant *so,
+ /* common subexpression elimination: */
+ bool ir3_cse(struct ir3 *ir);
+ 
++/* occupancy-cliff pre-RA register pressure optimization: */
++bool ir3_opt_occupancy(struct ir3 *ir, struct ir3_shader_variant *v);
++
+ /* Make arrays SSA */
+ bool ir3_array_to_ssa(struct ir3 *ir);
+ 
+diff --git a/src/freedreno/ir3/ir3_compiler.c b/src/freedreno/ir3/ir3_compiler.c
+index 2f35c19..f4bdeff 100644
+--- a/src/freedreno/ir3/ir3_compiler.c
++++ b/src/freedreno/ir3/ir3_compiler.c
+@@ -169,6 +169,7 @@ static const nir_shader_compiler_options ir3_base_options = {
+    .force_indirect_unrolling_sampler = true,
+    .lower_uniforms_to_ubo = true,
+    .max_unroll_iterations = 32,
++   .max_unroll_iterations_aggressive = 48,
+    .max_samples = 4,
+ 
+    /* Not actually supported but we want fmulz to be produced and then be
+diff --git a/src/freedreno/ir3/ir3_compiler_nir.c b/src/freedreno/ir3/ir3_compiler_nir.c
+index 49b4bde..5d09ad5 100644
+--- a/src/freedreno/ir3/ir3_compiler_nir.c
++++ b/src/freedreno/ir3/ir3_compiler_nir.c
+@@ -6180,6 +6180,7 @@ ir3_compile_shader_nir(struct ir3_compiler *compiler,
+       }
+    }
+ 
++   IR3_PASS(ir, ir3_opt_occupancy, so);
+    IR3_PASS(ir, ir3_cleanup_rpt, so);
+    ret = ir3_ra(so);
+ 
+diff --git a/src/freedreno/ir3/ir3_cse.c b/src/freedreno/ir3/ir3_cse.c
+index ac5199c..c56041a 100644
+--- a/src/freedreno/ir3/ir3_cse.c
++++ b/src/freedreno/ir3/ir3_cse.c
+@@ -4,6 +4,8 @@
+  */
+ 
+ #include "ir3.h"
++#include "ir3_ra.h"
++#include "ir3_shader.h"
+ 
+ #define XXH_INLINE_ALL
+ #include "util/xxhash.h"
+@@ -163,3 +165,579 @@ ir3_cse(struct ir3 *ir)
+    _mesa_set_destroy(instr_set, NULL);
+    return progress;
+ }
++
++static bool
++occ_is_kept_in_block(const struct ir3_block *block,
++                     const struct ir3_instruction *instr)
++{
++   for (unsigned i = 0; i < block->keeps_count; i++) {
++      if (block->keeps[i] == instr)
++         return true;
++   }
++   return false;
++}
++
++static bool
++occ_is_pure_movable_alu(struct ir3_instruction *instr)
++{
++   unsigned cat = opc_cat(instr->opc);
++   if (cat < 1 || cat > 4)
++      return false;
++   if (cat == 1 && instr->opc != OPC_MOV)
++      return false;
++
++   if (is_input(instr) || is_subgroup_cond_mov_macro(instr))
++      return false;
++
++   if (instr->barrier_class || instr->barrier_conflict || instr->address)
++      return false;
++
++   if (instr->flags & IR3_INSTR_EQ)
++      return false;
++
++   if (instr->dsts_count != 1 || has_dummy_dst(instr))
++      return false;
++
++   struct ir3_register *dst = instr->dsts[0];
++   if (!ra_reg_is_dst(dst))
++      return false;
++
++   if (dst->flags & (IR3_REG_ARRAY | IR3_REG_SHARED | IR3_REG_RELATIV |
++                     IR3_REG_PREDICATE | IR3_REG_EI))
++      return false;
++
++   foreach_src (src, instr) {
++      if (src->flags & (IR3_REG_ARRAY | IR3_REG_SHARED | IR3_REG_RELATIV |
++                        IR3_REG_PREDICATE))
++         return false;
++      if (!(src->flags & (IR3_REG_IMMED | IR3_REG_CONST | IR3_REG_SSA)))
++         return false;
++      if ((src->flags & IR3_REG_SSA) && src->def && reg_num(src->def) == REG_A0)
++         return false;
++   }
++
++   return true;
++}
++
++/* Sink pure post-discard ALU instructions past OPC_KILL so discarded fragments
++ * avoid unnecessary ALU work and pre/post-kill temporaries don't overlap.
++ */
++static bool
++occ_sink_past_kill(struct ir3 *ir, struct ir3_shader_variant *v)
++{
++   if (v->type != MESA_SHADER_FRAGMENT)
++      return false;
++
++   void *mem_ctx = ralloc_context(NULL);
++   struct ir3_liveness *live = ir3_calc_liveness(mem_ctx, ir);
++   if (!live->definitions_count) {
++      ralloc_free(mem_ctx);
++      return false;
++   }
++
++   BITSET_WORD *need = BITSET_RZALLOC(mem_ctx, live->definitions_count);
++   bool progress = false;
++
++   foreach_block (block, &ir->block_list) {
++      struct ir3_instruction *first_kill = NULL;
++      bool has_demote = false;
++
++      foreach_instr (instr, &block->instr_list) {
++         if (instr->opc == OPC_DEMOTE) {
++            has_demote = true;
++            break;
++         }
++         if (instr->opc == OPC_KILL && !first_kill)
++            first_kill = instr;
++      }
++
++      if (!first_kill || has_demote)
++         continue;
++
++      memset(need, 0, BITSET_WORDS(live->definitions_count) * sizeof(*need));
++      foreach_src (src, first_kill) {
++         if (ra_reg_is_src(src))
++            BITSET_SET(need, src->def->name);
++      }
++
++      struct list_head *pos = first_kill->node.prev;
++      while (pos != &block->instr_list) {
++         struct list_head *prev_pos = pos->prev;
++         struct ir3_instruction *instr =
++            list_entry(pos, struct ir3_instruction, node);
++
++         if (occ_is_pure_movable_alu(instr) &&
++             !occ_is_kept_in_block(block, instr) &&
++             !BITSET_TEST(need, instr->dsts[0]->name)) {
++            list_del(&instr->node);
++            list_add(&instr->node, &first_kill->node);
++            progress = true;
++         } else {
++            foreach_src (src, instr) {
++               if (ra_reg_is_src(src))
++                  BITSET_SET(need, src->def->name);
++            }
++         }
++
++         pos = prev_pos;
++      }
++   }
++
++   ralloc_free(mem_ctx);
++   return progress;
++}
++
++struct occ_split_children {
++   struct ir3_register *child[4];
++   uint8_t count;
++};
++
++struct occ_tracker {
++   const struct ir3_liveness *live;
++   uint32_t defs_count;
++   uint32_t *rem_uses;
++   uint16_t *active_weight;
++   bool *defined;
++   bool *is_live;
++   struct occ_split_children *splits;
++   int32_t live_half;
++   int32_t max_live_half;
++};
++
++static bool
++occ_track_gpr(const struct ir3_register *reg)
++{
++   return (reg->flags & IR3_REG_SSA) && def_is_gpr(reg) &&
++          !(reg->flags & IR3_REG_SHARED);
++}
++
++static void
++occ_kill_def(struct occ_tracker *t, struct ir3_register *def)
++{
++   unsigned name = def->name;
++   if (!t->is_live[name])
++      return;
++
++   t->is_live[name] = false;
++   t->live_half -= t->active_weight[name];
++   t->active_weight[name] = 0;
++
++   struct occ_split_children *sc = &t->splits[name];
++   for (unsigned i = 0; i < sc->count; i++) {
++      struct ir3_register *c = sc->child[i];
++      unsigned cname = c->name;
++      if (t->is_live[cname] && t->active_weight[cname] == 0) {
++         t->active_weight[cname] = (uint16_t)reg_size(c);
++         t->live_half += t->active_weight[cname];
++      }
++   }
++   if (t->live_half > t->max_live_half)
++      t->max_live_half = t->live_half;
++}
++
++static void
++occ_exec_instr(struct occ_tracker *t, struct ir3_instruction *instr)
++{
++   foreach_src (src, instr) {
++      if (!ra_reg_is_src(src))
++         continue;
++      unsigned sname = src->def->name;
++      if (t->rem_uses[sname] > 0) {
++         t->rem_uses[sname]--;
++         if (t->rem_uses[sname] == 0)
++            occ_kill_def(t, src->def);
++      }
++   }
++
++   foreach_dst (dst, instr) {
++      if (!(dst->flags & IR3_REG_SSA))
++         continue;
++      unsigned dname = dst->name;
++      t->defined[dname] = true;
++
++      if (!occ_track_gpr(dst) || t->rem_uses[dname] == 0)
++         continue;
++
++      t->is_live[dname] = true;
++      if (instr->opc == OPC_META_SPLIT) {
++         struct ir3_register *p = instr->srcs[0]->def;
++         if (p && (p->flags & IR3_REG_SSA) && t->is_live[p->name]) {
++            struct occ_split_children *sc = &t->splits[p->name];
++            if (sc->count < 4)
++               sc->child[sc->count++] = dst;
++            t->active_weight[dname] = 0;
++            continue;
++         }
++      }
++      t->active_weight[dname] = (uint16_t)reg_size(dst);
++      t->live_half += t->active_weight[dname];
++   }
++
++   if (t->live_half > t->max_live_half)
++      t->max_live_half = t->live_half;
++}
++
++static void
++occ_init_block_tracker(struct occ_tracker *t, struct ir3_block *block)
++{
++   memset(t->rem_uses, 0, t->defs_count * sizeof(*t->rem_uses));
++   memset(t->active_weight, 0, t->defs_count * sizeof(*t->active_weight));
++   memset(t->defined, 0, t->defs_count * sizeof(*t->defined));
++   memset(t->is_live, 0, t->defs_count * sizeof(*t->is_live));
++   memset(t->splits, 0, t->defs_count * sizeof(*t->splits));
++   t->live_half = 0;
++   t->max_live_half = 0;
++
++   unsigned name;
++   BITSET_FOREACH_SET (name, t->live->live_in[block->index], t->defs_count) {
++      struct ir3_register *def = t->live->definitions[name];
++      t->defined[name] = true;
++      if (occ_track_gpr(def)) {
++         t->is_live[name] = true;
++         t->active_weight[name] = (uint16_t)reg_size(def);
++         t->live_half += t->active_weight[name];
++      }
++   }
++
++   BITSET_FOREACH_SET (name, t->live->live_out[block->index], t->defs_count) {
++      t->rem_uses[name]++;
++   }
++
++   foreach_instr (instr, &block->instr_list) {
++      foreach_src (src, instr) {
++         if (ra_reg_is_src(src))
++            t->rem_uses[src->def->name]++;
++      }
++   }
++
++   t->max_live_half = t->live_half;
++}
++
++static bool
++occ_stops_lookahead(struct ir3_instruction *instr)
++{
++   if (opc_cat(instr->opc) == 0 || is_kill_or_demote(instr) ||
++       is_barrier(instr) || is_store(instr))
++      return true;
++   if (instr->barrier_class & (IR3_BARRIER_EVERYTHING |
++                               IR3_BARRIER_ACTIVE_FIBERS_W |
++                               IR3_BARRIER_IMAGE_W |
++                               IR3_BARRIER_BUFFER_W |
++                               IR3_BARRIER_SHARED_W |
++                               IR3_BARRIER_ARRAY_W |
++                               IR3_BARRIER_PRIVATE_W))
++      return true;
++   return false;
++}
++
++static bool
++occ_instr_srcs_ready(const struct occ_tracker *t,
++                     const struct ir3_block *block,
++                     struct ir3_instruction *cand,
++                     struct ir3_instruction *const *group,
++                     unsigned group_len,
++                     struct ir3_instruction **need_splits,
++                     unsigned *need_splits_count,
++                     unsigned max_splits)
++{
++   foreach_src (src, cand) {
++      if (!ra_reg_is_src(src))
++         continue;
++
++      struct ir3_register *def = src->def;
++      if (t->defined[def->name])
++         continue;
++
++      bool in_group = false;
++      for (unsigned g = 0; g < group_len; g++) {
++         if (group[g] == def->instr) {
++            in_group = true;
++            break;
++         }
++      }
++      if (in_group)
++         continue;
++
++      /* Also allow pulling a ready OPC_META_SPLIT whose parent is defined. */
++      struct ir3_instruction *di = def->instr;
++      if (di->opc == OPC_META_SPLIT && di->block == block &&
++          ra_reg_is_src(di->srcs[0]) && t->defined[di->srcs[0]->def->name] &&
++          !(di->dsts[0]->flags & (IR3_REG_SHARED | IR3_REG_ARRAY))) {
++         bool already = false;
++         for (unsigned s = 0; s < *need_splits_count; s++) {
++            if (need_splits[s] == di) {
++               already = true;
++               break;
++            }
++         }
++         if (!already) {
++            if (*need_splits_count >= max_splits)
++               return false;
++            need_splits[(*need_splits_count)++] = di;
++         }
++         continue;
++      }
++
++      return false;
++   }
++   return true;
++}
++
++static bool
++occ_try_pull_before(struct occ_tracker *t, struct ir3_block *block,
++                    struct ir3_instruction *cur, struct ir3_instruction *cand)
++{
++   if (cand->rpt_prev != NULL)
++      return false;
++
++   struct ir3_instruction *group[8];
++   unsigned group_len = 0;
++   for (struct ir3_instruction *g = cand; g && group_len < ARRAY_SIZE(group);
++        g = g->rpt_next) {
++      if (g->block != block || !occ_is_pure_movable_alu(g) ||
++          occ_is_kept_in_block(block, g))
++         return false;
++
++      /* Verify group members appear strictly in order after cur without barriers. */
++      if (g != cand) {
++         if (g == cur)
++            return false;
++         bool seen = false;
++         for (struct ir3_instruction *m =
++                 list_entry(group[group_len - 1]->node.next,
++                            struct ir3_instruction, node);
++              &m->node != &block->instr_list;
++              m = list_entry(m->node.next, struct ir3_instruction, node)) {
++            if (m == g) {
++               seen = true;
++               break;
++            }
++            if (occ_stops_lookahead(m))
++               return false;
++         }
++         if (!seen)
++            return false;
++      }
++      group[group_len++] = g;
++   }
++   if (group[group_len - 1]->rpt_next != NULL)
++      return false;
++
++   struct ir3_instruction *need_splits[32];
++   unsigned need_splits_count = 0;
++   for (unsigned i = 0; i < group_len; i++) {
++      if (!occ_instr_srcs_ready(t, block, group[i], group, i,
++                                need_splits, &need_splits_count,
++                                ARRAY_SIZE(need_splits)))
++         return false;
++   }
++
++   /* Verify no unmoved split sits at/before cur or past a barrier from cur. */
++   for (unsigned s = 0; s < need_splits_count; s++) {
++      if (need_splits[s] == cur)
++         return false;
++      bool reached = false;
++      for (struct ir3_instruction *m = list_entry(cur->node.next, struct ir3_instruction, node);
++           &m->node != &block->instr_list;
++           m = list_entry(m->node.next, struct ir3_instruction, node)) {
++         if (m == need_splits[s]) {
++            reached = true;
++            break;
++         }
++         if (occ_stops_lookahead(m))
++            return false;
++      }
++      if (!reached)
++         return false;
++   }
++
++   /* Compute net scalar pressure delta if this group executes before cur. */
++   struct ir3_register *seen_srcs[32];
++   uint32_t seen_uses[32];
++   unsigned n_srcs = 0;
++   int32_t produced = 0;
++
++   for (unsigned i = 0; i < group_len; i++) {
++      produced += (int32_t)reg_size(group[i]->dsts[0]);
++      foreach_src (src, group[i]) {
++         if (!ra_reg_is_src(src) || !occ_track_gpr(src->def))
++            continue;
++         bool is_grp_def = false;
++         for (unsigned j = 0; j < i; j++) {
++            if (group[j]->dsts[0] == src->def) {
++               is_grp_def = true;
++               break;
++            }
++         }
++         if (is_grp_def) {
++            produced -= (int32_t)reg_size(src->def);
++            continue;
++         }
++         unsigned idx = 0;
++         for (; idx < n_srcs; idx++) {
++            if (seen_srcs[idx] == src->def) {
++               seen_uses[idx]++;
++               break;
++            }
++         }
++         if (idx == n_srcs) {
++            if (n_srcs >= ARRAY_SIZE(seen_srcs))
++               return false;
++            seen_srcs[n_srcs] = src->def;
++            seen_uses[n_srcs++] = 1;
++         }
++      }
++   }
++
++   int32_t killed = 0;
++   for (unsigned idx = 0; idx < n_srcs; idx++) {
++      if (t->rem_uses[seen_srcs[idx]->name] == seen_uses[idx])
++         killed += (int32_t)reg_size(seen_srcs[idx]);
++   }
++
++   if (produced >= killed)
++      return false;
++
++   for (unsigned s = 0; s < need_splits_count; s++) {
++      struct ir3_instruction *sp = need_splits[s];
++      list_del(&sp->node);
++      list_addtail(&sp->node, &cur->node);
++      occ_exec_instr(t, sp);
++   }
++
++   for (unsigned i = 0; i < group_len; i++) {
++      struct ir3_instruction *g = group[i];
++      list_del(&g->node);
++      list_addtail(&g->node, &cur->node);
++      occ_exec_instr(t, g);
++   }
++
++   return true;
++}
++
++bool
++ir3_opt_occupancy(struct ir3 *ir, struct ir3_shader_variant *v)
++{
++   bool progress = occ_sink_past_kill(ir, v);
++
++   if (!v->compiler->mergedregs)
++      return progress;
++
++   void *mem_ctx = ralloc_context(NULL);
++   struct ir3_liveness *live = ir3_calc_liveness(mem_ctx, ir);
++   if (!live->definitions_count) {
++      ralloc_free(mem_ctx);
++      return progress;
++   }
++
++   struct occ_tracker t = {
++      .live = live,
++      .defs_count = live->definitions_count,
++      .rem_uses = rzalloc_array(mem_ctx, uint32_t, live->definitions_count),
++      .active_weight = rzalloc_array(mem_ctx, uint16_t, live->definitions_count),
++      .defined = rzalloc_array(mem_ctx, bool, live->definitions_count),
++      .is_live = rzalloc_array(mem_ctx, bool, live->definitions_count),
++      .splits = rzalloc_array(mem_ctx, struct occ_split_children, live->definitions_count),
++   };
++
++   int32_t overall_max_half = 0;
++   foreach_block (block, &ir->block_list) {
++      occ_init_block_tracker(&t, block);
++      foreach_instr (instr, &block->instr_list)
++         occ_exec_instr(&t, instr);
++      if (t.max_live_half > overall_max_half)
++         overall_max_half = t.max_live_half;
++   }
++
++   unsigned cur_vecs = DIV_ROUND_UP((unsigned)overall_max_half, 8);
++   if (cur_vecs == 0) {
++      ralloc_free(mem_ctx);
++      return progress;
++   }
++
++   bool dbl = ir3_should_double_threadsize(v, cur_vecs);
++   unsigned indep_waves = ir3_get_reg_independent_max_waves(v, dbl);
++   unsigned max_hw_waves = MIN2(indep_waves, v->compiler->info->max_waves);
++   unsigned cur_waves =
++      MIN2(indep_waves,
++           ir3_get_reg_dependent_max_waves(v->compiler, cur_vecs, dbl));
++
++   if (cur_waves >= max_hw_waves) {
++      ralloc_free(mem_ctx);
++      return progress;
++   }
++
++   unsigned tier1_vecs = 0, tier1_waves = cur_waves;
++   unsigned tier2_vecs = 0, tier2_waves = cur_waves;
++   unsigned min_tv = cur_vecs > 6 ? cur_vecs - 6 : 1;
++   for (unsigned tv = cur_vecs - 1; tv >= min_tv; tv--) {
++      if (ir3_should_double_threadsize(v, tv) != dbl)
++         break;
++      unsigned w =
++         MIN2(indep_waves,
++              ir3_get_reg_dependent_max_waves(v->compiler, tv, dbl));
++      if (!tier1_vecs && w > cur_waves) {
++         tier1_vecs = tv;
++         tier1_waves = w;
++      } else if (tier1_vecs && !tier2_vecs && w > tier1_waves) {
++         tier2_vecs = tv;
++         tier2_waves = w;
++      }
++      if (tv == 1)
++         break;
++   }
++
++   if (!tier1_vecs) {
++      ralloc_free(mem_ctx);
++      return progress;
++   }
++
++   foreach_block (block, &ir->block_list) {
++      unsigned tex_cnt = 0;
++      foreach_instr (instr, &block->instr_list) {
++         if (is_tex(instr))
++            tex_cnt++;
++      }
++
++      unsigned target_vecs =
++         (tex_cnt >= 4 && tier2_vecs > 0) ? tier2_vecs : tier1_vecs;
++      int32_t limit_half = (int32_t)(target_vecs * 8);
++      int32_t trigger_half =
++         (tex_cnt >= 4) ? MAX2(8, limit_half - 16) : MAX2(8, limit_half - 6);
++
++      occ_init_block_tracker(&t, block);
++
++      struct list_head *cur_node = block->instr_list.next;
++      while (cur_node != &block->instr_list) {
++         struct ir3_instruction *cur =
++            list_entry(cur_node, struct ir3_instruction, node);
++
++         if (t.live_half > trigger_half && !occ_stops_lookahead(cur) &&
++             !is_meta(cur) && cur->rpt_prev == NULL) {
++            unsigned steps = 0;
++            bool pulled = false;
++            for (struct list_head *look = cur->node.next;
++                 look != &block->instr_list && steps < 96;
++                 look = look->next, steps++) {
++               struct ir3_instruction *cand =
++                  list_entry(look, struct ir3_instruction, node);
++               if (occ_stops_lookahead(cand))
++                  break;
++               if (occ_try_pull_before(&t, block, cur, cand)) {
++                  pulled = true;
++                  progress = true;
++                  break;
++               }
++            }
++            if (pulled)
++               continue;
++         }
++
++         cur_node = cur->node.next;
++         occ_exec_instr(&t, cur);
++      }
++   }
++
++   ralloc_free(mem_ctx);
++   return progress;
++}
+diff --git a/src/freedreno/vulkan/tu_autotune.cc b/src/freedreno/vulkan/tu_autotune.cc
+index c7551c1..c30c3ed 100644
+--- a/src/freedreno/vulkan/tu_autotune.cc
++++ b/src/freedreno/vulkan/tu_autotune.cc
+@@ -100,7 +100,7 @@ enum class tu_autotune::algorithm : uint8_t {
+    PREFER_SYSMEM = 3, /* Always use SYSMEM unless we have strong evidence that GMEM is better. */
+    PREFER_GMEM = 4,   /* Always use GMEM unless we have strong evidence that SYSMEM is better. */
+ 
+-   DEFAULT = BANDWIDTH, /* Default algorithm, used if no other is specified. */
++   DEFAULT = PROFILED, /* Default algorithm, used if no other is specified. */
+ };
+ 
+ /* Modifier flags, these modify the behavior of the autotuner in a user-defined way. */
+@@ -995,7 +995,7 @@ template <typename T = double> class adaptive_average {
+ struct tu_autotune::rp_history {
+  private:
+    /* Amount of duration samples for profiling before we start averaging. */
+-   static constexpr uint32_t MIN_PROFILE_DURATION_COUNT = 5;
++   static constexpr uint32_t MIN_PROFILE_DURATION_COUNT = 3;
+ 
+    adaptive_average<uint64_t> sysmem_rp_average;
+    adaptive_average<uint64_t> gmem_rp_average;
+@@ -1092,7 +1092,7 @@ struct tu_autotune::rp_history {
+ 
+       std::atomic<uint32_t> sysmem_probability = PROBABILITY_MID;
+       bool should_reset = false; /* If true, will reset sysmem_probability before next update. */
+-      bool locked = false;       /* If true, the probability will no longer be updated. */
++      std::atomic<bool> locked = false; /* If true, the probability will no longer be updated. */
+       uint64_t seed[2] { 0x3bffb83978e24f88, 0x9238d5d56c71cd35 };
+ 
+       bool is_sysmem_winning = false;
+@@ -1106,12 +1106,13 @@ struct tu_autotune::rp_history {
+ 
+       void update(rp_history &history, bool immediate)
+       {
+-         if (locked)
++         if (locked.load(std::memory_order_relaxed))
+             return;
+ 
+          auto &sysmem_ema = history.sysmem_rp_average;
+          auto &gmem_ema = history.gmem_rp_average;
+          uint32_t sysmem_prob = sysmem_probability.load(std::memory_order_relaxed);
++         bool lock_now = false;
+          if (immediate) {
+             /* Try to immediately resolve the probability, this is useful for CI running a single trace of frames where
+              * the probabilites aren't expected to change from run to run. This environment also gives us a best case
+@@ -1124,7 +1125,7 @@ struct tu_autotune::rp_history {
+                sysmem_prob = 0;
+             } else {
+                sysmem_prob = gmem_ema.get() < sysmem_ema.get() ? 0 : PROBABILITY_MAX;
+-               locked = true;
++               lock_now = true;
+             }
+          } else {
+             if (sysmem_ema.count < MIN_PROFILE_DURATION_COUNT || gmem_ema.count < MIN_PROFILE_DURATION_COUNT) {
+@@ -1138,8 +1139,8 @@ struct tu_autotune::rp_history {
+                }
+ 
+                /* Adjust probability based on timing results. */
+-               constexpr uint32_t FAST_STEP_DELTA = 5, FAST_MIN_PROBABILITY = 5, FAST_MAX_PROBABILITY = 95;
+-               constexpr uint32_t SLOW_STEP_DELTA = 1, SLOW_MIN_PROBABILITY = 1, SLOW_MAX_PROBABILITY = 99;
++               constexpr uint32_t FAST_STEP_DELTA = 15, FAST_MIN_PROBABILITY = 2, FAST_MAX_PROBABILITY = 98;
++               constexpr uint32_t SLOW_STEP_DELTA = 5, SLOW_MIN_PROBABILITY = 1, SLOW_MAX_PROBABILITY = 99;
+ 
+                uint64_t avg_sysmem = sysmem_ema.get();
+                uint64_t avg_gmem = gmem_ema.get();
+@@ -1156,15 +1157,14 @@ struct tu_autotune::rp_history {
+                      sysmem_prob = MIN2(sysmem_prob + SLOW_STEP_DELTA, SLOW_MAX_PROBABILITY);
+                }
+ 
+-               /* If the RP duration exceeds a certain minimum duration threshold (i.e. has a large impact on frametime)
+-                * and the percentage difference between the modes is large enough, we lock into the optimal mode. This
+-                * avoids performance hazards from switching to an extremely suboptimal mode even if done very rarely.
+-                * Note: Due to the potentially huge negative impact of a bad lock, this is a very conservative check.
++               /* Lock into optimal mode quickly for both long and fast renderpasses, avoiding perpetual
++                * CS timestamp writes and autotuner bounce overhead.
+                 */
+-               constexpr uint32_t MIN_LOCK_DURATION_COUNT = 15;
+-               constexpr uint64_t MIN_LOCK_THRESHOLD = GPU_TICKS_PER_US * 1'000; /* 1ms */
+-               constexpr uint32_t LOCK_PERCENT_DIFF = 30;
+-               constexpr uint64_t LOCK_TIME_WINDOW_NS = 30'000'000'000; /* 30s */
++               constexpr uint32_t MIN_LOCK_DURATION_COUNT = 4;
++               constexpr uint64_t MIN_LOCK_THRESHOLD = GPU_TICKS_PER_US * 15; /* 15us */
++               constexpr uint32_t LOCK_PERCENT_DIFF = 8;
++               constexpr uint64_t LOCK_TIME_WINDOW_NS = 250'000'000;        /* 250ms */
++               constexpr uint64_t TIE_LOCK_TIME_WINDOW_NS = 1'000'000'000;  /* 1s tie convergence */
+ 
+                uint64_t now = os_time_get_nano();
+                bool current_sysmem_winning = avg_sysmem < avg_gmem;
+@@ -1179,28 +1179,45 @@ struct tu_autotune::rp_history {
+                   sysmem_ema.count >= MIN_LOCK_DURATION_COUNT && gmem_ema.count >= MIN_LOCK_DURATION_COUNT;
+                uint64_t min_avg = MIN2(avg_sysmem, avg_gmem);
+                uint64_t max_avg = MAX2(avg_sysmem, avg_gmem);
+-               uint64_t percent_diff = (100 * (max_avg - min_avg)) / min_avg;
+-
+-               if (has_resolved && enough_samples && max_avg >= MIN_LOCK_THRESHOLD &&
+-                   percent_diff >= LOCK_PERCENT_DIFF && (now - winning_since_ts) >= LOCK_TIME_WINDOW_NS) {
++               uint64_t percent_diff = min_avg ? (100 * (max_avg - min_avg)) / min_avg : 0;
++               uint64_t stable_ns = now - winning_since_ts;
++               bool tie_settled = sysmem_ema.count >= 8 && gmem_ema.count >= 8 &&
++                                  stable_ns >= TIE_LOCK_TIME_WINDOW_NS;
++
++               if (has_resolved && enough_samples &&
++                   ((max_avg >= MIN_LOCK_THRESHOLD && percent_diff >= LOCK_PERCENT_DIFF &&
++                     stable_ns >= LOCK_TIME_WINDOW_NS) || tie_settled)) {
+                   if (avg_gmem < avg_sysmem)
+                      sysmem_prob = 0;
+                   else
+                      sysmem_prob = 100;
+-                  locked = true;
++                  lock_now = true;
+                }
+             }
+          }
+ 
+          sysmem_probability.store(sysmem_prob, std::memory_order_relaxed);
++         if (lock_now)
++            locked.store(true, std::memory_order_release);
+ 
+          at_log_profiled_h("update%s avg_gmem: %" PRIu64 " us (%" PRIu64 " samples) avg_sysmem: %" PRIu64
+                            " us (%" PRIu64 " samples) = sysmem_probability: %" PRIu32 " locked: %u",
+                            history.hash, immediate ? "-imm" : "", ticks_to_us(gmem_ema.get()), gmem_ema.count,
+-                           ticks_to_us(sysmem_ema.get()), sysmem_ema.count, sysmem_prob, locked);
++                           ticks_to_us(sysmem_ema.get()), sysmem_ema.count, sysmem_prob,
++                           locked.load(std::memory_order_relaxed));
+       }
+ 
+     public:
++      bool get_locked_mode(render_mode *mode) const
++      {
++         if (!locked.load(std::memory_order_acquire))
++            return false;
++
++         uint32_t l_sysmem_probability = sysmem_probability.load(std::memory_order_relaxed);
++         *mode = l_sysmem_probability >= PROBABILITY_MID ? render_mode::SYSMEM : render_mode::GMEM;
++         return true;
++      }
++
+       render_mode get_optimal_mode(rp_history &history)
+       {
+          uint32_t l_sysmem_probability = sysmem_probability.load(std::memory_order_relaxed);
+@@ -1852,7 +1869,16 @@ tu_autotune::get_optimal_mode(struct tu_cmd_buffer *cmd_buffer, rp_ctx_t *rp_ctx
+     *
+     * Note: If we detect a small RP to be latency sensitive, we enable the autotuner for it anyway.
+     */
+-   bool ignore_small_rp = !config.test(mod_flag::TUNE_SMALL) && rp_state->drawcall_count < 5 &&
++   bool has_msaa = false;
++   for (uint32_t i = 0; i < pass->attachment_count; i++) {
++      if (pass->attachments[i].samples > VK_SAMPLE_COUNT_1_BIT ||
++          pass->attachments[i].will_be_resolved) {
++         has_msaa = true;
++         break;
++      }
++   }
++   bool ignore_small_rp = !config.test(mod_flag::TUNE_SMALL) && !has_msaa &&
++                          rp_state->drawcall_count < 5 &&
+                           (!latency_info || !latency_info->seen_latency_spike);
+ 
+    if (!enabled)
+@@ -1919,6 +1945,15 @@ tu_autotune::get_optimal_mode(struct tu_cmd_buffer *cmd_buffer, rp_ctx_t *rp_ctx
+          history.preempt_optimize.mark_as_latency_sensitive();
+       }
+    }
++   if ((config.is_enabled(algorithm::PROFILED) || config.is_enabled(algorithm::PROFILED_IMM)) &&
++       !config.test(mod_flag::PREEMPT_OPTIMIZE)) {
++      render_mode locked_mode;
++      if (history.profiled.get_locked_mode(&locked_mode)) {
++         at_log_base_h("locked, using %s (skipping instrumentation)", key.hash, render_mode_str(locked_mode));
++         return forced("Autotuner locked", locked_mode);
++      }
++   }
++
+    *rp_ctx = cb_ctx.attach_rp_entry(device, history, config, rp_state->drawcall_count);
+ 
+    if (config.test(mod_flag::PREEMPT_OPTIMIZE) && history.preempt_optimize.is_latency_sensitive()) {
+diff --git a/src/freedreno/vulkan/tu_device.cc b/src/freedreno/vulkan/tu_device.cc
+index 4f15084..9a35c8e 100644
+--- a/src/freedreno/vulkan/tu_device.cc
++++ b/src/freedreno/vulkan/tu_device.cc
+@@ -589,7 +589,6 @@ tu_get_features(struct tu_physical_device *pdevice,
+    features->shaderZeroInitializeWorkgroupMemory = true;
+    features->dynamicRendering                    = true;
+    features->shaderIntegerDotProduct             = true;
+-   features->maintenance4                        = true;
+ 
+    /* Vulkan 1.4 */
+    features->pushDescriptor = true;
+@@ -3075,7 +3074,7 @@ tu_CreateDevice(VkPhysicalDevice physicalDevice,
+ 
+    tu_bo_suballocator_init(
+       &device->vis_stream_suballocator, device,
+-      getpagesize(),
++      64 * 1024,
+       static_cast<enum tu_bo_alloc_flags>(TU_BO_ALLOC_INTERNAL_RESOURCE |
+                                           TU_BO_ALLOC_ALLOW_DUMP),
+       "vis_stream_suballoc");
+@@ -3148,7 +3147,7 @@ tu_CreateDevice(VkPhysicalDevice physicalDevice,
+       goto fail_pipeline_cache;
+    }
+ 
+-   tu_cs_init(&device->sub_cs, device, TU_CS_MODE_SUB_STREAM, 1024, "device sub cs");
++   tu_cs_init(&device->sub_cs, device, TU_CS_MODE_SUB_STREAM, 4096, "device sub cs");
+ 
+    if (device->vk.enabled_features.performanceCounterQueryPools) {
+       /* Prepare command streams setting pass index to the PERF_CNTRS_REG
+diff --git a/src/freedreno/vulkan/tu_device.h b/src/freedreno/vulkan/tu_device.h
+index 5ef943a..459313b 100644
+--- a/src/freedreno/vulkan/tu_device.h
++++ b/src/freedreno/vulkan/tu_device.h
+@@ -501,6 +501,19 @@ struct tu_device
+ 
+    /* Monotonically increasing counter assigned to each tu_image at creation. */
+    uint64_t next_image_id;
++
++   /* Recycled submit container + per-syncobj fast-wait fence hint ring. */
++   void *cached_submit;
++   uint32_t cached_submit_in_use;
++   uint32_t fence_hint_wr_lock;
++#define TU_FENCE_HINT_SLOTS 32
++   struct {
++      uintptr_t sync_ptr;
++      uint32_t syncobj_handle;
++      uint32_t queue_id;
++      uint32_t fence;
++      uint32_t seq;
++   } fence_hints[TU_FENCE_HINT_SLOTS];
+ };
+ VK_DEFINE_HANDLE_CASTS(tu_device, vk.base, VkDevice, VK_OBJECT_TYPE_DEVICE)
+ 
+diff --git a/src/freedreno/vulkan/tu_knl_drm.cc b/src/freedreno/vulkan/tu_knl_drm.cc
+index c2c2b34..e0ac90b 100644
+--- a/src/freedreno/vulkan/tu_knl_drm.cc
++++ b/src/freedreno/vulkan/tu_knl_drm.cc
+@@ -109,6 +109,23 @@ tu_bo_make_zombie(struct tu_device *dev, struct tu_bo *bo)
+ void *
+ msm_submit_create(struct tu_device *device)
+ {
++   if (p_atomic_cmpxchg(&device->cached_submit_in_use, 0, 1) == 0) {
++      struct tu_msm_queue_submit *submit =
++         static_cast<struct tu_msm_queue_submit *>(device->cached_submit);
++      if (!submit) {
++         submit = static_cast<struct tu_msm_queue_submit *>(
++            vk_zalloc(&device->vk.alloc, sizeof(struct tu_msm_queue_submit), 8,
++                      VK_SYSTEM_ALLOCATION_SCOPE_DEVICE));
++         if (submit) {
++            submit->from_device_cache = true;
++            device->cached_submit = submit;
++         } else {
++            p_atomic_set(&device->cached_submit_in_use, 0);
++         }
++      }
++      return submit;
++   }
++
+    return vk_zalloc(&device->vk.alloc, sizeof(struct tu_msm_queue_submit), 8,
+                     VK_SYSTEM_ALLOCATION_SCOPE_DEVICE);
+ }
+@@ -120,6 +137,29 @@ msm_submit_finish(struct tu_device *device,
+    struct tu_msm_queue_submit *submit =
+       static_cast<struct tu_msm_queue_submit *>(_submit);
+ 
++   if (submit->from_device_cache) {
++      util_dynarray_clear(&submit->commands);
++      util_dynarray_clear(&submit->command_bos);
++      util_dynarray_clear(&submit->binds);
++      p_atomic_set(&device->cached_submit_in_use, 0);
++      return;
++   }
++
++   util_dynarray_fini(&submit->commands);
++   util_dynarray_fini(&submit->command_bos);
++   util_dynarray_fini(&submit->binds);
++   vk_free(&device->vk.alloc, submit);
++}
++
++void
++msm_submit_cache_fini(struct tu_device *device)
++{
++   struct tu_msm_queue_submit *submit =
++      static_cast<struct tu_msm_queue_submit *>(device->cached_submit);
++   if (!submit)
++      return;
++
++   device->cached_submit = NULL;
+    util_dynarray_fini(&submit->commands);
+    util_dynarray_fini(&submit->command_bos);
+    util_dynarray_fini(&submit->binds);
+diff --git a/src/freedreno/vulkan/tu_knl_drm.h b/src/freedreno/vulkan/tu_knl_drm.h
+index 2e62585..e6e91c3 100644
+--- a/src/freedreno/vulkan/tu_knl_drm.h
++++ b/src/freedreno/vulkan/tu_knl_drm.h
+@@ -32,8 +32,12 @@ struct tu_msm_queue_submit
+    struct util_dynarray commands;
+    struct util_dynarray command_bos;
+    struct util_dynarray binds;
++   bool from_device_cache;
+ };
+ 
++struct tu_device;
++void msm_submit_cache_fini(struct tu_device *device);
++
+ void *msm_submit_create(struct tu_device *device);
+ void msm_submit_finish(struct tu_device *device, void *_submit);
+ void msm_submit_add_entries(struct tu_device *device, void *_submit,
+diff --git a/src/freedreno/vulkan/tu_knl_drm_msm.cc b/src/freedreno/vulkan/tu_knl_drm_msm.cc
+index 2f4bcf1..39c183d 100644
+--- a/src/freedreno/vulkan/tu_knl_drm_msm.cc
++++ b/src/freedreno/vulkan/tu_knl_drm_msm.cc
+@@ -8,8 +8,13 @@
+ 
+ #include <errno.h>
+ #include <fcntl.h>
++#include <poll.h>
++#include <sched.h>
++#include <stdlib.h>
+ #include <sys/ioctl.h>
+ #include <sys/mman.h>
++#include <time.h>
++#include <unistd.h>
+ #include <xf86drm.h>
+ 
+ #include "util/hash_table.h"
+@@ -18,10 +23,14 @@
+ 
+ #include "common/redump.h"
+ #include "drm/msm/msm_common.h"
++#include "vk_drm_syncobj.h"
++#include "vk_fence.h"
++#include "vk_semaphore.h"
+ #include "tu_cmd_buffer.h"
+ #include "tu_cs.h"
+ #include "tu_device.h"
+ #include "tu_dynamic_rendering.h"
++#include "tu_entrypoints.h"
+ #include "tu_knl.h"
+ #include "tu_knl_drm.h"
+ #include "tu_queue.h"
+@@ -106,18 +115,1025 @@ msm_device_init(struct tu_device *dev)
+                                "Failed to get initial fault count: %d", ret);
+    }
+ 
+-   dev->vk.copy_sync_payloads = vk_drm_syncobj_copy_payloads;
++   dev->vk.copy_sync_payloads =
++      [](struct vk_device *vk_dev, uint32_t wait_count,
++         const struct vk_sync_wait *waits, uint32_t signal_count,
++         const struct vk_sync_signal *signals) -> VkResult {
++      extern VkResult tu_msm_copy_sync_payloads(
++         struct vk_device *vk_dev, uint32_t wait_count,
++         const struct vk_sync_wait *waits, uint32_t signal_count,
++         const struct vk_sync_signal *signals);
++      return tu_msm_copy_sync_payloads(vk_dev, wait_count, waits, signal_count, signals);
++   };
+    dev->fd = fd;
+ 
+    return VK_SUCCESS;
+ }
+ 
++static void tu_clear_device_hints(struct tu_device *dev);
++
+ static void
+ msm_device_finish(struct tu_device *dev)
+ {
++   tu_clear_device_hints(dev);
++   msm_submit_cache_fini(dev);
+    close(dev->fd);
+ }
+ 
++static bool
++tu_lookup_fence_hint(struct tu_device *dev, struct vk_sync *sync,
++                     uint32_t syncobj_handle, uint32_t *queue_id_out,
++                     uint32_t *fence_out)
++{
++   uintptr_t sync_ptr = (uintptr_t)sync;
++   uint32_t slot = ((sync_ptr >> 6) ^ (sync_ptr >> 13)) &
++                   (TU_FENCE_HINT_SLOTS - 1);
++
++   for (unsigned retries = 0; retries < 4; retries++) {
++      uint32_t s1 = __atomic_load_n(&dev->fence_hints[slot].seq, __ATOMIC_ACQUIRE);
++      if (s1 & 1)
++         continue;
++
++      uintptr_t ptr = dev->fence_hints[slot].sync_ptr;
++      uint32_t handle = dev->fence_hints[slot].syncobj_handle;
++      uint32_t qid = dev->fence_hints[slot].queue_id;
++      uint32_t fence = dev->fence_hints[slot].fence;
++      __atomic_thread_fence(__ATOMIC_ACQUIRE);
++
++      if (__atomic_load_n(&dev->fence_hints[slot].seq, __ATOMIC_RELAXED) == s1) {
++         if (ptr == sync_ptr && handle == syncobj_handle && qid != 0) {
++            *queue_id_out = qid;
++            *fence_out = fence;
++            return true;
++         }
++         return false;
++      }
++   }
++
++   return false;
++}
++
++static void
++tu_invalidate_fence_hint(struct tu_device *dev, struct vk_sync *sync)
++{
++   uintptr_t sync_ptr = (uintptr_t)sync;
++   uint32_t slot = ((sync_ptr >> 6) ^ (sync_ptr >> 13)) &
++                   (TU_FENCE_HINT_SLOTS - 1);
++
++   /* Optimistic lockless check avoids writer lock contention on never-hinted fences. */
++   if (__atomic_load_n(&dev->fence_hints[slot].sync_ptr, __ATOMIC_RELAXED) != sync_ptr)
++      return;
++
++   while (__atomic_exchange_n(&dev->fence_hint_wr_lock, 1, __ATOMIC_ACQUIRE))
++      ;
++   if (dev->fence_hints[slot].sync_ptr == sync_ptr) {
++      uint32_t s = __atomic_load_n(&dev->fence_hints[slot].seq, __ATOMIC_RELAXED);
++      __atomic_store_n(&dev->fence_hints[slot].seq, s + 1, __ATOMIC_RELEASE);
++      dev->fence_hints[slot].sync_ptr = 0;
++      dev->fence_hints[slot].syncobj_handle = 0;
++      dev->fence_hints[slot].queue_id = 0;
++      dev->fence_hints[slot].fence = 0;
++      __atomic_store_n(&dev->fence_hints[slot].seq, s + 2, __ATOMIC_RELEASE);
++   }
++   __atomic_store_n(&dev->fence_hint_wr_lock, 0, __ATOMIC_RELEASE);
++}
++
++#define TU_COPY_HINT_SLOTS 64
++struct tu_copy_fence_hint {
++   uint32_t seq;
++   struct tu_device *dev;
++   uintptr_t sync_ptr;
++   uint32_t syncobj_handle;
++   uint32_t queue_id;
++   uint32_t fence;
++};
++static struct tu_copy_fence_hint tu_copy_fence_hints[TU_COPY_HINT_SLOTS];
++static uint32_t tu_copy_hint_wr_lock;
++
++static inline uint32_t
++tu_copy_hint_slot(uintptr_t sync_ptr)
++{
++   return (uint32_t)(((sync_ptr >> 6) ^ (sync_ptr >> 13)) & (TU_COPY_HINT_SLOTS - 1));
++}
++
++static bool
++tu_lookup_any_fence_hint(struct tu_device *dev, struct vk_sync *sync,
++                         uint32_t handle, uint32_t *qid_out, uint32_t *fence_out)
++{
++   if (tu_lookup_fence_hint(dev, sync, handle, qid_out, fence_out))
++      return true;
++
++   uintptr_t sync_ptr = (uintptr_t)sync;
++   uint32_t slot = tu_copy_hint_slot(sync_ptr);
++   struct tu_copy_fence_hint *h = &tu_copy_fence_hints[slot];
++   uint32_t s1 = __atomic_load_n(&h->seq, __ATOMIC_ACQUIRE);
++   if (s1 & 1)
++      return false;
++
++   struct tu_device *h_dev = h->dev;
++   uintptr_t h_ptr = h->sync_ptr;
++   uint32_t h_handle = h->syncobj_handle;
++   uint32_t h_qid = h->queue_id;
++   uint32_t h_fence = h->fence;
++   __atomic_thread_fence(__ATOMIC_ACQUIRE);
++   if (__atomic_load_n(&h->seq, __ATOMIC_RELAXED) != s1)
++      return false;
++
++   if (h_dev == dev && h_ptr == sync_ptr && h_handle == handle && h_qid != 0) {
++      *qid_out = h_qid;
++      *fence_out = h_fence;
++      return true;
++   }
++   return false;
++}
++
++static void
++tu_record_copy_hint(struct tu_device *dev, struct vk_sync *sync, uint32_t handle,
++                    uint32_t queue_id, uint32_t fence)
++{
++   uintptr_t sync_ptr = (uintptr_t)sync;
++   uint32_t slot = tu_copy_hint_slot(sync_ptr);
++   struct tu_copy_fence_hint *h = &tu_copy_fence_hints[slot];
++   while (__atomic_exchange_n(&tu_copy_hint_wr_lock, 1, __ATOMIC_ACQUIRE))
++      ;
++   uint32_t s = __atomic_load_n(&h->seq, __ATOMIC_RELAXED);
++   __atomic_store_n(&h->seq, s + 1, __ATOMIC_RELEASE);
++   h->dev = dev;
++   h->sync_ptr = sync_ptr;
++   h->syncobj_handle = handle;
++   h->queue_id = queue_id;
++   h->fence = fence;
++   __atomic_store_n(&h->seq, s + 2, __ATOMIC_RELEASE);
++   __atomic_store_n(&tu_copy_hint_wr_lock, 0, __ATOMIC_RELEASE);
++}
++
++static void
++tu_invalidate_copy_hint(struct tu_device *dev, struct vk_sync *sync)
++{
++   uintptr_t sync_ptr = (uintptr_t)sync;
++   uint32_t slot = tu_copy_hint_slot(sync_ptr);
++   if (__atomic_load_n(&tu_copy_fence_hints[slot].sync_ptr, __ATOMIC_RELAXED) != sync_ptr)
++      return;
++   struct tu_copy_fence_hint *h = &tu_copy_fence_hints[slot];
++   while (__atomic_exchange_n(&tu_copy_hint_wr_lock, 1, __ATOMIC_ACQUIRE))
++      ;
++   if (h->dev == dev && h->sync_ptr == sync_ptr) {
++      uint32_t s = __atomic_load_n(&h->seq, __ATOMIC_RELAXED);
++      __atomic_store_n(&h->seq, s + 1, __ATOMIC_RELEASE);
++      h->dev = NULL;
++      h->sync_ptr = 0;
++      h->syncobj_handle = 0;
++      h->queue_id = 0;
++      h->fence = 0;
++      __atomic_store_n(&h->seq, s + 2, __ATOMIC_RELEASE);
++   }
++   __atomic_store_n(&tu_copy_hint_wr_lock, 0, __ATOMIC_RELEASE);
++}
++
++#define TU_Q_DONE_SLOTS 64
++struct tu_queue_done_entry {
++   uint32_t seq;
++   struct tu_device *dev;
++   uint32_t queue_id;
++   uint32_t completed_fence;
++};
++static struct tu_queue_done_entry tu_q_done[TU_Q_DONE_SLOTS];
++static uint32_t tu_q_done_wr_lock;
++
++static inline uint32_t
++tu_q_done_slot(struct tu_device *dev, uint32_t qid)
++{
++   uintptr_t p = (uintptr_t)dev;
++   return (uint32_t)((((p >> 6) ^ (p >> 14)) ^ (qid * 2654435761u)) &
++                     (TU_Q_DONE_SLOTS - 1));
++}
++
++static bool
++tu_is_msm_fence_completed(struct tu_device *dev, uint32_t qid, uint32_t fence)
++{
++   if (qid == 0 || fence == 0)
++      return false;
++   struct tu_queue_done_entry *e = &tu_q_done[tu_q_done_slot(dev, qid)];
++   for (unsigned retries = 0; retries < 4; retries++) {
++      uint32_t s1 = __atomic_load_n(&e->seq, __ATOMIC_ACQUIRE);
++      if (s1 & 1)
++         continue;
++      struct tu_device *e_dev = e->dev;
++      uint32_t e_qid = e->queue_id;
++      uint32_t done = e->completed_fence;
++      __atomic_thread_fence(__ATOMIC_ACQUIRE);
++      if (__atomic_load_n(&e->seq, __ATOMIC_RELAXED) == s1) {
++         return e_dev == dev && e_qid == qid && done != 0 &&
++                (int32_t)(fence - done) <= 0;
++      }
++   }
++   return false;
++}
++
++static void
++tu_mark_msm_fence_completed(struct tu_device *dev, uint32_t qid, uint32_t fence)
++{
++   if (qid == 0 || fence == 0)
++      return;
++   struct tu_queue_done_entry *e = &tu_q_done[tu_q_done_slot(dev, qid)];
++   while (__atomic_exchange_n(&tu_q_done_wr_lock, 1, __ATOMIC_ACQUIRE))
++      ;
++   uint32_t s = __atomic_load_n(&e->seq, __ATOMIC_RELAXED);
++   if (e->dev == dev && e->queue_id == qid) {
++      if (e->completed_fence == 0 || (int32_t)(fence - e->completed_fence) > 0) {
++         __atomic_store_n(&e->seq, s + 1, __ATOMIC_RELEASE);
++         e->completed_fence = fence;
++         __atomic_store_n(&e->seq, s + 2, __ATOMIC_RELEASE);
++      }
++   } else {
++      __atomic_store_n(&e->seq, s + 1, __ATOMIC_RELEASE);
++      e->dev = dev;
++      e->queue_id = qid;
++      e->completed_fence = fence;
++      __atomic_store_n(&e->seq, s + 2, __ATOMIC_RELEASE);
++   }
++   __atomic_store_n(&tu_q_done_wr_lock, 0, __ATOMIC_RELEASE);
++}
++
++static void
++tu_clear_queue_done(struct tu_device *dev, uint32_t qid)
++{
++   if (qid == 0)
++      return;
++   struct tu_queue_done_entry *e = &tu_q_done[tu_q_done_slot(dev, qid)];
++   while (__atomic_exchange_n(&tu_q_done_wr_lock, 1, __ATOMIC_ACQUIRE))
++      ;
++   if (e->dev == dev && e->queue_id == qid) {
++      uint32_t s = __atomic_load_n(&e->seq, __ATOMIC_RELAXED);
++      __atomic_store_n(&e->seq, s + 1, __ATOMIC_RELEASE);
++      e->dev = NULL;
++      e->queue_id = 0;
++      e->completed_fence = 0;
++      __atomic_store_n(&e->seq, s + 2, __ATOMIC_RELEASE);
++   }
++   __atomic_store_n(&tu_q_done_wr_lock, 0, __ATOMIC_RELEASE);
++}
++
++/* Steer unrestricted high-rate Vulkan submit/wait threads off slow in-order
++ * little cores (CPUs 0-3 on asymmetric big.LITTLE SoCs like sm8450) onto the
++ * high-clock out-of-order core(s), while strictly preserving any explicit
++ * affinity set via taskset or the application.
++ */
++static uint32_t tu_perf_cpu_mask_state; /* 0 = uninit, 1 = disabled, >=2 = (mask << 2) | 2 */
++
++static uint32_t
++tu_read_sysfs_u32(const char *path)
++{
++   int fd = open(path, O_RDONLY | O_CLOEXEC);
++   if (fd < 0)
++      return 0;
++   char buf[32] = {};
++   ssize_t n = read(fd, buf, sizeof(buf) - 1);
++   close(fd);
++   return n > 0 ? (uint32_t)strtoul(buf, NULL, 10) : 0;
++}
++
++static uint32_t
++tu_get_perf_cpu_mask(void)
++{
++   uint32_t st = __atomic_load_n(&tu_perf_cpu_mask_state, __ATOMIC_ACQUIRE);
++   if (likely(st != 0))
++      return (st & 2) ? (st >> 2) : 0;
++
++   uint32_t mask = 0;
++   const char *env = getenv("TU_PERF_MASK");
++   if (env) {
++      mask = (uint32_t)strtoul(env, NULL, 0);
++   } else {
++      uint32_t f0 = tu_read_sysfs_u32("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq");
++      uint32_t f7 = tu_read_sysfs_u32("/sys/devices/system/cpu/cpu7/cpufreq/cpuinfo_max_freq");
++      if (f0 > 0 && f7 > f0)
++         mask = 0x80u; /* Prime core (CPU 7, co-located with gpu-irq & 1MB L2) */
++   }
++
++   uint32_t next_st = mask ? ((mask << 2) | 2u) : 1u;
++   __atomic_store_n(&tu_perf_cpu_mask_state, next_st, __ATOMIC_RELEASE);
++   return mask;
++}
++
++static inline void
++tu_maybe_steer_perf_thread(void)
++{
++   static thread_local uint8_t tls_calls;
++   if (likely(tls_calls >= 8))
++      return;
++   if (++tls_calls < 8)
++      return;
++
++   uint32_t mask = tu_get_perf_cpu_mask();
++   if (!mask)
++      return;
++
++   cpu_set_t cur;
++   CPU_ZERO(&cur);
++   if (sched_getaffinity(0, sizeof(cur), &cur) != 0)
++      return;
++
++   /* Only steer if the thread currently has the default all-8-cores mask,
++    * never overriding explicit taskset or app-pinned threads.
++    */
++   if (CPU_COUNT(&cur) < 8 || !CPU_ISSET(0, &cur) || !CPU_ISSET(7, &cur))
++      return;
++
++   cpu_set_t target;
++   CPU_ZERO(&target);
++   for (unsigned c = 0; c < 32; c++) {
++      if ((mask & (1u << c)) && CPU_ISSET(c, &cur))
++         CPU_SET(c, &target);
++   }
++   if (CPU_COUNT(&target) > 0)
++      sched_setaffinity(0, sizeof(target), &target);
++}
++
++#define TU_TL_HINT_SLOTS 64
++#define TU_TL_RECENT_POINTS 16
++struct tu_tl_sync_state {
++   uint32_t seq;
++   struct tu_device *dev;
++   uintptr_t sync_ptr;
++   uint32_t syncobj_handle;
++   uint32_t queue_id; /* UINT32_MAX = multi-queue */
++   uint32_t head;
++   bool has_untracked;
++   uint64_t max_point;
++   uint32_t max_fence;
++   struct {
++      uint64_t point;
++      uint32_t fence;
++   } recent[TU_TL_RECENT_POINTS];
++};
++static struct tu_tl_sync_state tu_tl_hints[TU_TL_HINT_SLOTS];
++static uint32_t tu_tl_hint_wr_lock;
++
++static inline uint32_t
++tu_tl_hint_slot(uintptr_t sync_ptr)
++{
++   return (uint32_t)(((sync_ptr >> 6) ^ (sync_ptr >> 13)) & (TU_TL_HINT_SLOTS - 1));
++}
++
++static void
++tu_invalidate_tl_hint(struct tu_device *dev, struct vk_sync *sync,
++                      bool keep_queue, uint64_t drop_point)
++{
++   if (!sync)
++      return;
++   uintptr_t sync_ptr = (uintptr_t)sync;
++   uint32_t slot = tu_tl_hint_slot(sync_ptr);
++   if (__atomic_load_n(&tu_tl_hints[slot].sync_ptr, __ATOMIC_RELAXED) != sync_ptr)
++      return;
++
++   struct tu_tl_sync_state *h = &tu_tl_hints[slot];
++   while (__atomic_exchange_n(&tu_tl_hint_wr_lock, 1, __ATOMIC_ACQUIRE))
++      ;
++   if (h->dev == dev && h->sync_ptr == sync_ptr) {
++      uint32_t s = __atomic_load_n(&h->seq, __ATOMIC_RELAXED);
++      __atomic_store_n(&h->seq, s + 1, __ATOMIC_RELEASE);
++      if (keep_queue) {
++         h->has_untracked = true;
++         if (drop_point != 0) {
++            for (uint32_t k = 0; k < TU_TL_RECENT_POINTS; k++) {
++               if (h->recent[k].point == drop_point) {
++                  h->recent[k].point = 0;
++                  h->recent[k].fence = 0;
++               }
++            }
++         } else {
++            memset(h->recent, 0, sizeof(h->recent));
++         }
++      } else {
++         h->dev = NULL;
++         h->sync_ptr = 0;
++         h->syncobj_handle = 0;
++         h->queue_id = 0;
++         h->head = 0;
++         h->has_untracked = false;
++         h->max_point = 0;
++         h->max_fence = 0;
++         memset(h->recent, 0, sizeof(h->recent));
++      }
++      __atomic_store_n(&h->seq, s + 2, __ATOMIC_RELEASE);
++   }
++   __atomic_store_n(&tu_tl_hint_wr_lock, 0, __ATOMIC_RELEASE);
++}
++
++static void
++tu_record_tl_hint(struct tu_device *dev, struct vk_sync *sync, uint32_t handle,
++                  uint64_t point, uint32_t queue_id, uint32_t fence)
++{
++   if (point == 0 || queue_id == 0 || queue_id == UINT32_MAX)
++      return;
++
++   uintptr_t sync_ptr = (uintptr_t)sync;
++   uint32_t slot = tu_tl_hint_slot(sync_ptr);
++   struct tu_tl_sync_state *h = &tu_tl_hints[slot];
++   while (__atomic_exchange_n(&tu_tl_hint_wr_lock, 1, __ATOMIC_ACQUIRE))
++      ;
++   uint32_t s = __atomic_load_n(&h->seq, __ATOMIC_RELAXED);
++   __atomic_store_n(&h->seq, s + 1, __ATOMIC_RELEASE);
++   if (h->dev == dev && h->sync_ptr == sync_ptr && h->syncobj_handle == handle) {
++      if (h->queue_id == UINT32_MAX ||
++          (h->queue_id != 0 && h->queue_id != queue_id)) {
++         h->queue_id = UINT32_MAX;
++         h->has_untracked = true;
++         h->max_point = 0;
++         h->max_fence = 0;
++         memset(h->recent, 0, sizeof(h->recent));
++      } else {
++         h->queue_id = queue_id;
++         uint32_t idx = h->head++ & (TU_TL_RECENT_POINTS - 1);
++         h->recent[idx].point = point;
++         h->recent[idx].fence = fence;
++         if (point >= h->max_point) {
++            h->max_point = point;
++            h->max_fence = fence;
++         }
++      }
++   } else {
++      h->dev = dev;
++      h->sync_ptr = sync_ptr;
++      h->syncobj_handle = handle;
++      h->queue_id = queue_id;
++      h->head = 1;
++      h->has_untracked = false;
++      h->max_point = point;
++      h->max_fence = fence;
++      memset(h->recent, 0, sizeof(h->recent));
++      h->recent[0].point = point;
++      h->recent[0].fence = fence;
++   }
++   __atomic_store_n(&h->seq, s + 2, __ATOMIC_RELEASE);
++   __atomic_store_n(&tu_tl_hint_wr_lock, 0, __ATOMIC_RELEASE);
++}
++
++static bool
++tu_lookup_tl_hint(struct tu_device *dev, struct vk_sync *sync, uint32_t handle,
++                  uint64_t point, uint32_t *qid_out, uint32_t *fence_out)
++{
++   if (point == 0)
++      return false;
++
++   uintptr_t sync_ptr = (uintptr_t)sync;
++   uint32_t slot = tu_tl_hint_slot(sync_ptr);
++   struct tu_tl_sync_state *h = &tu_tl_hints[slot];
++
++   for (unsigned retries = 0; retries < 4; retries++) {
++      uint32_t s1 = __atomic_load_n(&h->seq, __ATOMIC_ACQUIRE);
++      if (s1 & 1)
++         continue;
++
++      struct tu_device *h_dev = h->dev;
++      uintptr_t h_ptr = h->sync_ptr;
++      uint32_t h_handle = h->syncobj_handle;
++      uint32_t h_qid = h->queue_id;
++      bool found = false;
++      uint32_t found_fence = 0;
++      if (h_dev == dev && h_ptr == sync_ptr && h_handle == handle &&
++          h_qid != 0 && h_qid != UINT32_MAX) {
++         for (uint32_t k = 0; k < TU_TL_RECENT_POINTS; k++) {
++            if (h->recent[k].point == point) {
++               found = true;
++               found_fence = h->recent[k].fence;
++               break;
++            }
++         }
++      }
++      __atomic_thread_fence(__ATOMIC_ACQUIRE);
++      if (__atomic_load_n(&h->seq, __ATOMIC_RELAXED) == s1) {
++         if (found) {
++            *qid_out = h_qid;
++            *fence_out = found_fence;
++            return true;
++         }
++         return false;
++      }
++   }
++
++   return false;
++}
++
++static void
++tu_clear_device_hints(struct tu_device *dev)
++{
++   while (__atomic_exchange_n(&tu_copy_hint_wr_lock, 1, __ATOMIC_ACQUIRE))
++      ;
++   for (uint32_t i = 0; i < TU_COPY_HINT_SLOTS; i++) {
++      struct tu_copy_fence_hint *h = &tu_copy_fence_hints[i];
++      if (h->dev == dev) {
++         uint32_t s = __atomic_load_n(&h->seq, __ATOMIC_RELAXED);
++         __atomic_store_n(&h->seq, s + 1, __ATOMIC_RELEASE);
++         h->dev = NULL;
++         h->sync_ptr = 0;
++         h->syncobj_handle = 0;
++         h->queue_id = 0;
++         h->fence = 0;
++         __atomic_store_n(&h->seq, s + 2, __ATOMIC_RELEASE);
++      }
++   }
++   __atomic_store_n(&tu_copy_hint_wr_lock, 0, __ATOMIC_RELEASE);
++
++   while (__atomic_exchange_n(&tu_tl_hint_wr_lock, 1, __ATOMIC_ACQUIRE))
++      ;
++   for (uint32_t i = 0; i < TU_TL_HINT_SLOTS; i++) {
++      struct tu_tl_sync_state *h = &tu_tl_hints[i];
++      if (h->dev == dev) {
++         uint32_t s = __atomic_load_n(&h->seq, __ATOMIC_RELAXED);
++         __atomic_store_n(&h->seq, s + 1, __ATOMIC_RELEASE);
++         h->dev = NULL;
++         h->sync_ptr = 0;
++         h->syncobj_handle = 0;
++         h->queue_id = 0;
++         h->head = 0;
++         h->has_untracked = false;
++         h->max_point = 0;
++         h->max_fence = 0;
++         memset(h->recent, 0, sizeof(h->recent));
++         __atomic_store_n(&h->seq, s + 2, __ATOMIC_RELEASE);
++      }
++   }
++   __atomic_store_n(&tu_tl_hint_wr_lock, 0, __ATOMIC_RELEASE);
++
++   while (__atomic_exchange_n(&tu_q_done_wr_lock, 1, __ATOMIC_ACQUIRE))
++      ;
++   for (uint32_t i = 0; i < TU_Q_DONE_SLOTS; i++) {
++      struct tu_queue_done_entry *e = &tu_q_done[i];
++      if (e->dev == dev) {
++         uint32_t s = __atomic_load_n(&e->seq, __ATOMIC_RELAXED);
++         __atomic_store_n(&e->seq, s + 1, __ATOMIC_RELEASE);
++         e->dev = NULL;
++         e->queue_id = 0;
++         e->completed_fence = 0;
++         __atomic_store_n(&e->seq, s + 2, __ATOMIC_RELEASE);
++      }
++   }
++   __atomic_store_n(&tu_q_done_wr_lock, 0, __ATOMIC_RELEASE);
++}
++
++static bool
++tu_tl_is_point_materialized(struct tu_device *dev, struct vk_sync *sync,
++                            uint32_t handle, uint64_t point)
++{
++   if (point == 0)
++      return true;
++   uintptr_t sync_ptr = (uintptr_t)sync;
++   struct tu_tl_sync_state *h = &tu_tl_hints[tu_tl_hint_slot(sync_ptr)];
++   for (unsigned retries = 0; retries < 4; retries++) {
++      uint32_t s1 = __atomic_load_n(&h->seq, __ATOMIC_ACQUIRE);
++      if (s1 & 1)
++         continue;
++      struct tu_device *h_dev = h->dev;
++      uintptr_t h_ptr = h->sync_ptr;
++      uint32_t h_handle = h->syncobj_handle;
++      uint32_t h_qid = h->queue_id;
++      uint64_t max_pt = h->max_point;
++      __atomic_thread_fence(__ATOMIC_ACQUIRE);
++      if (__atomic_load_n(&h->seq, __ATOMIC_RELAXED) == s1) {
++         return h_dev == dev && h_ptr == sync_ptr && h_handle == handle &&
++                h_qid != 0 && h_qid != UINT32_MAX && max_pt >= point;
++      }
++   }
++   return false;
++}
++
++static int
++tu_msm_peek_fence(struct tu_device *dev, uint32_t queue_id, uint32_t fence)
++{
++   if (tu_is_msm_fence_completed(dev, queue_id, fence))
++      return 0;
++
++   struct drm_msm_wait_fence req = {
++      .fence = fence,
++      .queueid = queue_id,
++   };
++   int ret = drmCommandWrite(dev->fd, DRM_MSM_WAIT_FENCE, &req, sizeof(req));
++   if (ret == 0) {
++      tu_mark_msm_fence_completed(dev, queue_id, fence);
++      return 0;
++   }
++   if (ret == -ETIMEDOUT || (ret < 0 && errno == ETIMEDOUT))
++      return -ETIMEDOUT;
++   return -EINVAL;
++}
++
++VkResult
++tu_msm_copy_sync_payloads(struct vk_device *vk_dev,
++                          uint32_t wait_count,
++                          const struct vk_sync_wait *waits,
++                          uint32_t signal_count,
++                          const struct vk_sync_signal *signals);
++
++VkResult
++tu_msm_copy_sync_payloads(struct vk_device *vk_dev,
++                          uint32_t wait_count,
++                          const struct vk_sync_wait *waits,
++                          uint32_t signal_count,
++                          const struct vk_sync_signal *signals)
++{
++   struct tu_device *dev = container_of(vk_dev, struct tu_device, vk);
++   uint32_t src_qid = 0, src_fence = 0;
++   bool propagate = wait_count > 0 && signal_count > 0;
++   struct vk_sync_wait pruned_waits[16];
++   const struct vk_sync_wait *pass_waits = waits;
++   uint32_t pass_wait_count = wait_count;
++
++   if (wait_count > 0 && wait_count <= ARRAY_SIZE(pruned_waits)) {
++      uint32_t active_n = 0;
++      for (uint32_t i = 0; i < wait_count; i++) {
++         struct vk_sync *sync = waits[i].sync;
++         uint32_t qid = 0, fence = 0;
++         bool ok = false;
++         if (sync && vk_sync_type_is_drm_syncobj(sync->type)) {
++            uint32_t handle = vk_sync_as_drm_syncobj(sync)->syncobj;
++            ok = (sync->flags & VK_SYNC_IS_TIMELINE)
++                    ? tu_lookup_tl_hint(dev, sync, handle, waits[i].wait_value,
++                                        &qid, &fence)
++                    : tu_lookup_any_fence_hint(dev, sync, handle, &qid, &fence);
++         }
++         if (!ok) {
++            propagate = false;
++            pruned_waits[active_n++] = waits[i];
++            continue;
++         }
++         if (propagate) {
++            if (src_qid == 0) {
++               src_qid = qid;
++               src_fence = fence;
++            } else if (src_qid == qid) {
++               if ((int32_t)(fence - src_fence) > 0)
++                  src_fence = fence;
++            } else {
++               propagate = false;
++            }
++         }
++         /* Prune already-completed waits when merging multiple syncobjs so
++          * vk_drm_syncobj_copy_payloads avoids temporary syncobj CREATE/DESTROY
++          * or sync_file HANDLE_TO_FD + SYNC_IOC_MERGE + FD_TO_HANDLE storms.
++          */
++         if (wait_count > 1 && tu_msm_peek_fence(dev, qid, fence) == 0)
++            continue;
++         pruned_waits[active_n++] = waits[i];
++      }
++      pass_waits = pruned_waits;
++      pass_wait_count = active_n;
++   } else if (propagate) {
++      propagate = false;
++   }
++
++   VkResult result = vk_drm_syncobj_copy_payloads(vk_dev, pass_wait_count,
++                                                  pass_waits, signal_count,
++                                                  signals);
++   if (result != VK_SUCCESS)
++      return result;
++
++   for (uint32_t i = 0; i < signal_count; i++) {
++      struct vk_sync *sync = signals[i].sync;
++      if (!sync || !vk_sync_type_is_drm_syncobj(sync->type))
++         continue;
++      uint32_t handle = vk_sync_as_drm_syncobj(sync)->syncobj;
++      if (sync->flags & VK_SYNC_IS_TIMELINE) {
++         if (propagate && src_qid != 0)
++            tu_record_tl_hint(dev, sync, handle, signals[i].signal_value,
++                              src_qid, src_fence);
++         else
++            tu_invalidate_tl_hint(dev, sync, true, signals[i].signal_value);
++         continue;
++      }
++      if (propagate && src_qid != 0)
++         tu_record_copy_hint(dev, sync, handle, src_qid, src_fence);
++      else
++         tu_invalidate_copy_hint(dev, sync);
++   }
++
++   return VK_SUCCESS;
++}
++
++static int
++tu_msm_wait_fence_boost_ns(struct tu_device *dev, uint32_t queue_id,
++                           uint32_t fence, uint64_t spin_ns)
++{
++   if (tu_is_msm_fence_completed(dev, queue_id, fence))
++      return 0;
++
++   struct timespec ts;
++   clock_gettime(CLOCK_MONOTONIC, &ts);
++
++   uint64_t abs_ns = (uint64_t)ts.tv_sec * 1000000000ULL + ts.tv_nsec + spin_ns;
++   struct drm_msm_wait_fence req = {
++      .fence = fence,
++      .flags = MSM_WAIT_FENCE_BOOST,
++      .timeout = {
++         .tv_sec = (int64_t)(abs_ns / 1000000000ULL),
++         .tv_nsec = (int64_t)(abs_ns % 1000000000ULL),
++      },
++      .queueid = queue_id,
++   };
++
++   int ret = drmCommandWrite(dev->fd, DRM_MSM_WAIT_FENCE, &req, sizeof(req));
++   if (ret == 0)
++      tu_mark_msm_fence_completed(dev, queue_id, fence);
++   return ret;
++}
++
++VKAPI_ATTR VkResult VKAPI_CALL
++tu_ResetFences(VkDevice _device,
++               uint32_t fenceCount,
++               const VkFence *pFences)
++{
++   VK_FROM_HANDLE(tu_device, dev, _device);
++   for (uint32_t i = 0; i < fenceCount; i++) {
++      VK_FROM_HANDLE(vk_fence, fence, pFences[i]);
++      tu_invalidate_fence_hint(dev, &fence->permanent);
++      tu_invalidate_copy_hint(dev, &fence->permanent);
++   }
++   return vk_common_ResetFences(_device, fenceCount, pFences);
++}
++
++VKAPI_ATTR void VKAPI_CALL
++tu_DestroyFence(VkDevice _device,
++                VkFence _fence,
++                const VkAllocationCallbacks *pAllocator)
++{
++   VK_FROM_HANDLE(tu_device, dev, _device);
++   VK_FROM_HANDLE(vk_fence, fence, _fence);
++   if (fence) {
++      tu_invalidate_fence_hint(dev, &fence->permanent);
++      tu_invalidate_copy_hint(dev, &fence->permanent);
++   }
++   vk_common_DestroyFence(_device, _fence, pAllocator);
++}
++
++VKAPI_ATTR VkResult VKAPI_CALL
++tu_GetFenceStatus(VkDevice _device, VkFence _fence)
++{
++   VK_FROM_HANDLE(tu_device, dev, _device);
++   VK_FROM_HANDLE(vk_fence, fence, _fence);
++
++   if (unlikely(vk_device_is_lost(&dev->vk)))
++      return VK_ERROR_DEVICE_LOST;
++
++   if (dev->instance->knl->name[0] == 'm') {
++      struct vk_sync *sync = vk_fence_get_active_sync(fence);
++      if (sync == &fence->permanent && vk_sync_type_is_drm_syncobj(sync->type)) {
++         uint32_t qid = 0, msm_fence = 0;
++         if (tu_lookup_any_fence_hint(dev, sync,
++                                      vk_sync_as_drm_syncobj(sync)->syncobj,
++                                      &qid, &msm_fence)) {
++            int r = tu_msm_peek_fence(dev, qid, msm_fence);
++            if (r == 0)
++               return VK_SUCCESS;
++            if (r == -ETIMEDOUT)
++               return VK_NOT_READY;
++         }
++      }
++   }
++
++   return vk_common_GetFenceStatus(_device, _fence);
++}
++
++VKAPI_ATTR VkResult VKAPI_CALL
++tu_GetSemaphoreCounterValue(VkDevice _device,
++                            VkSemaphore _semaphore,
++                            uint64_t *pValue)
++{
++   VK_FROM_HANDLE(tu_device, dev, _device);
++   VK_FROM_HANDLE(vk_semaphore, sem, _semaphore);
++
++   if (unlikely(vk_device_is_lost(&dev->vk)))
++      return VK_ERROR_DEVICE_LOST;
++
++   if (dev->instance->knl->name[0] == 'm') {
++      struct vk_sync *sync = vk_semaphore_get_active_sync(sem);
++      if (sync == &sem->permanent && (sync->flags & VK_SYNC_IS_TIMELINE) &&
++          vk_sync_type_is_drm_syncobj(sync->type)) {
++         uintptr_t sync_ptr = (uintptr_t)sync;
++         uint32_t handle = vk_sync_as_drm_syncobj(sync)->syncobj;
++         struct tu_tl_sync_state *h = &tu_tl_hints[tu_tl_hint_slot(sync_ptr)];
++         uint32_t s1 = __atomic_load_n(&h->seq, __ATOMIC_ACQUIRE);
++         if (!(s1 & 1)) {
++            struct tu_device *h_dev = h->dev;
++            uintptr_t h_ptr = h->sync_ptr;
++            uint32_t h_handle = h->syncobj_handle;
++            uint32_t h_qid = h->queue_id;
++            bool untracked = h->has_untracked;
++            uint64_t max_pt = h->max_point;
++            uint32_t max_fn = h->max_fence;
++            __atomic_thread_fence(__ATOMIC_ACQUIRE);
++            if (__atomic_load_n(&h->seq, __ATOMIC_RELAXED) == s1 &&
++                h_dev == dev && h_ptr == sync_ptr && h_handle == handle &&
++                !untracked && h_qid != 0 && h_qid != UINT32_MAX && max_pt > 0) {
++               if (tu_msm_peek_fence(dev, h_qid, max_fn) == 0) {
++                  *pValue = max_pt;
++                  return VK_SUCCESS;
++               }
++            }
++         }
++      }
++   }
++
++   return vk_common_GetSemaphoreCounterValue(_device, _semaphore, pValue);
++}
++
++/* Returns: 1 = VK_SUCCESS, -1 = proven VK_TIMEOUT (timeout==0), 0 = fallback */
++static int
++tu_wait_msm_syncs(struct tu_device *dev, uint32_t count,
++                  struct vk_sync *const *syncs, const uint64_t *values,
++                  bool is_timeline, bool wait_all, uint64_t *timeout_inout)
++{
++   uint64_t timeout = *timeout_inout;
++   if (count == 0 || count > 16 || (!wait_all && count > 1) ||
++       dev->instance->knl->name[0] != 'm' ||
++       strcmp(dev->instance->knl->name, "msm") != 0)
++      return 0;
++
++   tu_maybe_steer_perf_thread();
++
++   uint32_t last_qid = 0, max_fence = 0, hits = 0;
++   bool single_queue = true;
++   uint32_t qids[16];
++   uint32_t fences[16];
++
++   for (uint32_t i = 0; i < count; i++) {
++      qids[i] = 0;
++      fences[i] = 0;
++      struct vk_sync *sync = syncs[i];
++      if (!sync || !vk_sync_type_is_drm_syncobj(sync->type))
++         continue;
++      bool tl = (sync->flags & VK_SYNC_IS_TIMELINE) != 0;
++      if (tl != is_timeline)
++         continue;
++
++      uint32_t handle = vk_sync_as_drm_syncobj(sync)->syncobj;
++      uint32_t qid = 0, msm_fence = 0;
++      bool ok = is_timeline
++                   ? tu_lookup_tl_hint(dev, sync, handle, values[i], &qid, &msm_fence)
++                   : tu_lookup_any_fence_hint(dev, sync, handle, &qid, &msm_fence);
++      if (!ok)
++         continue;
++
++      qids[i] = qid;
++      fences[i] = msm_fence;
++      hits++;
++      if (last_qid == 0) {
++         last_qid = qid;
++         max_fence = msm_fence;
++      } else if (last_qid == qid) {
++         if ((int32_t)(msm_fence - max_fence) > 0)
++            max_fence = msm_fence;
++      } else {
++         single_queue = false;
++      }
++   }
++
++   if (last_qid == 0)
++      return 0;
++
++   if (single_queue && hits == count) {
++      if (tu_is_msm_fence_completed(dev, last_qid, max_fence))
++         return 1;
++      if (timeout == 0) {
++         int r = tu_msm_peek_fence(dev, last_qid, max_fence);
++         if (r == 0)
++            return 1;
++         if (r == -ETIMEDOUT)
++            return -1;
++         return 0;
++      }
++   } else if (timeout == 0) {
++      return 0;
++   }
++
++   struct timespec t0;
++   uint64_t start_ns = 0;
++   if (timeout != UINT64_MAX) {
++      clock_gettime(CLOCK_MONOTONIC, &t0);
++      start_ns = (uint64_t)t0.tv_sec * 1000000000ULL + t0.tv_nsec;
++   }
++
++   uint64_t full_budget = MIN2(timeout, 50000000ULL);
++   uint64_t probe_budget = MIN2(timeout, 2000000ULL);
++
++   if (!single_queue) {
++      for (uint32_t i = 0; i < count; i++) {
++         if (qids[i] != 0 && qids[i] != last_qid)
++            tu_msm_wait_fence_boost_ns(dev, qids[i], fences[i], probe_budget / 2);
++      }
++   }
++
++   if (single_queue && hits == count) {
++      if (tu_msm_wait_fence_boost_ns(dev, last_qid, max_fence, full_budget) == 0)
++         return 1;
++   } else {
++      tu_msm_wait_fence_boost_ns(dev, last_qid, max_fence,
++                                 single_queue ? probe_budget : probe_budget / 2);
++   }
++
++   if (timeout != UINT64_MAX) {
++      struct timespec t1;
++      clock_gettime(CLOCK_MONOTONIC, &t1);
++      uint64_t end_ns = (uint64_t)t1.tv_sec * 1000000000ULL + t1.tv_nsec;
++      uint64_t elapsed = end_ns > start_ns ? end_ns - start_ns : 0;
++      *timeout_inout = elapsed < timeout ? timeout - elapsed : 0;
++   }
++   return 0;
++}
++
++VKAPI_ATTR VkResult VKAPI_CALL
++tu_WaitForFences(VkDevice _device,
++                 uint32_t fenceCount,
++                 const VkFence *pFences,
++                 VkBool32 waitAll,
++                 uint64_t timeout)
++{
++   VK_FROM_HANDLE(tu_device, dev, _device);
++
++   if (unlikely(vk_device_is_lost(&dev->vk)))
++      return VK_ERROR_DEVICE_LOST;
++
++   if (fenceCount > 0 && fenceCount <= 16) {
++      struct vk_sync *syncs[16];
++      for (uint32_t i = 0; i < fenceCount; i++) {
++         VK_FROM_HANDLE(vk_fence, fence, pFences[i]);
++         struct vk_sync *sync = vk_fence_get_active_sync(fence);
++         syncs[i] = (sync == &fence->permanent) ? sync : NULL;
++      }
++      int r = tu_wait_msm_syncs(dev, fenceCount, syncs, NULL, false, waitAll, &timeout);
++      if (r > 0)
++         return VK_SUCCESS;
++      if (r < 0)
++         return VK_TIMEOUT;
++   }
++
++   return vk_common_WaitForFences(_device, fenceCount, pFences, waitAll, timeout);
++}
++
++VKAPI_ATTR VkResult VKAPI_CALL
++tu_WaitSemaphores(VkDevice _device,
++                  const VkSemaphoreWaitInfo *pWaitInfo,
++                  uint64_t timeout)
++{
++   VK_FROM_HANDLE(tu_device, dev, _device);
++
++   if (unlikely(vk_device_is_lost(&dev->vk)))
++      return VK_ERROR_DEVICE_LOST;
++
++   uint32_t cnt = pWaitInfo->semaphoreCount;
++   if (cnt > 0 && cnt <= 16) {
++      bool wait_all = !(pWaitInfo->flags & VK_SEMAPHORE_WAIT_ANY_BIT);
++      struct vk_sync *syncs[16];
++      for (uint32_t i = 0; i < cnt; i++) {
++         VK_FROM_HANDLE(vk_semaphore, sem, pWaitInfo->pSemaphores[i]);
++         struct vk_sync *sync = vk_semaphore_get_active_sync(sem);
++         syncs[i] = (sync == &sem->permanent) ? sync : NULL;
++      }
++      int r = tu_wait_msm_syncs(dev, cnt, syncs, pWaitInfo->pValues, true, wait_all, &timeout);
++      if (r > 0)
++         return VK_SUCCESS;
++      if (r < 0)
++         return VK_TIMEOUT;
++   }
++
++   return vk_common_WaitSemaphores(_device, pWaitInfo, timeout);
++}
++
++VKAPI_ATTR VkResult VKAPI_CALL
++tu_SignalSemaphore(VkDevice _device,
++                   const VkSemaphoreSignalInfo *pSignalInfo)
++{
++   VK_FROM_HANDLE(tu_device, dev, _device);
++   VK_FROM_HANDLE(vk_semaphore, sem, pSignalInfo->semaphore);
++   if (sem)
++      tu_invalidate_tl_hint(dev, vk_semaphore_get_active_sync(sem), true,
++                            pSignalInfo->value);
++   return vk_common_SignalSemaphore(_device, pSignalInfo);
++}
++
++VKAPI_ATTR void VKAPI_CALL
++tu_DestroySemaphore(VkDevice _device,
++                    VkSemaphore _semaphore,
++                    const VkAllocationCallbacks *pAllocator)
++{
++   VK_FROM_HANDLE(tu_device, dev, _device);
++   VK_FROM_HANDLE(vk_semaphore, sem, _semaphore);
++   if (sem)
++      tu_invalidate_tl_hint(dev, &sem->permanent, false, 0);
++   vk_common_DestroySemaphore(_device, _semaphore, pAllocator);
++}
++
++VKAPI_ATTR VkResult VKAPI_CALL
++tu_ImportSemaphoreFdKHR(VkDevice _device,
++                        const VkImportSemaphoreFdInfoKHR *pImportSemaphoreFdInfo)
++{
++   VK_FROM_HANDLE(tu_device, dev, _device);
++   VK_FROM_HANDLE(vk_semaphore, sem, pImportSemaphoreFdInfo->semaphore);
++   if (sem && !(pImportSemaphoreFdInfo->flags & VK_SEMAPHORE_IMPORT_TEMPORARY_BIT))
++      tu_invalidate_tl_hint(dev, &sem->permanent, false, 0);
++   return vk_common_ImportSemaphoreFdKHR(_device, pImportSemaphoreFdInfo);
++}
++
+ static int
+ msm_device_get_gpu_timestamp(struct tu_device *dev, uint64_t *ts)
+ {
+@@ -214,6 +1230,7 @@ static void
+ msm_submitqueue_close(struct tu_device *dev, struct tu_queue *queue)
+ {
+    if (queue->msm_queue_id) {
++      tu_clear_queue_done(dev, queue->msm_queue_id);
+       drmCommandWrite(dev->fd, DRM_MSM_SUBMITQUEUE_CLOSE,
+                       &queue->msm_queue_id, sizeof(uint32_t));
+    }
+@@ -249,7 +1266,10 @@ tu_wait_fence(struct tu_device *dev,
+ {
+    MESA_TRACE_FUNC();
+    /* fence was created when no work was yet submitted */
+-   if (fence < 0)
++   if (fence <= 0)
++      return VK_SUCCESS;
++
++   if (tu_is_msm_fence_completed(dev, queue_id, (uint32_t)fence))
+       return VK_SUCCESS;
+ 
+    int ret = msm_common_wait_fence(dev->fd, queue_id, fence, timeout_ns);
+@@ -262,6 +1282,7 @@ tu_wait_fence(struct tu_device *dev,
+       }
+    }
+ 
++   tu_mark_msm_fence_completed(dev, queue_id, (uint32_t)fence);
+    return VK_SUCCESS;
+ }
+ 
+@@ -993,6 +2014,7 @@ msm_queue_submit(struct tu_queue *queue, void *_submit,
+    uint64_t start_ts = tu_perfetto_begin_submit();
+ #endif
+    uint32_t fence = 0;
++   uint32_t active_wait_count = 0;
+    uint64_t other_timepoint =
+       submit->binds.size != 0 ? queue->gfx_timepoint :
+       queue->sparse_timepoint;
+@@ -1002,10 +2024,18 @@ msm_queue_submit(struct tu_queue *queue, void *_submit,
+       (queue->type == TU_QUEUE_GFX && has_vm_bind) ? 1 : 0;
+ 
+    /* Allocate without wait timeline semaphores */
+-   in_syncobjs = static_cast<struct drm_msm_syncobj *>(vk_zalloc(
+-      &queue->device->vk.alloc,
+-      (wait_count + extra_wait_count) * sizeof(*in_syncobjs), 8,
+-      VK_SYSTEM_ALLOCATION_SCOPE_DEVICE));
++   struct drm_msm_syncobj in_stack[8];
++   struct drm_msm_syncobj out_stack[8];
++   if (wait_count + extra_wait_count <= ARRAY_SIZE(in_stack)) {
++      memset(in_stack, 0,
++             (wait_count + extra_wait_count) * sizeof(*in_syncobjs));
++      in_syncobjs = in_stack;
++   } else {
++      in_syncobjs = static_cast<struct drm_msm_syncobj *>(vk_zalloc(
++         &queue->device->vk.alloc,
++         (wait_count + extra_wait_count) * sizeof(*in_syncobjs), 8,
++         VK_SYSTEM_ALLOCATION_SCOPE_DEVICE));
++   }
+ 
+    if (in_syncobjs == NULL) {
+       result = vk_error(queue, VK_ERROR_OUT_OF_HOST_MEMORY);
+@@ -1013,10 +2043,16 @@ msm_queue_submit(struct tu_queue *queue, void *_submit,
+    }
+ 
+    /* Allocate with signal timeline semaphores considered */
+-   out_syncobjs = static_cast<struct drm_msm_syncobj *>(vk_zalloc(
+-      &queue->device->vk.alloc,
+-      (signal_count + extra_signal_count) * sizeof(*out_syncobjs), 8,
+-      VK_SYSTEM_ALLOCATION_SCOPE_DEVICE));
++   if (signal_count + extra_signal_count <= ARRAY_SIZE(out_stack)) {
++      memset(out_stack, 0,
++             (signal_count + extra_signal_count) * sizeof(*out_syncobjs));
++      out_syncobjs = out_stack;
++   } else {
++      out_syncobjs = static_cast<struct drm_msm_syncobj *>(vk_zalloc(
++         &queue->device->vk.alloc,
++         (signal_count + extra_signal_count) * sizeof(*out_syncobjs), 8,
++         VK_SYSTEM_ALLOCATION_SCOPE_DEVICE));
++   }
+ 
+    if (out_syncobjs == NULL) {
+       result = vk_error(queue, VK_ERROR_OUT_OF_HOST_MEMORY);
+@@ -1025,11 +2061,20 @@ msm_queue_submit(struct tu_queue *queue, void *_submit,
+ 
+    for (uint32_t i = 0; i < wait_count; i++) {
+       struct vk_sync *sync = waits[i].sync;
++      uint32_t handle = vk_sync_as_drm_syncobj(sync)->syncobj;
++      uint64_t pt = waits[i].wait_value;
++
++      if (pt != 0 && (sync->flags & VK_SYNC_IS_TIMELINE)) {
++         uint32_t qid = 0, msm_fence = 0;
++         if (tu_lookup_tl_hint(queue->device, sync, handle, pt, &qid, &msm_fence) &&
++             tu_is_msm_fence_completed(queue->device, qid, msm_fence))
++            continue;
++      }
+ 
+-      in_syncobjs[i] = (struct drm_msm_syncobj) {
+-         .handle = vk_sync_as_drm_syncobj(sync)->syncobj,
++      in_syncobjs[active_wait_count++] = (struct drm_msm_syncobj) {
++         .handle = handle,
+          .flags = 0,
+-         .point = waits[i].wait_value,
++         .point = pt,
+       };
+    }
+ 
+@@ -1045,7 +2090,7 @@ msm_queue_submit(struct tu_queue *queue, void *_submit,
+ 
+    if (queue->type == TU_QUEUE_SPARSE || submit->binds.size != 0) {
+       if (extra_wait_count) {
+-         in_syncobjs[wait_count] = (struct drm_msm_syncobj) {
++         in_syncobjs[active_wait_count] = (struct drm_msm_syncobj) {
+             .handle = queue->gfx_syncobj,
+             .flags = 0,
+             .point = queue->gfx_timepoint,
+@@ -1091,7 +2136,7 @@ msm_queue_submit(struct tu_queue *queue, void *_submit,
+          .queue_id = queue->sparse_queue_id,
+          .in_syncobjs = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(in_syncobjs)),
+          .out_syncobjs = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(out_syncobjs)),
+-         .nr_in_syncobjs = wait_count + extra_wait_count,
++         .nr_in_syncobjs = active_wait_count + extra_wait_count,
+          .nr_out_syncobjs = signal_count + extra_signal_count,
+          .syncobj_stride = sizeof(struct drm_msm_syncobj),
+          .op_stride = sizeof(struct drm_msm_vm_bind_op),
+@@ -1155,7 +2200,7 @@ msm_queue_submit(struct tu_queue *queue, void *_submit,
+                   .fence_fd = queue->device->vm_bind_fence_fd,
+                   .queue_id = queue->sparse_queue_id,
+                   .in_syncobjs =
+-                     static_cast<uint64_t>(reinterpret_cast<uintptr_t>(&in_syncobjs[wait_count])),
++                     static_cast<uint64_t>(reinterpret_cast<uintptr_t>(&in_syncobjs[active_wait_count])),
+                   .out_syncobjs = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(out_syncobjs)),
+                   .nr_in_syncobjs = extra_wait_count,
+                   .nr_out_syncobjs = last ? signal_count +
+@@ -1190,7 +2235,7 @@ msm_queue_submit(struct tu_queue *queue, void *_submit,
+ 
+       if (has_vm_bind) {
+          if (extra_wait_count) {
+-            in_syncobjs[wait_count] = (struct drm_msm_syncobj) {
++            in_syncobjs[active_wait_count] = (struct drm_msm_syncobj) {
+                .handle = queue->sparse_syncobj,
+                .flags = 0,
+                .point = queue->sparse_timepoint,
+@@ -1257,7 +2302,7 @@ msm_queue_submit(struct tu_queue *queue, void *_submit,
+          .queueid = queue->msm_queue_id,
+          .in_syncobjs = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(in_syncobjs)),
+          .out_syncobjs = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(out_syncobjs)),
+-         .nr_in_syncobjs = wait_count + extra_wait_count,
++         .nr_in_syncobjs = active_wait_count + extra_wait_count,
+          .nr_out_syncobjs = signal_count + extra_signal_count,
+          .syncobj_stride = sizeof(struct drm_msm_syncobj),
+       };
+@@ -1282,8 +2327,45 @@ msm_queue_submit(struct tu_queue *queue, void *_submit,
+       goto fail_submit;
+    }
+ 
+-   if (queue->type != TU_QUEUE_SPARSE)
++   if (queue->type != TU_QUEUE_SPARSE) {
++      tu_maybe_steer_perf_thread();
+       p_atomic_set(&queue->fence, fence);
++      if (signal_count > 0) {
++         struct tu_device *dev = queue->device;
++         while (__atomic_exchange_n(&dev->fence_hint_wr_lock, 1, __ATOMIC_ACQUIRE))
++            ;
++         for (uint32_t i = 0; i < signal_count; i++) {
++            struct vk_sync *sync = signals[i].sync;
++            if (!sync || (sync->flags & VK_SYNC_IS_TIMELINE) ||
++                !vk_sync_type_is_drm_syncobj(sync->type))
++               continue;
++            uintptr_t sync_ptr = (uintptr_t)sync;
++            uint32_t slot = ((sync_ptr >> 6) ^ (sync_ptr >> 13)) &
++                            (TU_FENCE_HINT_SLOTS - 1);
++            uint32_t s = __atomic_load_n(&dev->fence_hints[slot].seq,
++                                         __ATOMIC_RELAXED);
++            __atomic_store_n(&dev->fence_hints[slot].seq, s + 1,
++                             __ATOMIC_RELEASE);
++            dev->fence_hints[slot].sync_ptr = sync_ptr;
++            dev->fence_hints[slot].syncobj_handle = vk_sync_as_drm_syncobj(sync)->syncobj;
++            dev->fence_hints[slot].queue_id = queue->msm_queue_id;
++            dev->fence_hints[slot].fence = (uint32_t)fence;
++            __atomic_store_n(&dev->fence_hints[slot].seq, s + 2,
++                             __ATOMIC_RELEASE);
++         }
++         __atomic_store_n(&dev->fence_hint_wr_lock, 0, __ATOMIC_RELEASE);
++
++         for (uint32_t i = 0; i < signal_count; i++) {
++            struct vk_sync *sync = signals[i].sync;
++            if (!sync || !(sync->flags & VK_SYNC_IS_TIMELINE) ||
++                !vk_sync_type_is_drm_syncobj(sync->type))
++               continue;
++            tu_record_tl_hint(dev, sync, vk_sync_as_drm_syncobj(sync)->syncobj,
++                              signals[i].signal_value, queue->msm_queue_id,
++                              (uint32_t)fence);
++         }
++      }
++   }
+ 
+ #if HAVE_PERFETTO
+    clocks = tu_perfetto_end_submit(queue, queue->device->submit_count,
+@@ -1296,9 +2378,11 @@ msm_queue_submit(struct tu_queue *queue, void *_submit,
+    }
+ 
+ fail_submit:
+-   vk_free(&queue->device->vk.alloc, out_syncobjs);
++   if (out_syncobjs != out_stack)
++      vk_free(&queue->device->vk.alloc, out_syncobjs);
+ fail_out_syncobjs:
+-   vk_free(&queue->device->vk.alloc, in_syncobjs);
++   if (in_syncobjs != in_stack)
++      vk_free(&queue->device->vk.alloc, in_syncobjs);
+ fail_in_syncobjs:
+    return result;
+ }
+@@ -1427,6 +2511,140 @@ tu_knl_drm_msm_load(struct tu_instance *instance,
+ 
+    device->syncobj_type = vk_drm_syncobj_get_type(fd);
+ 
++   {
++      static struct vk_sync_type orig_syncobj_ops;
++      static uint32_t orig_inited;
++      if (__atomic_load_n(&orig_inited, __ATOMIC_ACQUIRE) == 0) {
++         orig_syncobj_ops = device->syncobj_type;
++         __atomic_store_n(&orig_inited, 1, __ATOMIC_RELEASE);
++      }
++
++      if (device->syncobj_type.reset) {
++         device->syncobj_type.reset =
++            [](struct vk_device *vk_dev, struct vk_sync *sync) -> VkResult {
++               struct tu_device *dev = container_of(vk_dev, struct tu_device, vk);
++               tu_invalidate_fence_hint(dev, sync);
++               tu_invalidate_copy_hint(dev, sync);
++               return orig_syncobj_ops.reset(vk_dev, sync);
++            };
++      }
++
++      if (device->syncobj_type.reset_many) {
++         device->syncobj_type.reset_many =
++            [](struct vk_device *vk_dev, uint32_t sync_count,
++               struct vk_sync *const *syncs) -> VkResult {
++               struct tu_device *dev = container_of(vk_dev, struct tu_device, vk);
++               for (uint32_t i = 0; i < sync_count; i++) {
++                  tu_invalidate_fence_hint(dev, syncs[i]);
++                  tu_invalidate_copy_hint(dev, syncs[i]);
++               }
++               return orig_syncobj_ops.reset_many(vk_dev, sync_count, syncs);
++            };
++      }
++
++      if (device->syncobj_type.move) {
++         device->syncobj_type.move =
++            [](struct vk_device *vk_dev, struct vk_sync *dst,
++               struct vk_sync *src) -> VkResult {
++               struct tu_device *dev = container_of(vk_dev, struct tu_device, vk);
++               uint32_t qid = 0, fn = 0;
++               bool had_hint = tu_lookup_any_fence_hint(
++                  dev, src, vk_sync_as_drm_syncobj(src)->syncobj, &qid, &fn);
++               tu_invalidate_fence_hint(dev, src);
++               tu_invalidate_copy_hint(dev, src);
++               tu_invalidate_fence_hint(dev, dst);
++               tu_invalidate_copy_hint(dev, dst);
++               VkResult r = orig_syncobj_ops.move(vk_dev, dst, src);
++               if (r == VK_SUCCESS && had_hint) {
++                  tu_record_copy_hint(dev, dst,
++                                      vk_sync_as_drm_syncobj(dst)->syncobj,
++                                      qid, fn);
++               }
++               return r;
++            };
++      }
++
++      if (device->syncobj_type.import_opaque_fd) {
++         device->syncobj_type.import_opaque_fd =
++            [](struct vk_device *vk_dev, struct vk_sync *sync, int sfd) -> VkResult {
++               struct tu_device *dev = container_of(vk_dev, struct tu_device, vk);
++               tu_invalidate_fence_hint(dev, sync);
++               tu_invalidate_copy_hint(dev, sync);
++               tu_invalidate_tl_hint(dev, sync, false, 0);
++               return orig_syncobj_ops.import_opaque_fd(vk_dev, sync, sfd);
++            };
++      }
++
++      if (device->syncobj_type.import_sync_file) {
++         device->syncobj_type.import_sync_file =
++            [](struct vk_device *vk_dev, struct vk_sync *sync, int sfd) -> VkResult {
++               struct tu_device *dev = container_of(vk_dev, struct tu_device, vk);
++               tu_invalidate_fence_hint(dev, sync);
++               tu_invalidate_copy_hint(dev, sync);
++               tu_invalidate_tl_hint(dev, sync, false, 0);
++               return orig_syncobj_ops.import_sync_file(vk_dev, sync, sfd);
++            };
++      }
++
++      if (device->syncobj_type.wait_many) {
++         device->syncobj_type.wait_many =
++            [](struct vk_device *vk_dev, uint32_t wait_count,
++               const struct vk_sync_wait *waits,
++               enum vk_sync_wait_flags wait_flags,
++               uint64_t abs_timeout_ns) -> VkResult {
++               struct tu_device *dev = container_of(vk_dev, struct tu_device, vk);
++               if (wait_count == 0)
++                  return VK_SUCCESS;
++
++               if (!(wait_flags & VK_SYNC_WAIT_ANY) && wait_count <= 16) {
++                  struct vk_sync_wait rem_waits[16];
++                  uint32_t rem = 0;
++
++                  if (wait_flags & VK_SYNC_WAIT_PENDING) {
++                     for (uint32_t i = 0; i < wait_count; i++) {
++                        struct vk_sync *s = waits[i].sync;
++                        uint32_t handle = vk_sync_as_drm_syncobj(s)->syncobj;
++                        uint32_t qid = 0, fn = 0;
++                        bool pending = (s->flags & VK_SYNC_IS_TIMELINE)
++                                          ? tu_tl_is_point_materialized(
++                                               dev, s, handle, waits[i].wait_value)
++                                          : tu_lookup_any_fence_hint(
++                                               dev, s, handle, &qid, &fn);
++                        if (!pending)
++                           rem_waits[rem++] = waits[i];
++                     }
++                     if (rem == 0)
++                        return VK_SUCCESS;
++                     return orig_syncobj_ops.wait_many(vk_dev, rem, rem_waits,
++                                                       wait_flags, abs_timeout_ns);
++                  } else {
++                     for (uint32_t i = 0; i < wait_count; i++) {
++                        struct vk_sync *s = waits[i].sync;
++                        uint32_t handle = vk_sync_as_drm_syncobj(s)->syncobj;
++                        uint32_t qid = 0, fn = 0;
++                        bool ok = (s->flags & VK_SYNC_IS_TIMELINE)
++                                     ? tu_lookup_tl_hint(dev, s, handle,
++                                                         waits[i].wait_value,
++                                                         &qid, &fn)
++                                     : tu_lookup_any_fence_hint(dev, s, handle,
++                                                                &qid, &fn);
++                        if (ok && tu_is_msm_fence_completed(dev, qid, fn))
++                           continue;
++                        rem_waits[rem++] = waits[i];
++                     }
++                     if (rem == 0)
++                        return VK_SUCCESS;
++                     return orig_syncobj_ops.wait_many(vk_dev, rem, rem_waits,
++                                                       wait_flags, abs_timeout_ns);
++                  }
++               }
++
++               return orig_syncobj_ops.wait_many(vk_dev, wait_count, waits,
++                                                 wait_flags, abs_timeout_ns);
++            };
++      }
++   }
++
+    /* msm didn't expose DRM_CAP_SYNCOBJ_TIMELINE until kernel 6.15, so emulate timeline
+     * semaphores if necessary.
+     */
