@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+
+# 1. Enable PCIe ASPM L1/L1ss power saving for QCA6490 WLAN (1c00000.pcie)
+if [ -w /sys/module/pcie_aspm/parameters/policy ]; then
+  echo powersave > /sys/module/pcie_aspm/parameters/policy 2>/dev/null || true
+fi
+for l1 in /sys/bus/pci/devices/*/link/l1_aspm /sys/bus/pci/devices/*/link/l1_1_aspm /sys/bus/pci/devices/*/link/l1_2_aspm; do
+  [ -w "$l1" ] && echo 1 > "$l1" 2>/dev/null || true
+done
+
+# 2. Ensure Wi-Fi power_save is enabled on wlan0
+if command -v iw >/dev/null 2>&1 && [ -d /sys/class/net/wlan0 ]; then
+  iw dev wlan0 set power_save on 2>/dev/null || true
+fi
+
+# 3. Ensure Fingerprint VDD_BTP_1P8 stays off in idle unless explicitly enabled
+if [ -w /sys/class/fingerprint/fingerprint/power_enable ]; then
+  echo 0 > /sys/class/fingerprint/fingerprint/power_enable 2>/dev/null || true
+fi
+
+echo "S22 power-save policy applied: ASPM=$(cat /sys/module/pcie_aspm/parameters/policy 2>/dev/null || echo N/A)"

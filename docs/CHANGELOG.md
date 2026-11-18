@@ -61,6 +61,8 @@ Wi-Fi is the one big item still open. Even the failed Wi-Fi attempts are useful:
 - Display black despite a correct init sequence: missing DCS 0x53 (found in Samsung's own S901E source)
 - Hot-unbinding `msm-mdss` oopsed the phone: install modules and reboot instead
 
+- Battery reported 1,348 mAh (2.5x low) and bootlooped via `upowerd` PowerOff on low-SOC cold boots: fixed 2 mOhm `rsns-microohm = <2000>`, `AvgCurrent`/`NOT_CHARGING` guard while supplied, Type-C 3.0 A `CHGIN_ILIM` propagation (+4.56 W charging), and `MAX17042_VALRT_Th` / `qcom_q6v5` handover IRQ wakeup storms
+
 ## Still open
 
 Wi-Fi (details in README), audio, cellular modem, sleep/suspend, sensors, cameras, NFC, cable detection. See

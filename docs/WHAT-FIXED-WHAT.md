@@ -55,6 +55,11 @@ From flashing uniLoader up to attempt 39 (2026-10-20). Kernel 7.2.11, postmarket
 | 42 | Camera rails unreachable | S2MPB02 camera PMIC regulator driver on i2c-gpio 175/176 (attempt 36) | Samsung kernel (GPL driver, wiring) + Ours |
 | 43 | No sensor settings | Vendor partition read via F2FS (with compression) module; CamX Chromatix decoder (tools/camx-chromatix-dump.py) | Ours |
 
+| 45 | Battery capacity & current under-reported by 2.5x (`1,348 mAh` instead of `3,370 mAh`) | Set `maxim,rsns-microohm = <2000>;` in `sm8450-samsung-r0q.dts` and add `samsung,r0q` `5000 -> 2000` uOhm guard in `max17042_parse_dt()` (stock `max77705_fuelgauge.dtsi` `fg_resistor = <5>` encodes 2 mOhm, not 5 mOhm) | Samsung kernel (`max77705_fuelgauge`) + Ours |
+| 46 | Continuous boot-to-PowerOff loop when booting at low SOC on USB power | In `max17042_get_status()`, when `power_supply_am_i_supplied > 0` and instantaneous `Current <= 0` during ~4.3 W cold-boot spikes, check `AvgCurrent` (`> 0` -> `CHARGING`, `<= 0` -> `NOT_CHARGING`, never `DISCHARGING`), plus set mobile UPower thresholds (`10%`/`2%`/`1%`) | Ours |
+| 47 | Slow `+665 mA` USB-C charging & net battery drain under boot load on Type-C 3.0 A ports | Propagate non-PD Type-C Rp (`1.5 A` / `3.0 A`, `[C]`) limits to `max77705-charger` via `max77705_usbc_apply_typec_ilim()` (plus `s22-usbc-ilim.sh` udev/boot helper), raising `CHGIN_ILIM` from `900 mA` to `3,000 mA` (`+1,143 mA` / `+4.56 W` net battery charge) | Tab S8+ + Ours |
+| 48 | `5.7 Hz` `max77705-battery` IRQ storm (>1,000 wakeups) & `qcom_q6v5_pas` SLPI handover wakeup spam | Disarm stale vendor `MAX17042_VALRT_Th` (`0xff00`) when DT omits `vmin`/`vmax`, and mask `handover_irq` (`disable_irq_nosync`) once `qcom_q6v5` `handover_issued` is set | Ours |
+
 ## Not fixed yet
 - 2.4 GHz Wi-Fi association times out (5 GHz works)
 - Speaker protection firmware (volume kept moderate)

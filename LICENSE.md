@@ -4,7 +4,7 @@ This repository carries two licenses, following the upstream projects each part 
 
 | Path | License | Why |
 |---|---|---|
-| `kernel/` (DTS, kernel patches, kernel config, audio topology) | **GPL-2.0-only** | Linux kernel sources; parts derived from Samsung's GPL SM-S901E kernel and the GPL-2.0 Galaxy Tab S8+ port |
+| `kernel/` (DTS, kernel patches, kernel config, audio topology) | **GPL-2.0-only** (or file-matching `GPL-2.0+` where noted by `SPDX-License-Identifier`) | Linux kernel sources; parts derived from Samsung's GPL SM-S901E kernel and the GPL-2.0 Galaxy Tab S8+ port |
 | `phone-config/` (UCM2, modprobe, OpenRC/local.d, udev, NetworkManager snippets) | **MIT** | postmarketOS device configuration is conventionally MIT |
 | `tools/`, `docs/`, `logs/`, `wifi-debug/`, top-level notes | **MIT** | Maximum reuse for other porters |
 

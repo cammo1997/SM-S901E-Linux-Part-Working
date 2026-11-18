@@ -1,0 +1,83 @@
+SPDX-License-Identifier: GPL-2.0-only
+Subject: [PATCH] usb: typec: max77705: apply Type-C Rp (1.5A / 3.0A) input current limit to charger
+
+When attached as a sink to a non-PD USB Type-C source advertising Rp 1.5A
+or Rp 3.0A (`[C]` mode, `!u->pd_contract`), `max77705_usbc_update_cc()`
+updated `typec_set_pwr_opmode()` (so `max77705-usbc/current_max` reported
+1,500,000 or 3,000,000 uA) but never propagated that limit to
+`max77705-charger` via `max77705_usbc_set_ilim()`. As a result, `CHGIN_ILIM`
+remained clamped at the bootloader default of 900,000 uA (900 mA / ~4.5 W),
+causing net battery discharge during 4.3 W cold-boot spikes and capping
+charging at ~665 mA.
+
+Add `max77705_usbc_apply_typec_ilim()` and invoke it in
+`max77705_usbc_update_cc()` and `max77705_usbc_hard_reset()` whenever
+attached as a non-PD Type-C sink, raising net battery charge current on 3.0A
+Type-C ports to ~1,140 mA (+4.56 W) and keeping battery current positive
+throughout cold boot.
+
+Credits:
+- aaronsb (Galaxy Tab S8+ GPL-2.0 max77705-typec driver)
+- Dzmitry Sankouski (mainline GPL-2.0 max77705_charger driver)
+
+diff --git a/drivers/usb/typec/max77705.c b/drivers/usb/typec/max77705.c
+index a121f2d..7a38970 100644
+--- a/drivers/usb/typec/max77705.c
++++ b/drivers/usb/typec/max77705.c
+@@ -766,6 +766,28 @@ static enum typec_pwr_opmode max77705_usbc_opmode(u8 cc_status0)
+ 	}
+ }
+ 
++static void max77705_usbc_apply_typec_ilim(struct max77705_usbc *u, u8 cc_status0)
++{
++	int ua;
++
++	if (!u->chg_psy || u->pd_contract)
++		return;
++
++	switch (max77705_usbc_opmode(cc_status0)) {
++	case TYPEC_PWR_MODE_3_0A:
++		ua = 3000000;
++		break;
++	case TYPEC_PWR_MODE_1_5A:
++		ua = 1500000;
++		break;
++	default:
++		ua = u->ilim_base_ua > 0 ? u->ilim_base_ua : MAX77705_ILIM_SAFE_UA;
++		break;
++	}
++
++	max77705_usbc_set_ilim(u, ua);
++}
++
+ static void max77705_usbc_set_orientation(struct max77705_usbc *u,
+ 					  u8 cc_status0)
+ {
+@@ -863,8 +885,10 @@ static void max77705_usbc_update_cc(struct max77705_usbc *u, u8 cc_status0)
+ 			     TYPEC_SOURCE : TYPEC_SINK);
+ 
+ 	if (ccstat == old) {
+-		if (ccstat == MAX77705_CC_SINK && !u->pd_contract)
++		if (ccstat == MAX77705_CC_SINK && !u->pd_contract) {
+ 			typec_set_pwr_opmode(u->port, max77705_usbc_opmode(cc_status0));
++			max77705_usbc_apply_typec_ilim(u, cc_status0);
++		}
+ 		return;
+ 	}
+ 
+@@ -873,6 +897,7 @@ static void max77705_usbc_update_cc(struct max77705_usbc *u, u8 cc_status0)
+ 
+ 	switch (ccstat) {
+ 	case MAX77705_CC_SINK:
++		max77705_usbc_apply_typec_ilim(u, cc_status0);
+ 		typec_set_pwr_role(u->port, TYPEC_SINK);
+ 		typec_set_pwr_opmode(u->port, max77705_usbc_opmode(cc_status0));
+ 		if (old == MAX77705_CC_NONE) {
+@@ -1420,6 +1445,7 @@ static void max77705_usbc_hard_reset(struct max77705_usbc *u)
+ 	max77705_usbc_restore_ilim(u);
+ 	max77705_usbc_pd_reset(u);
+ 	typec_set_pwr_opmode(u->port, max77705_usbc_opmode(u->cc_status0));
++	max77705_usbc_apply_typec_ilim(u, u->cc_status0);
+ 	u->voltage_uv = 5000000;
+ 	power_supply_changed(u->psy);
+ }

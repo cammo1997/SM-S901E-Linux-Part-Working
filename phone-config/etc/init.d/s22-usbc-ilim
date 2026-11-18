@@ -1,0 +1,10 @@
+#!/sbin/openrc-run
+# SPDX-License-Identifier: MIT
+description="Sync MAX77705 Charger Input Current Limit with USB-C Rp"
+depend() {
+	after udev dev
+}
+start() {
+	/usr/local/sbin/s22-usbc-ilim.sh
+	return 0
+}

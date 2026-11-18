@@ -10,6 +10,8 @@ This port stands on other people's work. Thank you to:
 | ivoszbg – uniLoader | https://github.com/ivoszbg/uniLoader | GPL-2.0 | Secondary bootloader used to boot mainline from Samsung's bootloader |
 | postmarketOS | https://postmarketos.org · https://gitlab.postmarketos.org/postmarketOS/pmbootstrap | GPL-3.0 / MIT | Distribution, pmbootstrap, initramfs USB networking |
 | KDE Plasma Mobile | https://plasma-mobile.org | GPL / LGPL | Phone user interface, Plasma keyboard, KRecorder, Discover |
+| MyungJoo Ham / Samsung Electronics | `drivers/power/supply/max17042_battery.c` in mainline · https://opensource.samsung.com | GPL-2.0+ / GPL-2.0 | Mainline MAX17042/MAX17047 fuel gauge driver and SM-S901E `max77705_fuelgauge.dtsi` 2 mOhm (`fg_resistor = <5>`) sense-resistor specification |
+| Dzmitry Sankouski | `drivers/power/supply/max77705_charger.c` & `drivers/mfd/max77705.c` in mainline | GPL-2.0 | Mainline Maxim MAX77705 MFD & charger input-current-limit (`CHGIN_ILIM`) driver |
 | Samsung Galaxy S9 (starqltechn) mainline port | `arch/arm64/boot/dts/qcom/sdm845-samsung-starqltechn.dts` in mainline | GPL-2.0 | MAX77705 device tree template and mainline MAX77705 MFD/charger drivers |
 | Viveris – uMTP-Responder | https://github.com/viveris/uMTP-Responder | GPL-3.0 | MTP file transfer (`umtprd`) |
 | Nura wiki – Samsung Galaxy S22 5G (samsung-r0q) | https://wiki.nura.eco/wiki/Samsung_Galaxy_S22_5G_(samsung-r0q) | – | Reference notes for r0q |

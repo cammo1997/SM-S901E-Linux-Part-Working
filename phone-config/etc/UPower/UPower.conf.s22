@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: MIT
+# Recommended mobile UPower thresholds for Samsung Galaxy S22 (sm8450-samsung-r0q).
+# Desktop UPower defaults (PercentageCritical=5.0, PercentageAction=2.0) combined
+# with cold-boot load spikes can trigger premature PowerOff loops at low SOC.
+PercentageLow=10
+PercentageCritical=2
+PercentageAction=1

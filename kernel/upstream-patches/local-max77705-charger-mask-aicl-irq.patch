@@ -1,0 +1,39 @@
+From: Antigravity <antigravity@s22-linux.local>
+Subject: [PATCH] power: supply: max77705_charger: keep AICL_I masked to stop 345 Hz IRQ/uevent storm
+
+MAX77705 regulates input voltage autonomously in hardware via VCHGIN_REG.
+When connected to a standard 500 mA USB host port on Samsung Galaxy S22
+(SM-S901E, r0q), AICL_OK chatters at ~345 Hz at the regulation boundary,
+driving 345 threaded I2C IRQs/s on 994000.i2c and 345 power_supply_changed()
+uevents/s into upowerd and plasmashell.
+
+Do not request/unmask MAX77705_AICL_I so regmap-irq leaves it masked in
+CHG_INT_MASK, reducing idle 994000.i2c interrupts from 345/s to 0/s.
+
+Signed-off-by: Antigravity <antigravity@s22-linux.local>
+---
+ drivers/power/supply/max77705_charger.c | 11 +++++------
+ 1 file changed, 5 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/power/supply/max77705_charger.c b/drivers/power/supply/max77705_charger.c
+index 89e954262..c4f81a2b0 100644
+--- a/drivers/power/supply/max77705_charger.c
++++ b/drivers/power/supply/max77705_charger.c
+@@ -765,12 +765,11 @@ static int max77705_charger_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		return ret;
+ 
+-	ret = devm_request_threaded_irq(dev, regmap_irq_get_virq(irq_data, MAX77705_AICL_I),
+-					NULL, max77705_aicl_irq,
+-					IRQF_TRIGGER_NONE,
+-					"aicl-irq", chg);
+-	if (ret)
+-		return ret;
++	/* Keep MAX77705_AICL_I masked in hardware: VCHGIN_REG regulates input
++	 * voltage autonomously, whereas unmasking AICL_I triggers ~345 IRQs/s
++	 * on i2c-4 and continuous power_supply_changed() uevent storms.
++	 */
++	(void)max77705_aicl_irq;
+ 
+ 	ret = max77705_charger_enable(chg);
+ 	if (ret)

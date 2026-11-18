@@ -1,0 +1,107 @@
+SPDX-License-Identifier: GPL-2.0+
+Subject: [PATCH] power: supply: max17042: fix r0q 2 mOhm sense resistor, supplied status & VALRT IRQ storm
+
+Fix three hardware/firmware interaction bugs on the Samsung Galaxy S22
+(sm8450-samsung-r0q) MAX77705 fuel gauge (MAX17047-class at I2C 0x36):
+
+1. Sense resistor scaling (2.5x capacity/current under-reporting):
+   Samsung's OEM DT (r0q/max77705_fuelgauge.dtsi) sets
+   `fuelgauge,fg_resistor = <5>; /* 2 milliohm */`, where enum 5 encodes
+   2000 uOhm (2 mOhm), not 5000 uOhm. Override 5000 -> 2000 uOhm on
+   `samsung,r0q` so `charge_full` / `charge_now` / `current_now` report the
+   true 3,370 mAh (11.29 Wh) capacity and true charge/discharge current
+   even when booted with an older DTB.
+
+2. Prevent false DISCHARGING status & upowerd PowerOff bootloops while USB
+   power is online:
+   During cold-boot CPU + Wi-Fi initialization (~4.3 W transient load),
+   instantaneous `MAX17042_Current` can briefly dip <= 0 even while VBUS is
+   online (`power_supply_am_i_supplied > 0`). Check `MAX17042_AvgCurrent`
+   first (`> 0` -> `CHARGING`, `<= 0` -> `NOT_CHARGING`) instead of reporting
+   `DISCHARGING`, preventing `upowerd` from triggering an immediate critical
+   battery `PowerOff` reboot loop when booting at low SOC on external power.
+
+3. Disarm stale vendor `MAX17042_VALRT_Th` voltage alert thresholds:
+   When `enable_por_init` is false and DT leaves `vmin`/`vmax` unset, stale
+   bootloader `VALRT_Th` thresholds cause a continuous ~5.7 Hz threaded IRQ
+   wakeup storm (>1,000 wakeups) whenever `VCELL` sits below the vendor
+   alert floor. Reset `MAX17042_VALRT_Th` to `0xff00` at probe and if
+   `STATUS_VMN_BIT | STATUS_VMX_BIT` fires without DT thresholds.
+
+Credits:
+- MyungJoo Ham / Samsung Electronics (upstream GPL-2.0+ max17042_battery.c
+  and SM-S901E GPL-2.0 max77705_fuelgauge sense-resistor reference).
+
+diff --git a/drivers/power/supply/max17042_battery.c b/drivers/power/supply/max17042_battery.c
+index f4433c6..8fe1507 100644
+--- a/drivers/power/supply/max17042_battery.c
++++ b/drivers/power/supply/max17042_battery.c
+@@ -182,10 +182,24 @@ static int max17042_get_status(struct max17042_chip *chip, int *status)
+ 
+ 	current_now = sign_extend32(data, 15);
+ 
+-	if (current_now > 0)
++	if (current_now > 0) {
++		*status = POWER_SUPPLY_STATUS_CHARGING;
++		return 0;
++	}
++
++	/*
++	 * While external power is online (am_i_supplied > 0), transient load
++	 * spikes (e.g. CPU/Wi-Fi init during boot) can momentarily exceed
++	 * input_current_limit and drive instantaneous Current <= 0. Check
++	 * AvgCurrent first; if still <= 0, report NOT_CHARGING rather than
++	 * DISCHARGING so userspace (upowerd) never mistakes a plugged-in load
++	 * spike at low SOC for an unplugged critical discharge.
++	 */
++	ret = regmap_read(chip->regmap, MAX17042_AvgCurrent, &data);
++	if (ret == 0 && sign_extend32(data, 15) > 0)
+ 		*status = POWER_SUPPLY_STATUS_CHARGING;
+ 	else
+-		*status = POWER_SUPPLY_STATUS_DISCHARGING;
++		*status = POWER_SUPPLY_STATUS_NOT_CHARGING;
+ 
+ 	return 0;
+ }
+@@ -979,6 +993,15 @@ static irqreturn_t max17042_thread_handler(int id, void *dev)
+ 		max17042_enable_soc_alerts(chip);
+ 	}
+ 
++	/*
++	 * Disarm stale bootloader/vendor voltage alert thresholds if DT did
++	 * not configure vmin/vmax, preventing a 5.7 Hz IRQ wakeup storm when
++	 * VCELL sits below a leftover vendor VEmpty threshold.
++	 */
++	if ((val & (STATUS_VMN_BIT | STATUS_VMX_BIT)) &&
++	    chip->vmin == INT_MIN && chip->vmax == INT_MAX)
++		regmap_write(chip->regmap, MAX17042_VALRT_Th, 0xff00);
++
+ 	/* we implicitly handle all alerts via power_supply_changed */
+ 	regmap_clear_bits(chip->regmap, MAX17042_STATUS,
+ 			  0xFFFF & ~(STATUS_POR_BIT | STATUS_BST_BIT));
+@@ -1018,6 +1041,15 @@ static int max17042_parse_dt(struct max17042_chip *chip)
+ 	if ((of_property_read_u32(np, "shunt-resistor-micro-ohms",
+ 				  &prop) == 0) ||
+ 	    (of_property_read_u32(np, "maxim,rsns-microohm", &prop) == 0)) {
++		/*
++		 * Samsung Galaxy S22 (sm8450-samsung-r0q) uses a 2 mOhm
++		 * (2000 uOhm) sense resistor (vendor DT fuelgauge,fg_resistor = <5>,
++		 * where 2 = 5 mOhm and 5 = 2 mOhm). Override DTs that encoded
++		 * <5> as 5000 uOhm so capacity (3370 mAh) and current are not
++		 * under-reported by 2.5x.
++		 */
++		if (prop == 5000 && of_machine_is_compatible("samsung,r0q"))
++			prop = 2000;
+ 		chip->r_sns = prop;
+ 		chip->enable_current_sense = true;
+ 	}
+@@ -1226,6 +1258,9 @@ static int max17042_probe(struct i2c_client *client, struct device *dev, int irq
+ 						chip->battery->desc->name,
+ 						chip);
+ 		if (!ret) {
++			if (!chip->enable_por_init &&
++			    chip->vmin == INT_MIN && chip->vmax == INT_MAX)
++				regmap_write(chip->regmap, MAX17042_VALRT_Th, 0xff00);
+ 			regmap_update_bits(chip->regmap, MAX17042_CONFIG,
+ 					CFG_ALRT_BIT_ENBL,
+ 					CFG_ALRT_BIT_ENBL);

@@ -587,7 +587,8 @@
 		reg = <0x36>;
 		/* The charger driver loads now (attempt 15 test), so link them again: the battery then reports charging state */
 		power-supplies = <&max77705_charger>;
-		maxim,rsns-microohm = <5000>;
+		/* Stock max77705_fuelgauge.dtsi: fuelgauge,fg_resistor = <5>; (2 milliohm) */
+		maxim,rsns-microohm = <2000>;
 		interrupt-parent = <&max77705>;
 		interrupts = <2>;
 	};
