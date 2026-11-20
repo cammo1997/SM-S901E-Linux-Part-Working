@@ -72,3 +72,8 @@ CONFIG_ZRAM_BACKEND_LZ4=y
 # Attempt 11: touchscreen (upstream fts2ba61y patch) on spi-gpio
 CONFIG_SPI_GPIO=m
 CONFIG_TOUCHSCREEN_FTS2BA61Y=m
+
+# Android Binder IPC & BinderFS (required by Waydroid)
+CONFIG_ANDROID_BINDER_IPC=y
+CONFIG_ANDROID_BINDERFS=y
+CONFIG_ANDROID_BINDER_DEVICES="binder,hwbinder,vndbinder"

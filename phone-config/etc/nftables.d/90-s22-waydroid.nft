@@ -1,0 +1,18 @@
+# Allow Waydroid Android container (waydroid0, 192.168.240.0/24) DHCP/DNS,
+# outbound forwarding, and NAT masquerading on postmarketOS firewall.
+table inet filter {
+    chain input {
+        iifname "waydroid0" udp dport { 53, 67 } accept comment "Allow Waydroid DNS/DHCP"
+        iifname "waydroid0" tcp dport { 53, 67 } accept comment "Allow Waydroid DNS/DHCP"
+    }
+    chain forward {
+        iifname "waydroid0" accept comment "Allow Waydroid outbound forwarding"
+        oifname "waydroid0" ct state { established, related } accept comment "Allow Waydroid return traffic"
+    }
+}
+table ip s22_waydroid_nat {
+    chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+        ip saddr 192.168.240.0/24 oifname != "waydroid0" masquerade
+    }
+}
