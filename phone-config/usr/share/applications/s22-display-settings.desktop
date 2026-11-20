@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Tela S22 & Always-On Display
+Comment=Taxa de atualiza??o 120/60Hz, Modo Jogo 90Hz, Always-On Display e calibra??o AMOLED
+Exec=/usr/local/bin/s22-display-settings
+Icon=preferences-desktop-display
+Terminal=false
+Categories=Settings;HardwareSettings;X-KDE-settings-hardware;

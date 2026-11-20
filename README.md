@@ -12,7 +12,7 @@ Credits: [CREDITS.md](CREDITS.md) · License: [LICENSE.md](LICENSE.md) (GPL-2.0 
 | 5.10 (Android GKI) | Samsung stock kernel ([opensource.samsung.com](https://opensource.samsung.com)) | Android only, not mainline |
 | 6.16-rc1 | Ghatto404 / Arthurus36 ([Nura wiki](https://wiki.nura.eco/wiki/Samsung_Galaxy_S22_5G_(samsung-r0q))) | Wiki lists Wi-Fi as working; source tree not public (Arthurus36's public repo has a decompiled stock DT only) |
 | 7.2.11 (upstream) | Mainline `arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dts` | Minimal: framebuffer, regulators, USB 2.0. No panel, touch, Wi-Fi, GPU or battery |
-| **7.2.11 (this repo)** | This port | Wi-Fi 5 GHz, Bluetooth, 120 Hz panel, touch, GPU, stereo speakers, mics, USB-C hotplug, MTP, buttons, charging, modem boot |
+| **7.2.11 (this repo)** | This port | Wi-Fi 5 GHz, Bluetooth, 120 Hz panel, touch, GPU, stereo speakers, mics, USB-C hotplug, MTP, buttons, charging, **SM8450 IPA v5.1 cellular modem (ModemManager, mobile data, SMS/calls/VoLTE stack)**, **S6E3FAC dynamic VRR/HBM/mDNIe/AOD** |
 
 To my knowledge this is the newest working mainline kernel on the r0q, and the most complete public one,
 as of 2026-10-18. Know of a newer or more complete one? Please open an issue.
@@ -65,6 +65,7 @@ Full checklist: [docs/CHECKLIST-not-sorted.md](docs/CHECKLIST-not-sorted.md). Co
 8. **Never unbind `msm-mdss` live** (oopsed and hung the phone). Install display modules and reboot.
 9. **Bluetooth** needs the antenna-switch rail (PMR735A L7, 2.8 V always-on) or discovery finds nothing.
 10. Safe flash loop without Download-mode buttons: TWRP in the recovery slot, `adb push boot.img`, sha256 check, `dd` to `boot`, read back, `adb reboot`.
+11. **KWin must start after the Adreno DRM nodes.** If the Plasma session starts first, KWin initializes compositing on `udmabuf`/`llvmpipe` and never switches. `startplasmamobile` now unsets `EGL_PLATFORM=wayland` and waits for `/dev/dri/card0` + `/dev/dri/renderD128`; KWin then picks `renderD128` (`freedreno FD730`). Display helpers also discover `wayland-[0-9]` and resolve the session user from `/etc/passwd` before calling `kscreen-doctor`.
 
 ## Wi-Fi: works (5 GHz)
 
